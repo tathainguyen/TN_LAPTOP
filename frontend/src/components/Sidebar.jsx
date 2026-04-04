@@ -1,0 +1,90 @@
+import {
+  BadgePercent,
+  BarChart3,
+  Boxes,
+  ClipboardList,
+  FolderTree,
+  Gauge,
+  LayoutPanelTop,
+  MessageSquare,
+  Newspaper,
+  PackagePlus,
+  Receipt,
+  ShieldCheck,
+  ShoppingCart,
+  Truck,
+  UserCog,
+  Users,
+} from 'lucide-react';
+
+const menuGroups = [
+  {
+    title: 'Tổng quan',
+    items: [
+      { label: 'Dashboard', icon: Gauge },
+    ],
+  },
+  {
+    title: 'Quản lý Hệ thống & User',
+    items: [
+      { label: 'Người dùng', icon: Users },
+      { label: 'Danh mục & Nhãn hàng', icon: FolderTree },
+      { label: 'Banner & Tin tức', icon: LayoutPanelTop },
+      { label: 'Đánh giá & Bình luận', icon: MessageSquare },
+    ],
+  },
+  {
+    title: 'Quản lý Kho & Sản phẩm',
+    items: [
+      { label: 'Nhập hàng', icon: PackagePlus },
+      { label: 'Quản lý Sản phẩm', icon: Boxes },
+      { label: 'Nhà cung cấp', icon: ShieldCheck },
+    ],
+  },
+  {
+    title: 'Quản lý Kinh doanh & Vận hành',
+    items: [
+      { label: 'Voucher', icon: BadgePercent },
+      { label: 'Vận chuyển', icon: Truck },
+      { label: 'Đơn hàng', icon: ShoppingCart },
+      { label: 'Tin nhắn', icon: Newspaper },
+      { label: 'Báo cáo', icon: BarChart3 },
+    ],
+  },
+];
+
+function Sidebar() {
+  return (
+    <aside className="admin-sidebar">
+      <div className="admin-sidebar__brand">
+        <ClipboardList size={18} />
+        <strong>TRANG QUẢN TRỊ</strong>
+      </div>
+
+      <nav className="admin-sidebar__nav" aria-label="Admin navigation">
+        {menuGroups.map((group) => (
+          <section className="admin-menu-group" key={group.title}>
+            <p className="admin-menu-group__title">{group.title}</p>
+
+            <ul>
+              {group.items.map((item) => {
+                const Icon = item.icon;
+
+                return (
+                  <li key={item.label}>
+                    <button type="button" className="admin-menu-item">
+                      <Icon size={16} />
+                      <span>{item.label}</span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        ))}
+      </nav>
+    </aside>
+  );
+}
+
+export default Sidebar;
