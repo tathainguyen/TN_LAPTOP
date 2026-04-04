@@ -16,12 +16,13 @@ import {
   UserCog,
   Users,
 } from 'lucide-react';
+import { NavLink } from 'react-router-dom';
 
 const menuGroups = [
   {
     title: 'Tổng quan',
     items: [
-      { label: 'Dashboard', icon: Gauge },
+      { label: 'Dashboard', icon: Gauge, to: '/admin' },
     ],
   },
   {
@@ -37,7 +38,7 @@ const menuGroups = [
     title: 'Quản lý Kho & Sản phẩm',
     items: [
       { label: 'Nhập hàng', icon: PackagePlus },
-      { label: 'Quản lý Sản phẩm', icon: Boxes },
+      { label: 'Quản lý Sản phẩm', icon: Boxes, to: '/admin/products' },
       { label: 'Nhà cung cấp', icon: ShieldCheck },
     ],
   },
@@ -72,10 +73,22 @@ function Sidebar() {
 
                 return (
                   <li key={item.label}>
-                    <button type="button" className="admin-menu-item">
-                      <Icon size={16} />
-                      <span>{item.label}</span>
-                    </button>
+                    {item.to ? (
+                      <NavLink
+                        to={item.to}
+                        className={({ isActive }) =>
+                          `admin-menu-item ${isActive ? 'is-active' : ''}`
+                        }
+                      >
+                        <Icon size={16} />
+                        <span>{item.label}</span>
+                      </NavLink>
+                    ) : (
+                      <button type="button" className="admin-menu-item">
+                        <Icon size={16} />
+                        <span>{item.label}</span>
+                      </button>
+                    )}
                   </li>
                 );
               })}
