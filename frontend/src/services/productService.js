@@ -11,3 +11,8 @@ export async function getAllProducts() {
   const response = await productApi.get('/');
   return response.data;
 }
+
+export async function getProductBySlug(slug) {
+  const response = await productApi.get(`/${slug}`);
+  return response.data;
+}

@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 const FALLBACK_IMAGE =
   'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?auto=format&fit=crop&w=900&q=80';
 
@@ -25,6 +27,10 @@ function ProductCard({ product }) {
           {product.ram_option ? <span className="badge">RAM: {product.ram_option}</span> : null}
           {product.vga_option ? <span className="badge">VGA: {product.vga_option}</span> : null}
         </div>
+
+        <Link className="product-link" to={`/product/${product.slug}`}>
+          Xem chi tiết
+        </Link>
       </div>
     </article>
   );
