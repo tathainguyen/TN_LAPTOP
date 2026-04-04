@@ -65,6 +65,7 @@ function AdminProductList() {
 
   const [viewItem, setViewItem] = useState(null);
   const [editItem, setEditItem] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const [editForm, setEditForm] = useState({
     group_id: '',
     product_name: '',
@@ -276,21 +277,21 @@ function AdminProductList() {
     }
   }
 
-  async function handleDelete(item) {
-    const confirmed = window.confirm(`Bạn chắc chắn muốn xoá SKU ${item.sku}?`);
-    if (!confirmed) {
+  async function handleConfirmDelete() {
+    if (!deleteTarget) {
       return;
     }
 
     try {
-      setSubmittingId(item.id);
-      await deleteProduct(item.id);
+      setSubmittingId(deleteTarget.id);
+      await deleteProduct(deleteTarget.id);
       toast.success('Đã xoá SKU.');
+      setDeleteTarget(null);
 
       if (products.length === 1 && pagination.page > 1) {
         setPagination((prev) => ({ ...prev, page: prev.page - 1 }));
       } else {
-        setProducts((prev) => prev.filter((product) => product.id !== item.id));
+        setProducts((prev) => prev.filter((product) => product.id !== deleteTarget.id));
       }
     } catch (error) {
       const message = error?.response?.data?.message || 'Không thể xoá sản phẩm.';
@@ -551,7 +552,13 @@ function AdminProductList() {
                             type="button"
                             className="admin-btn admin-btn--delete"
                             disabled={submittingId === item.id}
-                            onClick={() => handleDelete(item)}
+                            onClick={() =>
+                              setDeleteTarget({
+                                id: item.id,
+                                sku: item.sku,
+                                product_name: item.product_name,
+                              })
+                            }
                           >
                             Delete
                           </button>
@@ -774,6 +781,35 @@ function AdminProductList() {
                 </button>
               </div>
             </form>
+          </article>
+        </div>
+      ) : null}
+
+      {deleteTarget ? (
+        <div className="admin-modal-overlay" role="presentation">
+          <article className="admin-modal admin-confirm-modal">
+            <header>
+              <h3>Xác nhận xóa SKU</h3>
+            </header>
+
+            <div className="admin-confirm-body">
+              <p>
+                Bạn có chắc muốn xóa
+                {' '}
+                <strong>{deleteTarget.product_name}</strong>
+                {' '}
+                ({deleteTarget.sku})?
+              </p>
+
+              <div className="admin-form-actions">
+                <button type="button" onClick={() => setDeleteTarget(null)}>
+                  Hủy
+                </button>
+                <button type="button" onClick={handleConfirmDelete}>
+                  Xác nhận xóa
+                </button>
+              </div>
+            </div>
           </article>
         </div>
       ) : null}
