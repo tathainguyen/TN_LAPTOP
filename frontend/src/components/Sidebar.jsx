@@ -29,7 +29,7 @@ const menuGroups = [
     title: 'Quản lý Hệ thống & User',
     items: [
       { label: 'Người dùng', icon: Users },
-      { label: 'Danh mục & Nhãn hàng', icon: FolderTree },
+      { label: 'Danh mục & Nhãn hàng', icon: FolderTree, to: '/admin/catalog-brand' },
       { label: 'Banner & Tin tức', icon: LayoutPanelTop },
       { label: 'Đánh giá & Bình luận', icon: MessageSquare },
     ],

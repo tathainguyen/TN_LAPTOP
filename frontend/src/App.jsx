@@ -2,6 +2,7 @@ import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 
 import './App.css';
 import Header from './components/Header.jsx';
+import AdminCatalogBrand from './pages/AdminCatalogBrand.jsx';
 import AdminDashboard from './pages/AdminDashboard.jsx';
 import AdminProductCreate from './pages/AdminProductCreate.jsx';
 import AdminProductList from './pages/AdminProductList.jsx';
@@ -23,6 +24,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/catalog-brand" element={<AdminCatalogBrand />} />
           <Route path="/admin/products" element={<AdminProductList />} />
           <Route path="/admin/products/create" element={<AdminProductCreate />} />
           <Route path="/product" element={<Product />} />

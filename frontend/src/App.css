@@ -445,6 +445,19 @@
   width: min(980px, 100%);
 }
 
+.admin-confirm-modal {
+  width: min(460px, 100%);
+}
+
+.admin-confirm-body {
+  padding: 16px;
+}
+
+.admin-confirm-body p {
+  margin: 0;
+  color: #1d3555;
+}
+
 .admin-modal header {
   padding: 12px 14px;
   border-bottom: 1px solid #e8edf6;

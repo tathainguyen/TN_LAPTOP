@@ -8,6 +8,7 @@ import cors from 'cors';
 
 import { testConnection } from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
+import catalogRoutes from './routes/catalogRoutes.js';
 import productRoutes from './routes/productRoutes.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -32,6 +33,7 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api/auth', authRoutes);
+app.use('/api/catalog', catalogRoutes);
 app.use('/api/products', productRoutes);
 
 app.use((err, req, res, next) => {
