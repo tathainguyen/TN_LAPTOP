@@ -13,7 +13,11 @@ function Home() {
       try {
         setLoading(true);
         const response = await getAllProducts();
-        setProducts(response?.data || []);
+        const payload = response?.data;
+        const normalizedProducts = Array.isArray(payload)
+          ? payload
+          : payload?.items || [];
+        setProducts(normalizedProducts);
       } catch (error) {
         const message =
           error?.response?.data?.message || 'Không thể tải danh sách sản phẩm.';

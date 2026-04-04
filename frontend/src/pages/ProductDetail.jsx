@@ -47,7 +47,10 @@ function ProductDetail() {
 
         setProduct(selectedProduct);
 
-        const allProducts = allProductsResponse?.data || [];
+        const allProductsPayload = allProductsResponse?.data;
+        const allProducts = Array.isArray(allProductsPayload)
+          ? allProductsPayload
+          : allProductsPayload?.items || [];
         const sameGroup = allProducts.filter(
           (item) => Number(item.group_id) === Number(selectedProduct.group_id)
         );
