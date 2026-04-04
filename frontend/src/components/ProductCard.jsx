@@ -13,13 +13,20 @@ function formatVnd(value) {
 
 function ProductCard({ product }) {
   return (
-    <article className="product-card">
+    <article className="product-card group overflow-hidden">
       <div className="product-thumb-wrap">
-        <img className="product-thumb" src={FALLBACK_IMAGE} alt={product.product_name} />
+        <img
+          className="product-thumb transition-transform duration-300 group-hover:scale-105"
+          src={FALLBACK_IMAGE}
+          alt={product.product_name}
+          loading="lazy"
+        />
       </div>
 
       <div className="product-content">
-        <h3 className="product-title">{product.product_name}</h3>
+        <h3 className="product-title transition-colors duration-300 group-hover:text-blue-500">
+          {product.product_name}
+        </h3>
         <p className="product-price">{formatVnd(product.price_sale)}</p>
 
         <div className="product-badges">
