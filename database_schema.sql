@@ -32,8 +32,8 @@ DROP TABLE IF EXISTS purchase_receipts;
 DROP TABLE IF EXISTS suppliers;
 DROP TABLE IF EXISTS product_images;
 DROP TABLE IF EXISTS product_specs;
-DROP TABLE IF EXISTS product_variants;
 DROP TABLE IF EXISTS products;
+DROP TABLE IF EXISTS product_groups;
 DROP TABLE IF EXISTS categories;
 DROP TABLE IF EXISTS brands;
 DROP TABLE IF EXISTS user_addresses;
@@ -127,11 +127,11 @@ CREATE TABLE IF NOT EXISTS categories (
 		ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS products (
+CREATE TABLE IF NOT EXISTS product_groups (
 	id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
 	category_id BIGINT UNSIGNED NOT NULL,
 	brand_id BIGINT UNSIGNED NOT NULL,
-	product_name VARCHAR(255) NOT NULL,
+	group_name VARCHAR(255) NOT NULL,
 	slug VARCHAR(255) NOT NULL,
 	short_description VARCHAR(500) NULL,
 	description LONGTEXT NULL,
@@ -141,22 +141,24 @@ CREATE TABLE IF NOT EXISTS products (
 	view_count INT UNSIGNED NOT NULL DEFAULT 0,
 	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-	UNIQUE KEY uk_products_slug (slug),
-	KEY idx_products_category_id (category_id),
-	KEY idx_products_brand_id (brand_id),
-	CONSTRAINT fk_products_category_id
+	UNIQUE KEY uk_product_groups_slug (slug),
+	KEY idx_product_groups_category_id (category_id),
+	KEY idx_product_groups_brand_id (brand_id),
+	CONSTRAINT fk_product_groups_category_id
 		FOREIGN KEY (category_id) REFERENCES categories(id)
 		ON UPDATE CASCADE
 		ON DELETE RESTRICT,
-	CONSTRAINT fk_products_brand_id
+	CONSTRAINT fk_product_groups_brand_id
 		FOREIGN KEY (brand_id) REFERENCES brands(id)
 		ON UPDATE CASCADE
 		ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS product_variants (
+CREATE TABLE IF NOT EXISTS products (
 	id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-	product_id BIGINT UNSIGNED NOT NULL,
+	group_id BIGINT UNSIGNED NOT NULL,
+	product_name VARCHAR(255) NOT NULL,
+	slug VARCHAR(255) NOT NULL,
 	sku VARCHAR(100) NOT NULL,
 	cpu_option VARCHAR(100) NULL,
 	ram_option VARCHAR(100) NULL,
@@ -170,10 +172,11 @@ CREATE TABLE IF NOT EXISTS product_variants (
 	is_active TINYINT(1) NOT NULL DEFAULT 1,
 	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-	UNIQUE KEY uk_product_variants_sku (sku),
-	KEY idx_product_variants_product_id (product_id),
-	CONSTRAINT fk_product_variants_product_id
-		FOREIGN KEY (product_id) REFERENCES products(id)
+	UNIQUE KEY uk_products_slug (slug),
+	UNIQUE KEY uk_products_sku (sku),
+	KEY idx_products_group_id (group_id),
+	CONSTRAINT fk_products_group_id
+		FOREIGN KEY (group_id) REFERENCES product_groups(id)
 		ON UPDATE CASCADE
 		ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -194,20 +197,20 @@ CREATE TABLE IF NOT EXISTS product_specs (
 
 CREATE TABLE IF NOT EXISTS product_images (
 	id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+	group_id BIGINT UNSIGNED NULL,
 	product_id BIGINT UNSIGNED NULL,
-	variant_id BIGINT UNSIGNED NULL,
 	image_url VARCHAR(500) NOT NULL,
 	is_primary TINYINT(1) NOT NULL DEFAULT 0,
 	sort_order INT NOT NULL DEFAULT 0,
 	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	KEY idx_product_images_group_id (group_id),
 	KEY idx_product_images_product_id (product_id),
-	KEY idx_product_images_variant_id (variant_id),
-	CONSTRAINT fk_product_images_product_id
-		FOREIGN KEY (product_id) REFERENCES products(id)
+	CONSTRAINT fk_product_images_group_id
+		FOREIGN KEY (group_id) REFERENCES product_groups(id)
 		ON UPDATE CASCADE
 		ON DELETE CASCADE,
-	CONSTRAINT fk_product_images_variant_id
-		FOREIGN KEY (variant_id) REFERENCES product_variants(id)
+	CONSTRAINT fk_product_images_product_id
+		FOREIGN KEY (product_id) REFERENCES products(id)
 		ON UPDATE CASCADE
 		ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -248,36 +251,36 @@ CREATE TABLE IF NOT EXISTS purchase_receipts (
 CREATE TABLE IF NOT EXISTS purchase_receipt_items (
 	id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
 	receipt_id BIGINT UNSIGNED NOT NULL,
-	variant_id BIGINT UNSIGNED NOT NULL,
+	product_id BIGINT UNSIGNED NOT NULL,
 	quantity INT NOT NULL,
 	unit_cost DECIMAL(15,2) NOT NULL,
 	line_total DECIMAL(15,2) NOT NULL,
 	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	UNIQUE KEY uk_receipt_variant (receipt_id, variant_id),
-	KEY idx_purchase_receipt_items_variant_id (variant_id),
+	UNIQUE KEY uk_receipt_product (receipt_id, product_id),
+	KEY idx_purchase_receipt_items_product_id (product_id),
 	CONSTRAINT fk_purchase_receipt_items_receipt_id
 		FOREIGN KEY (receipt_id) REFERENCES purchase_receipts(id)
 		ON UPDATE CASCADE
 		ON DELETE CASCADE,
-	CONSTRAINT fk_purchase_receipt_items_variant_id
-		FOREIGN KEY (variant_id) REFERENCES product_variants(id)
+	CONSTRAINT fk_purchase_receipt_items_product_id
+		FOREIGN KEY (product_id) REFERENCES products(id)
 		ON UPDATE CASCADE
 		ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS stock_movements (
 	id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-	variant_id BIGINT UNSIGNED NOT NULL,
+	product_id BIGINT UNSIGNED NOT NULL,
 	source_type ENUM('IMPORT', 'ORDER', 'RETURN', 'ADJUST') NOT NULL,
 	source_id BIGINT UNSIGNED NULL,
 	quantity_change INT NOT NULL,
 	note VARCHAR(255) NULL,
 	created_by BIGINT UNSIGNED NULL,
 	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	KEY idx_stock_movements_variant_id (variant_id),
+	KEY idx_stock_movements_product_id (product_id),
 	KEY idx_stock_movements_created_by (created_by),
-	CONSTRAINT fk_stock_movements_variant_id
-		FOREIGN KEY (variant_id) REFERENCES product_variants(id)
+	CONSTRAINT fk_stock_movements_product_id
+		FOREIGN KEY (product_id) REFERENCES products(id)
 		ON UPDATE CASCADE
 		ON DELETE RESTRICT,
 	CONSTRAINT fk_stock_movements_created_by
@@ -446,20 +449,20 @@ CREATE TABLE IF NOT EXISTS carts (
 CREATE TABLE IF NOT EXISTS cart_items (
 	id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
 	cart_id BIGINT UNSIGNED NOT NULL,
-	variant_id BIGINT UNSIGNED NOT NULL,
+	product_id BIGINT UNSIGNED NOT NULL,
 	quantity INT NOT NULL DEFAULT 1,
 	unit_price DECIMAL(15,2) NOT NULL,
 	is_selected TINYINT(1) NOT NULL DEFAULT 1,
 	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-	UNIQUE KEY uk_cart_items_cart_variant (cart_id, variant_id),
-	KEY idx_cart_items_variant_id (variant_id),
+	UNIQUE KEY uk_cart_items_cart_product (cart_id, product_id),
+	KEY idx_cart_items_product_id (product_id),
 	CONSTRAINT fk_cart_items_cart_id
 		FOREIGN KEY (cart_id) REFERENCES carts(id)
 		ON UPDATE CASCADE
 		ON DELETE CASCADE,
-	CONSTRAINT fk_cart_items_variant_id
-		FOREIGN KEY (variant_id) REFERENCES product_variants(id)
+	CONSTRAINT fk_cart_items_product_id
+		FOREIGN KEY (product_id) REFERENCES products(id)
 		ON UPDATE CASCADE
 		ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -532,7 +535,7 @@ ALTER TABLE user_vouchers
 CREATE TABLE IF NOT EXISTS order_items (
 	id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
 	order_id BIGINT UNSIGNED NOT NULL,
-	variant_id BIGINT UNSIGNED NOT NULL,
+	product_id BIGINT UNSIGNED NOT NULL,
 	product_name VARCHAR(255) NOT NULL,
 	variant_name VARCHAR(255) NOT NULL,
 	sku VARCHAR(100) NOT NULL,
@@ -541,13 +544,13 @@ CREATE TABLE IF NOT EXISTS order_items (
 	line_total DECIMAL(15,2) NOT NULL,
 	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	KEY idx_order_items_order_id (order_id),
-	KEY idx_order_items_variant_id (variant_id),
+	KEY idx_order_items_product_id (product_id),
 	CONSTRAINT fk_order_items_order_id
 		FOREIGN KEY (order_id) REFERENCES orders(id)
 		ON UPDATE CASCADE
 		ON DELETE CASCADE,
-	CONSTRAINT fk_order_items_variant_id
-		FOREIGN KEY (variant_id) REFERENCES product_variants(id)
+	CONSTRAINT fk_order_items_product_id
+		FOREIGN KEY (product_id) REFERENCES products(id)
 		ON UPDATE CASCADE
 		ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
