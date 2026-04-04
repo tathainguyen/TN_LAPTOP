@@ -6,7 +6,7 @@ import { getAllProducts } from '../services/productService.js';
 
 const LIMIT = 12;
 
-function Shop() {
+function Product() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [products, setProducts] = useState([]);
@@ -60,7 +60,7 @@ function Shop() {
     <main className="home-page">
       <section className="home-products">
         <div className="section-head">
-          <h2>Cửa hàng sản phẩm</h2>
+          <h2>Sản phẩm</h2>
           <span>Trang {page}/{totalPages}</span>
         </div>
 
@@ -68,13 +68,13 @@ function Shop() {
           <div className="home-loading">Đang tải...</div>
         ) : (
           <>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 shop-grid">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 product-list-grid">
               {products.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>
 
-            <div className="shop-pagination">
+            <div className="product-pagination">
               <button
                 type="button"
                 className="page-btn"
@@ -111,4 +111,4 @@ function Shop() {
   );
 }
 
-export default Shop;
+export default Product;
