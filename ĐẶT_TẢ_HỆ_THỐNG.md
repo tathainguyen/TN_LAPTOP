@@ -65,11 +65,20 @@
 - **Quản lý Banner & Tin tức:** Cập nhật nội dung bài viết.
 - **Quản lý Đánh giá & Bình luận:** Xem toàn bộ bình luận và đánh giá. Quyền Ẩn/Xóa các bình luận spam, vi phạm.
 
-### 3.3. Quản lý Kho & Sản phẩm (Inventory & PIM)
+### 3.3. Quản lý Kho & Sản phẩm 
 - **Nhập hàng:** Tạo phiếu nhập yêu cầu chọn chính xác *Sản phẩm (Mã SKU cụ thể)*, nhập *Số lượng* và *Đơn giá vốn* để hệ thống tự động cộng dồn Tồn kho và làm cơ sở tính Lợi nhuận.
-- **Quản lý Sản phẩm (Product Grouping):**
-  - **Quản lý Dòng sản phẩm (Product Groups):** Tạo thông tin chung (Tên dòng máy, Hãng, Danh mục, Mô tả chung).
-  - **Quản lý Sản phẩm chi tiết (Products/SKU):** Gắn vào một Dòng sản phẩm tương ứng. Mỗi SKU là một thực thể độc lập có Tên hiển thị riêng, Giá bán riêng, Tồn kho riêng, và URL riêng. Cho phép Khóa/Mở bán từng SKU.
+- **Quản lý Sản phẩm:** Bao gồm 2 phân hệ chính (Quản lý theo mô hình Dòng sản phẩm và SKU độc lập):
+  1. **Danh sách Sản phẩm (Master List):**
+     - Hiển thị danh sách **TẤT CẢ** các phiên bản laptop (SKU) hiện có trên hệ thống, không phân biệt hãng hay cấu hình.
+     - **Bộ lọc tìm kiếm (Filters):** Bố trí ngay phía trên bảng, cho phép Admin lọc nhanh toàn bộ kho hàng theo:
+       - *Danh mục:* Laptop Gaming, Laptop Văn phòng, Laptop Đồ họa - Thiết kế.
+       - *Hãng (Brand):* Lenovo, Dell, Acer, MSI, Asus, HP.
+     - **Các cột hiển thị:** STT, Tên sản phẩm (Tên phiên bản chi tiết), Danh mục, Hãng, Phân khúc, Lượt xem, Số lượng (Tồn kho), Trạng thái (Đang kích hoạt / Khóa).
+     - **Thao tác (Actions):** - *Xem chi tiết:* Mở popup/trang chi tiết xem nhanh Giá gốc (niêm yết) và Giá được giảm (bán thực tế).
+       - *Khóa/Mở bán:* Nút gạt (Toggle) ẩn/hiện sản phẩm.
+       - *Sửa (Edit):* Chỉnh sửa toàn bộ thông tin (cấu hình, giá bán, xóa/tải lên lại hình ảnh mới).
+  2. **Thêm Sản phẩm mới:**
+     - Giao diện Form nhập liệu chuyên nghiệp. Hỗ trợ 2 bước: Chọn/Tạo "Dòng sản phẩm chung" (Hãng, Danh mục) và Khai báo "Phiên bản SKU" (Cấu hình chi tiết, Giá gốc, Giá bán, Upload Ảnh).
 - **Quản lý Nhà cung cấp:** Lưu data đối tác.
 
 ### 3.4. Quản lý Kinh doanh & Vận hành (Sales & Operations)
