@@ -66,10 +66,10 @@
 - **Quản lý Đánh giá & Bình luận:** Xem toàn bộ bình luận và đánh giá. Quyền Ẩn/Xóa các bình luận spam, vi phạm.
 
 ### 3.3. Quản lý Kho & Sản phẩm (Inventory & PIM)
-- **Nhập hàng:** Tạo phiếu nhập yêu cầu chọn chính xác *Phiên bản cấu hình*, nhập *Số lượng* và *Đơn giá vốn* để hệ thống tự động cộng dồn Tồn kho và làm cơ sở tính Lợi nhuận.
-- **Quản lý Sản phẩm:**
-  - Danh sách sản phẩm chung (Khóa/Mở bán).
-  - **Cấu hình Biến thể:** Cho phép 1 Sản phẩm gốc đẻ ra nhiều Phiên bản cấu hình (SKU). Sửa giá bán lẻ theo từng cấu hình.
+- **Nhập hàng:** Tạo phiếu nhập yêu cầu chọn chính xác *Sản phẩm (Mã SKU cụ thể)*, nhập *Số lượng* và *Đơn giá vốn* để hệ thống tự động cộng dồn Tồn kho và làm cơ sở tính Lợi nhuận.
+- **Quản lý Sản phẩm (Product Grouping):**
+  - **Quản lý Dòng sản phẩm (Product Groups):** Tạo thông tin chung (Tên dòng máy, Hãng, Danh mục, Mô tả chung).
+  - **Quản lý Sản phẩm chi tiết (Products/SKU):** Gắn vào một Dòng sản phẩm tương ứng. Mỗi SKU là một thực thể độc lập có Tên hiển thị riêng, Giá bán riêng, Tồn kho riêng, và URL riêng. Cho phép Khóa/Mở bán từng SKU.
 - **Quản lý Nhà cung cấp:** Lưu data đối tác.
 
 ### 3.4. Quản lý Kinh doanh & Vận hành (Sales & Operations)
