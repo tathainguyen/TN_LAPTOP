@@ -63,7 +63,7 @@ function Header() {
             </div>
 
             <div className="topbar-right">
-              <Link to={user ? '/' : '/login'} className={user ? 'topbar-user-link' : ''}>
+              <Link to={user ? '/account/profile' : '/login'} className={user ? 'topbar-user-link' : ''}>
                 {displayName}
               </Link>
               <span className="topbar-divider">|</span>
@@ -92,7 +92,7 @@ function Header() {
               <span className="cart-badge">0</span>
             </button>
 
-            <Link to={user ? '/' : '/login'} className="icon-btn" aria-label="Tài khoản">
+            <Link to={user ? '/account/profile' : '/login'} className="icon-btn" aria-label="Tài khoản">
               <UserIcon />
             </Link>
           </div>
