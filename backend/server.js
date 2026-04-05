@@ -10,6 +10,7 @@ import { testConnection } from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
 import catalogRoutes from './routes/catalogRoutes.js';
 import productRoutes from './routes/productRoutes.js';
+import userRoutes from './routes/userRoutes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -35,6 +36,7 @@ app.get('/', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/catalog', catalogRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/users', userRoutes);
 
 app.use((err, req, res, next) => {
   console.error('❌ Lỗi hệ thống:', err);
@@ -54,6 +56,7 @@ async function startServer() {
       console.log(`🚀 Server TN Laptop đang chạy tại cổng ${PORT}`);
       console.log(`🌐 Truy cập: http://localhost:${PORT}`);
       console.log('🔐 Auth routes: POST /api/auth/register | POST /api/auth/login');
+      console.log('👥 User routes: GET /api/users/admin | PUT /api/users/admin/:id');
       console.log('========================================');
     });
   } catch (error) {

@@ -7,6 +7,8 @@ import AdminDashboard from './pages/AdminDashboard.jsx';
 import AdminProductCreate from './pages/AdminProductCreate.jsx';
 import AdminProductLinkCode from './pages/AdminProductLinkCode.jsx';
 import AdminProductList from './pages/AdminProductList.jsx';
+import AdminUserCreate from './pages/AdminUserCreate.jsx';
+import AdminUserList from './pages/AdminUserList.jsx';
 import Home from './pages/Home.jsx';
 import Login from './pages/Login.jsx';
 import Product from './pages/Product.jsx';
@@ -26,6 +28,8 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/catalog-brand" element={<AdminCatalogBrand />} />
+          <Route path="/admin/users" element={<AdminUserList />} />
+          <Route path="/admin/users/create" element={<AdminUserCreate />} />
           <Route path="/admin/products" element={<AdminProductList />} />
           <Route path="/admin/products/create" element={<AdminProductCreate />} />
           <Route path="/admin/product-links" element={<AdminProductLinkCode />} />

@@ -27,7 +27,8 @@ const menuGroups = [
   {
     title: 'Quản lý Hệ thống & User',
     items: [
-      { label: 'Người dùng', icon: Users },
+      { label: 'Danh sách người dùng', icon: Users, to: '/admin/users' },
+      { label: 'Thêm người dùng', icon: Users, to: '/admin/users/create' },
       { label: 'Danh mục & Nhãn hàng', icon: FolderTree, to: '/admin/catalog-brand' },
       { label: 'Banner & Tin tức', icon: LayoutPanelTop },
       { label: 'Đánh giá & Bình luận', icon: MessageSquare },
