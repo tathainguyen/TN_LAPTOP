@@ -277,6 +277,24 @@
   cursor: pointer;
 }
 
+.admin-input-with-unit {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-input-with-unit span {
+  border: 1px solid #cfd9e6;
+  border-radius: 10px;
+  padding: 9px 10px;
+  background: #edf3ff;
+  color: #35527b;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
 .admin-loading {
   border: 1px dashed #b9cbe4;
   border-radius: 12px;

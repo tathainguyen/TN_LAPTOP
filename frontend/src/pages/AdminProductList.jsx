@@ -16,6 +16,20 @@ import {
 
 const LIMIT = 10;
 
+function formatCurrencyInput(value) {
+  const digits = String(value || '').replace(/\D/g, '');
+  if (!digits) {
+    return '';
+  }
+
+  return Number(digits).toLocaleString('vi-VN');
+}
+
+function parseCurrencyInputToNumber(value) {
+  const digits = String(value || '').replace(/\D/g, '');
+  return digits ? Number(digits) : 0;
+}
+
 function formatVnd(value) {
   return new Intl.NumberFormat('vi-VN', {
     style: 'currency',
@@ -66,6 +80,7 @@ function AdminProductList() {
   });
 
   const [editItem, setEditItem] = useState(null);
+  const [viewItem, setViewItem] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [editForm, setEditForm] = useState({
     brand_id: '',
@@ -325,10 +340,10 @@ function AdminProductList() {
         storage_option: detail.storage_option || '',
         vga_option: detail.vga_option || '',
         color_option: detail.color_option || '',
-        price_sale: String(detail.price_sale || ''),
+        price_sale: formatCurrencyInput(detail.price_sale || ''),
         price_compare:
           detail.price_compare !== null && detail.price_compare !== undefined
-            ? String(detail.price_compare)
+            ? formatCurrencyInput(detail.price_compare)
             : '',
         stock_quantity: String(detail.stock_quantity || 0),
         is_active: Number(detail.is_active) ? 1 : 0,
@@ -403,8 +418,9 @@ function AdminProductList() {
       storage_option: editForm.storage_option.trim(),
       vga_option: editForm.vga_option.trim(),
       color_option: editForm.color_option.trim(),
-      price_sale: Number(editForm.price_sale || 0),
-      price_compare: editForm.price_compare === '' ? null : Number(editForm.price_compare),
+      price_sale: parseCurrencyInputToNumber(editForm.price_sale),
+      price_compare:
+        editForm.price_compare === '' ? null : parseCurrencyInputToNumber(editForm.price_compare),
       stock_quantity: Number(editForm.stock_quantity || 0),
       is_active: Number(editForm.is_active) ? 1 : 0,
       image_urls: imageUrls,
@@ -449,6 +465,23 @@ function AdminProductList() {
       toast.error(message);
     } finally {
       setSubmittingId(null);
+    }
+  }
+
+  function updateEditPriceField(field, value) {
+    setEditForm((prev) => ({
+      ...prev,
+      [field]: formatCurrencyInput(value),
+    }));
+  }
+
+  async function handleView(item) {
+    try {
+      const response = await getProductById(item.id);
+      setViewItem(response?.data || item);
+    } catch (error) {
+      const message = error?.response?.data?.message || 'Không thể lấy chi tiết sản phẩm.';
+      toast.error(message);
     }
   }
 
@@ -502,7 +535,7 @@ function AdminProductList() {
             <div className="admin-search-inline">
               <input
                 type="search"
-                placeholder="Tìm theo tên SKU, mã SKU..."
+                placeholder="Tìm theo tên, mã SKU..."
                 value={keywordInput}
                 onChange={(event) => setKeywordInput(event.target.value)}
                 onKeyDown={(event) => {
@@ -570,6 +603,14 @@ function AdminProductList() {
                       </td>
                       <td>
                         <div className="admin-actions">
+                          <button
+                            type="button"
+                            className="admin-btn admin-btn--view"
+                            disabled={submittingId === item.id}
+                            onClick={() => handleView(item)}
+                          >
+                            View
+                          </button>
                           <button
                             type="button"
                             className="admin-btn admin-btn--edit"
@@ -751,26 +792,30 @@ function AdminProductList() {
               </label>
               <label>
                 Giá bán
-                <input
-                  type="number"
-                  min="0"
-                  value={editForm.price_sale}
-                  onChange={(event) =>
-                    setEditForm((prev) => ({ ...prev, price_sale: event.target.value }))
-                  }
-                  required
-                />
+                <div className="admin-input-with-unit">
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={editForm.price_sale}
+                    onChange={(event) => updateEditPriceField('price_sale', event.target.value)}
+                    placeholder="0"
+                    required
+                  />
+                  <span>VND</span>
+                </div>
               </label>
               <label>
                 Giá niêm yết
-                <input
-                  type="number"
-                  min="0"
-                  value={editForm.price_compare}
-                  onChange={(event) =>
-                    setEditForm((prev) => ({ ...prev, price_compare: event.target.value }))
-                  }
-                />
+                <div className="admin-input-with-unit">
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={editForm.price_compare}
+                    onChange={(event) => updateEditPriceField('price_compare', event.target.value)}
+                    placeholder="0"
+                  />
+                  <span>VND</span>
+                </div>
               </label>
               <label>
                 Tồn kho
@@ -816,6 +861,34 @@ function AdminProductList() {
                 </button>
               </div>
             </form>
+          </article>
+        </div>
+      ) : null}
+
+      {viewItem ? (
+        <div className="admin-modal-overlay" onClick={() => setViewItem(null)} role="presentation">
+          <article className="admin-modal" onClick={(event) => event.stopPropagation()}>
+            <header>
+              <h3>Chi tiết sản phẩm</h3>
+              <button type="button" onClick={() => setViewItem(null)}>Đóng</button>
+            </header>
+
+            <div className="admin-quick-info">
+              <p><strong>Tên:</strong> {viewItem.product_name || '-'}</p>
+              <p><strong>Mã SKU:</strong> {viewItem.sku || '-'}</p>
+              <p><strong>Mã liên kết:</strong> {viewItem.group_name || '-'}</p>
+              <p><strong>Hãng:</strong> {viewItem.brand_name || '-'}</p>
+              <p><strong>Danh mục:</strong> {viewItem.category_name || '-'}</p>
+              <p><strong>CPU:</strong> {viewItem.cpu_option || '-'}</p>
+              <p><strong>RAM:</strong> {viewItem.ram_option || '-'}</p>
+              <p><strong>VGA:</strong> {viewItem.vga_option || '-'}</p>
+              <p><strong>Lưu trữ:</strong> {viewItem.storage_option || '-'}</p>
+              <p><strong>Màu sắc:</strong> {viewItem.color_option || '-'}</p>
+              <p><strong>Giá bán:</strong> {formatVnd(viewItem.price_sale)}</p>
+              <p><strong>Giá niêm yết:</strong> {formatVnd(viewItem.price_compare || viewItem.price_sale)}</p>
+              <p><strong>Tồn kho:</strong> {viewItem.stock_quantity ?? 0}</p>
+              <p><strong>Trạng thái:</strong> {Number(viewItem.is_active) ? 'Đang kích hoạt' : 'Khóa'}</p>
+            </div>
           </article>
         </div>
       ) : null}

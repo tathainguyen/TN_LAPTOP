@@ -11,6 +11,20 @@ import {
   getProductMasterData,
 } from '../services/productService.js';
 
+function formatCurrencyInput(value) {
+  const digits = String(value || '').replace(/\D/g, '');
+  if (!digits) {
+    return '';
+  }
+
+  return Number(digits).toLocaleString('vi-VN');
+}
+
+function parseCurrencyInputToNumber(value) {
+  const digits = String(value || '').replace(/\D/g, '');
+  return digits ? Number(digits) : 0;
+}
+
 function AdminProductCreate() {
   const navigate = useNavigate();
 
@@ -138,6 +152,13 @@ function AdminProductCreate() {
     setSkuForm((prev) => ({ ...prev, [field]: value }));
   }
 
+  function updatePriceField(field, value) {
+    setSkuForm((prev) => ({
+      ...prev,
+      [field]: formatCurrencyInput(value),
+    }));
+  }
+
   function validateForm() {
     if (
       !productForm.brand_id ||
@@ -214,8 +235,9 @@ function AdminProductCreate() {
         storage_option: skuForm.storage_option.trim(),
         vga_option: skuForm.vga_option.trim(),
         color_option: skuForm.color_option.trim(),
-        price_sale: Number(skuForm.price_sale),
-        price_compare: skuForm.price_compare === '' ? null : Number(skuForm.price_compare),
+        price_sale: parseCurrencyInputToNumber(skuForm.price_sale),
+        price_compare:
+          skuForm.price_compare === '' ? null : parseCurrencyInputToNumber(skuForm.price_compare),
         stock_quantity: Number(skuForm.stock_quantity || 0),
         is_active: Number(skuForm.is_active) ? 1 : 0,
         image_urls: imageUrls,
@@ -391,22 +413,30 @@ function AdminProductCreate() {
 
             <label>
               Giá bán thực tế
-              <input
-                type="number"
-                min="0"
-                value={skuForm.price_sale}
-                onChange={(event) => updateSkuForm('price_sale', event.target.value)}
-              />
+              <div className="admin-input-with-unit">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={skuForm.price_sale}
+                  onChange={(event) => updatePriceField('price_sale', event.target.value)}
+                  placeholder="0"
+                />
+                <span>VND</span>
+              </div>
             </label>
 
             <label>
               Giá niêm yết
-              <input
-                type="number"
-                min="0"
-                value={skuForm.price_compare}
-                onChange={(event) => updateSkuForm('price_compare', event.target.value)}
-              />
+              <div className="admin-input-with-unit">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={skuForm.price_compare}
+                  onChange={(event) => updatePriceField('price_compare', event.target.value)}
+                  placeholder="0"
+                />
+                <span>VND</span>
+              </div>
             </label>
 
             <label>
