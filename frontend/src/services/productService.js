@@ -37,6 +37,23 @@ export async function createProductGroup(payload) {
   return response.data;
 }
 
+export async function updateProductGroup(id, payload) {
+  const response = await productApi.put(`/admin/groups/${id}`, payload);
+  return response.data;
+}
+
+export async function updateProductGroupStatus(id, isActive) {
+  const response = await productApi.patch(`/admin/groups/${id}/status`, {
+    is_active: isActive,
+  });
+  return response.data;
+}
+
+export async function deleteProductGroup(id) {
+  const response = await productApi.delete(`/admin/groups/${id}`);
+  return response.data;
+}
+
 export async function createProduct(payload) {
   const response = await productApi.post('/admin', payload);
   return response.data;

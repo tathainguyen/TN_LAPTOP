@@ -1,14 +1,19 @@
 import {
+  countProductsByGroupId,
   createProduct,
   createProductGroup,
+  deleteProductGroupById,
   deleteProductById,
   getAllProducts,
   getBrands,
   getCategories,
+  getProductGroupById,
   getProductById,
   getProductBySlug,
   getProductGroups,
   getProductImages,
+  updateProductGroupById,
+  updateProductGroupStatusById,
   updateProductById,
   updateProductStatusById,
 } from '../models/productModel.js';
@@ -206,6 +211,180 @@ export async function createGroup(req, res) {
     return res.status(500).json({
       status: 'error',
       message: normalizeDbErrorMessage(error, 'Không thể tạo dòng sản phẩm.'),
+      data: null,
+    });
+  }
+}
+
+export async function updateGroup(req, res) {
+  try {
+    const id = Number(req.params.id);
+    const {
+      brand_id,
+      category_id,
+      group_name,
+      short_description,
+      description,
+      warranty_months,
+      is_featured,
+    } = req.body;
+
+    if (!Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'ID dòng sản phẩm không hợp lệ.',
+        data: null,
+      });
+    }
+
+    if (!brand_id || !category_id || !group_name) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Thiếu trường bắt buộc: brand_id, category_id, group_name.',
+        data: null,
+      });
+    }
+
+    const existing = await getProductGroupById(id);
+    if (!existing) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Không tìm thấy mã liên kết để cập nhật.',
+        data: null,
+      });
+    }
+
+    const updated = await updateProductGroupById(id, {
+      brandId: Number(brand_id),
+      categoryId: Number(category_id),
+      groupName: group_name,
+      shortDescription: short_description,
+      description,
+      warrantyMonths: Number(warranty_months || 12),
+      isFeatured: Number(is_featured) ? 1 : 0,
+    });
+
+    if (!updated) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Cập nhật mã liên kết thất bại.',
+        data: null,
+      });
+    }
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Cập nhật mã liên kết thành công.',
+      data: { id },
+    });
+  } catch (error) {
+    console.error('❌ Lỗi updateGroup:', error);
+
+    return res.status(500).json({
+      status: 'error',
+      message: normalizeDbErrorMessage(error, 'Không thể cập nhật mã liên kết.'),
+      data: null,
+    });
+  }
+}
+
+export async function toggleGroupStatus(req, res) {
+  try {
+    const id = Number(req.params.id);
+    const { is_active } = req.body;
+
+    if (!Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'ID dòng sản phẩm không hợp lệ.',
+        data: null,
+      });
+    }
+
+    const existing = await getProductGroupById(id);
+    if (!existing) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Không tìm thấy mã liên kết để đổi trạng thái.',
+        data: null,
+      });
+    }
+
+    const updated = await updateProductGroupStatusById(id, Number(is_active) ? 1 : 0);
+    if (!updated) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Đổi trạng thái mã liên kết thất bại.',
+        data: null,
+      });
+    }
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Đổi trạng thái mã liên kết thành công.',
+      data: { id },
+    });
+  } catch (error) {
+    console.error('❌ Lỗi toggleGroupStatus:', error);
+
+    return res.status(500).json({
+      status: 'error',
+      message: 'Không thể đổi trạng thái mã liên kết.',
+      data: null,
+    });
+  }
+}
+
+export async function deleteGroup(req, res) {
+  try {
+    const id = Number(req.params.id);
+
+    if (!Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'ID dòng sản phẩm không hợp lệ.',
+        data: null,
+      });
+    }
+
+    const existing = await getProductGroupById(id);
+    if (!existing) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Không tìm thấy mã liên kết để xóa.',
+        data: null,
+      });
+    }
+
+    const totalSku = await countProductsByGroupId(id);
+    if (totalSku > 0) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Không thể xóa mã liên kết đang có SKU.',
+        data: null,
+      });
+    }
+
+    const deleted = await deleteProductGroupById(id);
+    if (!deleted) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Xóa mã liên kết thất bại.',
+        data: null,
+      });
+    }
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Xóa mã liên kết thành công.',
+      data: { id },
+    });
+  } catch (error) {
+    console.error('❌ Lỗi deleteGroup:', error);
+
+    return res.status(500).json({
+      status: 'error',
+      message: 'Không thể xóa mã liên kết.',
       data: null,
     });
   }

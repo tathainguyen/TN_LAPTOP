@@ -271,7 +271,10 @@ export async function getProductGroups({ brandId = null, categoryId = null } = {
       pg.group_name,
       pg.slug,
       pg.short_description,
+      pg.description,
       pg.warranty_months,
+      pg.is_active,
+      pg.is_featured,
       pg.brand_id,
       pg.category_id,
       b.brand_name,
@@ -285,6 +288,32 @@ export async function getProductGroups({ brandId = null, categoryId = null } = {
   );
 
   return rows;
+}
+
+export async function getProductGroupById(id) {
+  const [rows] = await pool.query(
+    `SELECT
+      pg.id,
+      pg.group_name,
+      pg.slug,
+      pg.short_description,
+      pg.description,
+      pg.warranty_months,
+      pg.is_active,
+      pg.is_featured,
+      pg.brand_id,
+      pg.category_id,
+      b.brand_name,
+      c.category_name
+    FROM product_groups pg
+    INNER JOIN brands b ON pg.brand_id = b.id
+    INNER JOIN categories c ON pg.category_id = c.id
+    WHERE pg.id = ?
+    LIMIT 1`,
+    [id]
+  );
+
+  return rows[0] || null;
 }
 
 export async function createProductGroup(payload) {
@@ -340,6 +369,99 @@ export async function createProductGroup(payload) {
   } finally {
     connection.release();
   }
+}
+
+export async function updateProductGroupById(id, payload) {
+  const {
+    brandId,
+    categoryId,
+    groupName,
+    shortDescription,
+    description,
+    warrantyMonths,
+    isFeatured,
+  } = payload;
+
+  const connection = await pool.getConnection();
+
+  try {
+    await connection.beginTransaction();
+
+    const [existingRows] = await connection.query(
+      'SELECT id, group_name FROM product_groups WHERE id = ? LIMIT 1',
+      [id]
+    );
+
+    if (existingRows.length === 0) {
+      await connection.rollback();
+      return false;
+    }
+
+    const currentName = String(existingRows[0].group_name || '');
+    const nextName = String(groupName || '').trim();
+
+    let slug = null;
+    if (nextName && nextName !== currentName) {
+      slug = await generateUniqueSlug(connection, 'product_groups', nextName);
+    }
+
+    const [result] = await connection.query(
+      `UPDATE product_groups
+      SET
+        category_id = ?,
+        brand_id = ?,
+        group_name = ?,
+        slug = COALESCE(?, slug),
+        short_description = ?,
+        description = ?,
+        warranty_months = ?,
+        is_featured = ?
+      WHERE id = ?`,
+      [
+        Number(categoryId),
+        Number(brandId),
+        nextName,
+        slug,
+        shortDescription || null,
+        description || null,
+        Number(warrantyMonths || 12),
+        Number(isFeatured) ? 1 : 0,
+        id,
+      ]
+    );
+
+    await connection.commit();
+    return result.affectedRows > 0;
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
+}
+
+export async function updateProductGroupStatusById(id, isActive) {
+  const [result] = await pool.query(
+    'UPDATE product_groups SET is_active = ? WHERE id = ?',
+    [Number(isActive) ? 1 : 0, id]
+  );
+
+  return result.affectedRows > 0;
+}
+
+export async function countProductsByGroupId(id) {
+  const [rows] = await pool.query(
+    'SELECT COUNT(*) AS total FROM products WHERE group_id = ?',
+    [id]
+  );
+
+  return Number(rows[0]?.total || 0);
+}
+
+export async function deleteProductGroupById(id) {
+  const [result] = await pool.query('DELETE FROM product_groups WHERE id = ?', [id]);
+
+  return result.affectedRows > 0;
 }
 
 export async function createProduct(payload) {

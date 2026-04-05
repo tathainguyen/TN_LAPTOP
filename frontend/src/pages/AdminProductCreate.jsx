@@ -165,12 +165,12 @@ function AdminProductCreate() {
     try {
       setSaving(true);
 
-      const normalizedLinkCode = productForm.link_code.trim().toLowerCase();
       const groupsResponse = await getProductGroups({
         brandId: Number(productForm.brand_id),
         categoryId: Number(productForm.category_id),
       });
 
+      const normalizedLinkCode = productForm.link_code.trim().toLowerCase();
       const existingGroup = (groupsResponse?.data || []).find(
         (group) => String(group.group_name || '').trim().toLowerCase() === normalizedLinkCode
       );
@@ -178,7 +178,6 @@ function AdminProductCreate() {
       let groupId = existingGroup?.id;
 
       if (!groupId) {
-        // Tạm thời dùng group_name làm mã liên kết để gom các SKU cùng model.
         const createdGroupResponse = await createProductGroup({
           brand_id: Number(productForm.brand_id),
           category_id: Number(productForm.category_id),
@@ -193,7 +192,7 @@ function AdminProductCreate() {
       }
 
       if (!groupId) {
-        toast.error('Không tạo được nhóm liên kết sản phẩm. Vui lòng thử lại.');
+        toast.error('Không tạo hoặc tìm được mã liên kết. Vui lòng thử lại.');
         return;
       }
 
@@ -244,7 +243,7 @@ function AdminProductCreate() {
         <div className="admin-panel__head">
           <div>
             <h2>Thêm sản phẩm mới</h2>
-            <p>Nhập thông tin chung và thông tin SKU trong một form thống nhất.</p>
+            <p>Nhập thông tin chung và SKU trong một form duy nhất.</p>
           </div>
         </div>
 
@@ -308,9 +307,7 @@ function AdminProductCreate() {
                 type="number"
                 min="1"
                 value={productForm.warranty_months}
-                onChange={(event) =>
-                  updateProductForm('warranty_months', event.target.value)
-                }
+                onChange={(event) => updateProductForm('warranty_months', event.target.value)}
               />
             </label>
 
@@ -351,6 +348,7 @@ function AdminProductCreate() {
                 onChange={(event) => updateSkuForm('cpu_option', event.target.value)}
               />
             </label>
+
             <label>
               RAM
               <input
@@ -359,6 +357,7 @@ function AdminProductCreate() {
                 onChange={(event) => updateSkuForm('ram_option', event.target.value)}
               />
             </label>
+
             <label>
               VGA
               <input
@@ -367,6 +366,7 @@ function AdminProductCreate() {
                 onChange={(event) => updateSkuForm('vga_option', event.target.value)}
               />
             </label>
+
             <label>
               Lưu trữ
               <input
@@ -375,6 +375,7 @@ function AdminProductCreate() {
                 onChange={(event) => updateSkuForm('storage_option', event.target.value)}
               />
             </label>
+
             <label>
               Màu sắc
               <input
@@ -383,6 +384,7 @@ function AdminProductCreate() {
                 onChange={(event) => updateSkuForm('color_option', event.target.value)}
               />
             </label>
+
             <label>
               Giá bán thực tế
               <input
@@ -392,6 +394,7 @@ function AdminProductCreate() {
                 onChange={(event) => updateSkuForm('price_sale', event.target.value)}
               />
             </label>
+
             <label>
               Giá niêm yết
               <input
@@ -401,6 +404,7 @@ function AdminProductCreate() {
                 onChange={(event) => updateSkuForm('price_compare', event.target.value)}
               />
             </label>
+
             <label>
               Tồn kho ban đầu
               <input
@@ -410,6 +414,7 @@ function AdminProductCreate() {
                 onChange={(event) => updateSkuForm('stock_quantity', event.target.value)}
               />
             </label>
+
             <label>
               Trạng thái
               <select
@@ -433,7 +438,7 @@ function AdminProductCreate() {
           </div>
 
           <p className="admin-helper-text">
-            Lưu ý: Trường Mã liên kết được dùng để gom các biến thể cùng model.
+            Trường Mã liên kết được dùng để gom các SKU cùng model hiển thị ở trang chi tiết.
           </p>
         </article>
 

@@ -4,10 +4,12 @@ import toast from 'react-hot-toast';
 
 import AdminLayout from '../layouts/AdminLayout.jsx';
 import {
+  createProductGroup,
   deleteProduct,
   getAllProducts,
   getProductById,
   getProductMasterData,
+  getProductGroups,
   updateProduct,
   updateProductStatus,
 } from '../services/productService.js';
@@ -63,11 +65,12 @@ function AdminProductList() {
     totalPages: 1,
   });
 
-  const [viewItem, setViewItem] = useState(null);
   const [editItem, setEditItem] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [editForm, setEditForm] = useState({
-    group_id: '',
+    brand_id: '',
+    category_id: '',
+    link_code: '',
     product_name: '',
     sku: '',
     cpu_option: '',
@@ -301,16 +304,6 @@ function AdminProductList() {
     }
   }
 
-  async function handleView(item) {
-    try {
-      const response = await getProductById(item.id);
-      setViewItem(response?.data || item);
-    } catch (error) {
-      const message = error?.response?.data?.message || 'Không thể lấy chi tiết sản phẩm.';
-      toast.error(message);
-    }
-  }
-
   async function handleOpenEdit(item) {
     try {
       const response = await getProductById(item.id);
@@ -322,7 +315,9 @@ function AdminProductList() {
 
       setEditItem(detail);
       setEditForm({
-        group_id: String(detail.group_id || ''),
+        brand_id: String(detail.brand_id || ''),
+        category_id: String(detail.category_id || ''),
+        link_code: detail.group_name || '',
         product_name: detail.product_name || '',
         sku: detail.sku || '',
         cpu_option: detail.cpu_option || '',
@@ -357,8 +352,47 @@ function AdminProductList() {
       .map((line) => line.trim())
       .filter(Boolean);
 
+    if (!editForm.brand_id || !editForm.category_id || !editForm.link_code.trim()) {
+      toast.error('Vui lòng nhập đủ Hãng, Danh mục và Mã liên kết.');
+      return;
+    }
+
+    let resolvedGroupId = 0;
+
+    try {
+      const groupsResponse = await getProductGroups({
+        brandId: Number(editForm.brand_id),
+        categoryId: Number(editForm.category_id),
+      });
+
+      const normalizedLinkCode = String(editForm.link_code || '').trim().toLowerCase();
+      const matchedGroup = (groupsResponse?.data || []).find(
+        (group) => String(group.group_name || '').trim().toLowerCase() === normalizedLinkCode
+      );
+
+      if (matchedGroup?.id) {
+        resolvedGroupId = Number(matchedGroup.id);
+      } else {
+        const createdGroupResponse = await createProductGroup({
+          brand_id: Number(editForm.brand_id),
+          category_id: Number(editForm.category_id),
+          group_name: editForm.link_code.trim(),
+          short_description: editForm.link_code.trim(),
+          description: '',
+          warranty_months: 12,
+          is_featured: 0,
+        });
+
+        resolvedGroupId = Number(createdGroupResponse?.data?.id || 0);
+      }
+    } catch (error) {
+      const message = error?.response?.data?.message || 'Không thể xử lý mã liên kết.';
+      toast.error(message);
+      return;
+    }
+
     const payload = {
-      group_id: Number(editForm.group_id),
+      group_id: resolvedGroupId,
       product_name: editForm.product_name.trim(),
       sku: editForm.sku.trim(),
       cpu_option: editForm.cpu_option.trim(),
@@ -374,7 +408,7 @@ function AdminProductList() {
     };
 
     if (!payload.group_id || !payload.product_name || !payload.sku || !payload.price_sale) {
-      toast.error('Vui lòng nhập đủ Group, Tên SKU, Mã SKU và Giá bán.');
+      toast.error('Vui lòng nhập đủ Mã liên kết, Tên SKU, Mã SKU và Giá bán.');
       return;
     }
 
@@ -389,6 +423,7 @@ function AdminProductList() {
             ? {
                 ...item,
                 group_id: payload.group_id,
+                group_name: editForm.link_code.trim(),
                 product_name: payload.product_name,
                 sku: payload.sku,
                 cpu_option: payload.cpu_option,
@@ -534,14 +569,6 @@ function AdminProductList() {
                         <div className="admin-actions">
                           <button
                             type="button"
-                            className="admin-btn admin-btn--view"
-                            disabled={submittingId === item.id}
-                            onClick={() => handleView(item)}
-                          >
-                            View
-                          </button>
-                          <button
-                            type="button"
                             className="admin-btn admin-btn--edit"
                             disabled={submittingId === item.id}
                             onClick={() => handleOpenEdit(item)}
@@ -593,29 +620,6 @@ function AdminProductList() {
         </div>
       </section>
 
-      {viewItem ? (
-        <div className="admin-modal-overlay" onClick={() => setViewItem(null)} role="presentation">
-          <article className="admin-modal" onClick={(event) => event.stopPropagation()}>
-            <header>
-              <h3>Chi tiết nhanh SKU</h3>
-              <button type="button" onClick={() => setViewItem(null)}>Đóng</button>
-            </header>
-
-            <div className="admin-quick-info">
-              <p><strong>Tên:</strong> {viewItem.product_name}</p>
-              <p><strong>SKU:</strong> {viewItem.sku}</p>
-              <p><strong>Giá niêm yết:</strong> {formatVnd(viewItem.price_compare || viewItem.price_sale)}</p>
-              <p><strong>Giá bán:</strong> {formatVnd(viewItem.price_sale)}</p>
-              <p><strong>CPU:</strong> {viewItem.cpu_option || '-'}</p>
-              <p><strong>RAM:</strong> {viewItem.ram_option || '-'}</p>
-              <p><strong>VGA:</strong> {viewItem.vga_option || '-'}</p>
-              <p><strong>Storage:</strong> {viewItem.storage_option || '-'}</p>
-              <p><strong>Màu:</strong> {viewItem.color_option || '-'}</p>
-            </div>
-          </article>
-        </div>
-      ) : null}
-
       {editItem ? (
         <div className="admin-modal-overlay" onClick={() => setEditItem(null)} role="presentation">
           <article className="admin-modal admin-modal--large" onClick={(event) => event.stopPropagation()}>
@@ -626,24 +630,55 @@ function AdminProductList() {
 
             <form className="admin-form-grid" onSubmit={handleSubmitEdit}>
               <label>
-                Dòng sản phẩm chung
+                Hãng
                 <select
-                  value={editForm.group_id}
+                  value={editForm.brand_id}
                   onChange={(event) =>
-                    setEditForm((prev) => ({ ...prev, group_id: event.target.value }))
+                    setEditForm((prev) => ({ ...prev, brand_id: event.target.value }))
                   }
                   required
                 >
-                  <option value="">-- Chọn dòng sản phẩm --</option>
-                  {masterData.groups.map((group) => (
-                    <option key={group.id} value={group.id}>
-                      {group.group_name} ({group.brand_name} / {group.category_name})
+                  <option value="">-- Chọn hãng --</option>
+                  {masterData.brands.map((brand) => (
+                    <option key={brand.id} value={brand.id}>
+                      {brand.brand_name}
                     </option>
                   ))}
                 </select>
               </label>
+
               <label>
-                Tên phiên bản SKU
+                Danh mục
+                <select
+                  value={editForm.category_id}
+                  onChange={(event) =>
+                    setEditForm((prev) => ({ ...prev, category_id: event.target.value }))
+                  }
+                  required
+                >
+                  <option value="">-- Chọn danh mục --</option>
+                  {masterData.categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.category_name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label>
+                Mã liên kết
+                <input
+                  type="text"
+                  value={editForm.link_code}
+                  onChange={(event) =>
+                    setEditForm((prev) => ({ ...prev, link_code: event.target.value }))
+                  }
+                  placeholder="Ví dụ: LOQ 2024"
+                  required
+                />
+              </label>
+              <label>
+                Tên
                 <input
                   type="text"
                   value={editForm.product_name}

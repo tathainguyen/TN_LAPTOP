@@ -13,7 +13,6 @@ import {
   ShieldCheck,
   ShoppingCart,
   Truck,
-  UserCog,
   Users,
 } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
@@ -39,6 +38,7 @@ const menuGroups = [
     items: [
       { label: 'Nhập hàng', icon: PackagePlus },
       { label: 'Quản lý Sản phẩm', icon: Boxes, to: '/admin/products' },
+      { label: 'Quản lý Mã liên kết', icon: Receipt, to: '/admin/product-links' },
       { label: 'Nhà cung cấp', icon: ShieldCheck },
     ],
   },
