@@ -90,6 +90,48 @@
   background: rgba(30, 64, 175, 0.36);
 }
 
+.admin-menu-item--parent {
+  justify-content: flex-start;
+}
+
+.admin-menu-item__chevron {
+  margin-left: auto;
+  transition: transform 180ms ease;
+}
+
+.admin-menu-item__chevron.is-open {
+  transform: rotate(180deg);
+}
+
+.admin-submenu {
+  margin-top: 6px !important;
+  margin-left: 24px !important;
+  display: grid;
+  gap: 5px;
+}
+
+.admin-submenu-item {
+  display: block;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 7px 9px;
+  text-decoration: none;
+  color: #c7d8f5;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.admin-submenu-item:hover {
+  border-color: rgba(96, 165, 250, 0.35);
+  background: rgba(30, 64, 175, 0.2);
+}
+
+.admin-submenu-item.is-active {
+  border-color: rgba(74, 222, 128, 0.5);
+  background: rgba(22, 163, 74, 0.28);
+  color: #d9ffe5;
+}
+
 .admin-main {
   min-width: 0;
   padding: 16px 20px;
@@ -267,6 +309,15 @@
 .admin-primary-link:disabled {
   opacity: 0.55;
   cursor: not-allowed;
+}
+
+.admin-primary-link--excel {
+  border-color: #15803d;
+  background: #16a34a;
+}
+
+.admin-primary-link--excel:hover {
+  background: #15803d;
 }
 
 .admin-filter-row {

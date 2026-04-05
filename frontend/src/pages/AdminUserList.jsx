@@ -331,7 +331,7 @@ function AdminUserList() {
 
           <button
             type="button"
-            className="admin-primary-link"
+            className="admin-primary-link admin-primary-link--excel"
             disabled={loading || exporting}
             onClick={handleExportUsers}
           >

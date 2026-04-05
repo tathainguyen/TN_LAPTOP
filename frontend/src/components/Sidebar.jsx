@@ -2,6 +2,7 @@ import {
   BadgePercent,
   BarChart3,
   Boxes,
+  ChevronDown,
   ClipboardList,
   FolderTree,
   Gauge,
@@ -15,7 +16,8 @@ import {
   Truck,
   Users,
 } from 'lucide-react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 
 const menuGroups = [
   {
@@ -27,8 +29,14 @@ const menuGroups = [
   {
     title: 'Quản lý Hệ thống & User',
     items: [
-      { label: 'Danh sách người dùng', icon: Users, to: '/admin/users' },
-      { label: 'Thêm người dùng', icon: Users, to: '/admin/users/create' },
+      {
+        label: 'Người dùng',
+        icon: Users,
+        children: [
+          { label: 'Danh sách người dùng', to: '/admin/users' },
+          { label: 'Thêm người dùng', to: '/admin/users/create' },
+        ],
+      },
       { label: 'Danh mục & Nhãn hàng', icon: FolderTree, to: '/admin/catalog-brand' },
       { label: 'Banner & Tin tức', icon: LayoutPanelTop },
       { label: 'Đánh giá & Bình luận', icon: MessageSquare },
@@ -56,6 +64,19 @@ const menuGroups = [
 ];
 
 function Sidebar() {
+  const location = useLocation();
+  const [openKeys, setOpenKeys] = useState({});
+
+  useEffect(() => {
+    if (location.pathname.startsWith('/admin/users')) {
+      setOpenKeys((prev) => ({ ...prev, user: true }));
+    }
+  }, [location.pathname]);
+
+  function toggleGroup(key) {
+    setOpenKeys((prev) => ({ ...prev, [key]: !prev[key] }));
+  }
+
   return (
     <aside className="admin-sidebar">
       <div className="admin-sidebar__brand">
@@ -71,6 +92,48 @@ function Sidebar() {
             <ul>
               {group.items.map((item) => {
                 const Icon = item.icon;
+
+                if (item.children?.length) {
+                  const subMenuKey = item.label === 'Người dùng' ? 'user' : item.label;
+                  const isOpen = Boolean(openKeys[subMenuKey]);
+                  const isParentActive = item.children.some((child) =>
+                    location.pathname.startsWith(child.to)
+                  );
+
+                  return (
+                    <li key={item.label}>
+                      <button
+                        type="button"
+                        className={`admin-menu-item admin-menu-item--parent ${isParentActive ? 'is-active' : ''}`}
+                        onClick={() => toggleGroup(subMenuKey)}
+                      >
+                        <Icon size={16} />
+                        <span>{item.label}</span>
+                        <ChevronDown
+                          size={15}
+                          className={`admin-menu-item__chevron ${isOpen ? 'is-open' : ''}`}
+                        />
+                      </button>
+
+                      {isOpen ? (
+                        <ul className="admin-submenu">
+                          {item.children.map((child) => (
+                            <li key={child.label}>
+                              <NavLink
+                                to={child.to}
+                                className={({ isActive }) =>
+                                  `admin-submenu-item ${isActive ? 'is-active' : ''}`
+                                }
+                              >
+                                {child.label}
+                              </NavLink>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
+                    </li>
+                  );
+                }
 
                 return (
                   <li key={item.label}>
