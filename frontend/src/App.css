@@ -998,10 +998,16 @@
   align-items: center;
 }
 
-.topbar-right a {
+.topbar-right a,
+.topbar-right button {
   text-decoration: none;
   font-weight: 700;
   color: #1f3a66;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
 }
 
 .topbar-user-link {

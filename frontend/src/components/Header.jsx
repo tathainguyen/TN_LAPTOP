@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 function CartIcon() {
   return (
@@ -21,6 +21,7 @@ function UserIcon() {
 }
 
 function Header() {
+  const navigate = useNavigate();
   const [user, setUser] = useState(() => {
     try {
       const storedUser = localStorage.getItem('tn_laptop_user');
@@ -52,6 +53,13 @@ function Header() {
   const displayName =
     user?.full_name?.trim() || user?.fullName?.trim() || user?.email?.trim() || 'ĐĂNG NHẬP';
 
+  function handleLogout() {
+    localStorage.removeItem('tn_laptop_token');
+    localStorage.removeItem('tn_laptop_user');
+    window.dispatchEvent(new Event('tn-laptop-auth-change'));
+    navigate('/', { replace: true });
+  }
+
   return (
     <>
       <header>
@@ -67,7 +75,13 @@ function Header() {
                 {displayName}
               </Link>
               <span className="topbar-divider">|</span>
-              <Link to="/register">ĐĂNG KÝ</Link>
+              {user ? (
+                <button type="button" onClick={handleLogout}>
+                  ĐĂNG XUẤT
+                </button>
+              ) : (
+                <Link to="/register">ĐĂNG KÝ</Link>
+              )}
             </div>
           </div>
         </div>
