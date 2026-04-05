@@ -604,6 +604,13 @@
   color: #1f3a66;
 }
 
+.topbar-user-link {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .topbar-divider {
   color: #94a3b8;
 }

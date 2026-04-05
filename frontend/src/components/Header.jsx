@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 function CartIcon() {
@@ -20,6 +21,37 @@ function UserIcon() {
 }
 
 function Header() {
+  const [user, setUser] = useState(() => {
+    try {
+      const storedUser = localStorage.getItem('tn_laptop_user');
+      return storedUser ? JSON.parse(storedUser) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  useEffect(() => {
+    function syncAuthState() {
+      try {
+        const storedUser = localStorage.getItem('tn_laptop_user');
+        setUser(storedUser ? JSON.parse(storedUser) : null);
+      } catch {
+        setUser(null);
+      }
+    }
+
+    window.addEventListener('storage', syncAuthState);
+    window.addEventListener('tn-laptop-auth-change', syncAuthState);
+
+    return () => {
+      window.removeEventListener('storage', syncAuthState);
+      window.removeEventListener('tn-laptop-auth-change', syncAuthState);
+    };
+  }, []);
+
+  const displayName =
+    user?.full_name?.trim() || user?.fullName?.trim() || user?.email?.trim() || 'ĐĂNG NHẬP';
+
   return (
     <>
       <header>
@@ -31,7 +63,9 @@ function Header() {
             </div>
 
             <div className="topbar-right">
-              <Link to="/login">ĐĂNG NHẬP</Link>
+              <Link to={user ? '/' : '/login'} className={user ? 'topbar-user-link' : ''}>
+                {displayName}
+              </Link>
               <span className="topbar-divider">|</span>
               <Link to="/register">ĐĂNG KÝ</Link>
             </div>
@@ -58,9 +92,9 @@ function Header() {
               <span className="cart-badge">0</span>
             </button>
 
-            <button type="button" className="icon-btn" aria-label="Tài khoản">
+            <Link to={user ? '/' : '/login'} className="icon-btn" aria-label="Tài khoản">
               <UserIcon />
-            </button>
+            </Link>
           </div>
         </div>
       </div>

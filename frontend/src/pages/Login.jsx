@@ -24,6 +24,7 @@ function Login() {
       setLoading(true);
       const response = await loginUser(formData);
       const token = response?.data?.token;
+      const user = response?.data?.user || null;
 
       if (!token) {
         toast.error('Không nhận được token từ máy chủ.');
@@ -31,8 +32,15 @@ function Login() {
       }
 
       localStorage.setItem('tn_laptop_token', token);
+      if (user) {
+        localStorage.setItem('tn_laptop_user', JSON.stringify(user));
+      } else {
+        localStorage.removeItem('tn_laptop_user');
+      }
+
+      window.dispatchEvent(new Event('tn-laptop-auth-change'));
       toast.success('Đăng nhập thành công.');
-      navigate('/login', { replace: true });
+      navigate('/', { replace: true });
     } catch (error) {
       const message =
         error?.response?.data?.message || 'Đăng nhập thất bại. Vui lòng thử lại.';
