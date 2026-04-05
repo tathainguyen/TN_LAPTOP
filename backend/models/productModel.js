@@ -39,9 +39,22 @@ function productSelectSQL() {
       LIMIT 1
     ) AS primary_image
   FROM products p
-  INNER JOIN product_groups pg ON p.group_id = pg.id
-  INNER JOIN brands b ON pg.brand_id = b.id
-  INNER JOIN categories c ON pg.category_id = c.id`;
+  LEFT JOIN product_groups pg ON p.group_id = pg.id
+  LEFT JOIN brands b ON pg.brand_id = b.id
+  LEFT JOIN categories c ON pg.category_id = c.id`;
+}
+
+function toNullableId(value) {
+  if (value === null || value === undefined || value === '') {
+    return null;
+  }
+
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return null;
+  }
+
+  return parsed;
 }
 
 function buildWhereClause({ brandId, categoryId, keyword, groupId }) {
@@ -141,9 +154,9 @@ export async function getAllProducts(options = {}) {
   const [countRows] = await pool.query(
     `SELECT COUNT(*) AS total
     FROM products p
-    INNER JOIN product_groups pg ON p.group_id = pg.id
-    INNER JOIN brands b ON pg.brand_id = b.id
-    INNER JOIN categories c ON pg.category_id = c.id
+    LEFT JOIN product_groups pg ON p.group_id = pg.id
+    LEFT JOIN brands b ON pg.brand_id = b.id
+    LEFT JOIN categories c ON pg.category_id = c.id
     ${whereSQL}`,
     params
   );
@@ -216,9 +229,9 @@ export async function getProductBySlug(slug) {
       c.category_name,
       c.slug AS category_slug
     FROM products p
-    INNER JOIN product_groups pg ON p.group_id = pg.id
-    INNER JOIN brands b ON pg.brand_id = b.id
-    INNER JOIN categories c ON pg.category_id = c.id
+    LEFT JOIN product_groups pg ON p.group_id = pg.id
+    LEFT JOIN brands b ON pg.brand_id = b.id
+    LEFT JOIN categories c ON pg.category_id = c.id
     WHERE p.slug = ?
     LIMIT 1`,
     [slug]
@@ -482,6 +495,7 @@ export async function createProduct(payload) {
   } = payload;
 
   const connection = await pool.getConnection();
+  const normalizedGroupId = toNullableId(groupId);
 
   try {
     await connection.beginTransaction();
@@ -505,7 +519,7 @@ export async function createProduct(payload) {
         is_active
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        Number(groupId),
+        normalizedGroupId,
         productName,
         slug,
         sku,
@@ -533,7 +547,7 @@ export async function createProduct(payload) {
         await connection.query(
           `INSERT INTO product_images (group_id, product_id, image_url, is_primary, sort_order)
           VALUES (?, ?, ?, ?, ?)`,
-          [Number(groupId), result.insertId, url, index === 0 ? 1 : 0, index]
+          [normalizedGroupId, result.insertId, url, index === 0 ? 1 : 0, index]
         );
       }
     }
@@ -570,6 +584,7 @@ export async function updateProductById(id, payload) {
   } = payload;
 
   const connection = await pool.getConnection();
+  const normalizedGroupId = toNullableId(groupId);
 
   try {
     await connection.beginTransaction();
@@ -591,7 +606,7 @@ export async function updateProductById(id, payload) {
         is_active = ?
       WHERE id = ?`,
       [
-        Number(groupId),
+        normalizedGroupId,
         productName,
         sku,
         cpuOption || null,
@@ -615,7 +630,7 @@ export async function updateProductById(id, payload) {
         [id]
       );
 
-      const productGroupId = productRows[0]?.group_id || Number(groupId);
+      const productGroupId = toNullableId(productRows[0]?.group_id);
 
       await connection.query('DELETE FROM product_images WHERE product_id = ?', [id]);
 

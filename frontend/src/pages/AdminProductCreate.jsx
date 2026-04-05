@@ -142,10 +142,9 @@ function AdminProductCreate() {
     if (
       !productForm.brand_id ||
       !productForm.category_id ||
-      !productForm.product_name.trim() ||
-      !productForm.link_code.trim()
+      !productForm.product_name.trim()
     ) {
-      toast.error('Vui lòng nhập đủ Hãng, Danh mục, Tên sản phẩm và Mã liên kết.');
+      toast.error('Vui lòng nhập đủ Hãng, Danh mục và Tên sản phẩm.');
       return false;
     }
 
@@ -165,35 +164,40 @@ function AdminProductCreate() {
     try {
       setSaving(true);
 
-      const groupsResponse = await getProductGroups({
-        brandId: Number(productForm.brand_id),
-        categoryId: Number(productForm.category_id),
-      });
+      let groupId = null;
+      const linkCode = productForm.link_code.trim();
 
-      const normalizedLinkCode = productForm.link_code.trim().toLowerCase();
-      const existingGroup = (groupsResponse?.data || []).find(
-        (group) => String(group.group_name || '').trim().toLowerCase() === normalizedLinkCode
-      );
-
-      let groupId = existingGroup?.id;
-
-      if (!groupId) {
-        const createdGroupResponse = await createProductGroup({
-          brand_id: Number(productForm.brand_id),
-          category_id: Number(productForm.category_id),
-          group_name: productForm.link_code.trim(),
-          short_description: productForm.product_name.trim(),
-          description: productForm.description.trim(),
-          warranty_months: Number(productForm.warranty_months || 12),
-          is_featured: Number(productForm.is_featured) ? 1 : 0,
+      if (linkCode) {
+        const groupsResponse = await getProductGroups({
+          brandId: Number(productForm.brand_id),
+          categoryId: Number(productForm.category_id),
         });
 
-        groupId = createdGroupResponse?.data?.id;
-      }
+        const normalizedLinkCode = linkCode.toLowerCase();
+        const existingGroup = (groupsResponse?.data || []).find(
+          (group) => String(group.group_name || '').trim().toLowerCase() === normalizedLinkCode
+        );
 
-      if (!groupId) {
-        toast.error('Không tạo hoặc tìm được mã liên kết. Vui lòng thử lại.');
-        return;
+        groupId = existingGroup?.id || null;
+
+        if (!groupId) {
+          const createdGroupResponse = await createProductGroup({
+            brand_id: Number(productForm.brand_id),
+            category_id: Number(productForm.category_id),
+            group_name: linkCode,
+            short_description: productForm.product_name.trim(),
+            description: productForm.description.trim(),
+            warranty_months: Number(productForm.warranty_months || 12),
+            is_featured: Number(productForm.is_featured) ? 1 : 0,
+          });
+
+          groupId = createdGroupResponse?.data?.id || null;
+        }
+
+        if (!groupId) {
+          toast.error('Không tạo hoặc tìm được mã liên kết. Vui lòng thử lại.');
+          return;
+        }
       }
 
       const imageUrls = skuForm.image_urls_text
@@ -202,7 +206,7 @@ function AdminProductCreate() {
         .filter(Boolean);
 
       await createProduct({
-        group_id: Number(groupId),
+        group_id: groupId,
         product_name: productForm.product_name.trim(),
         sku: skuForm.sku.trim(),
         cpu_option: skuForm.cpu_option.trim(),

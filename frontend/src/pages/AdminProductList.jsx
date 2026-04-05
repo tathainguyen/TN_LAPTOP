@@ -352,43 +352,46 @@ function AdminProductList() {
       .map((line) => line.trim())
       .filter(Boolean);
 
-    if (!editForm.brand_id || !editForm.category_id || !editForm.link_code.trim()) {
-      toast.error('Vui lòng nhập đủ Hãng, Danh mục và Mã liên kết.');
-      return;
-    }
+    const linkCode = String(editForm.link_code || '').trim();
+    let resolvedGroupId = null;
 
-    let resolvedGroupId = 0;
+    if (linkCode) {
+      if (!editForm.brand_id || !editForm.category_id) {
+        toast.error('Nếu có mã liên kết, vui lòng chọn đủ Hãng và Danh mục.');
+        return;
+      }
 
-    try {
-      const groupsResponse = await getProductGroups({
-        brandId: Number(editForm.brand_id),
-        categoryId: Number(editForm.category_id),
-      });
-
-      const normalizedLinkCode = String(editForm.link_code || '').trim().toLowerCase();
-      const matchedGroup = (groupsResponse?.data || []).find(
-        (group) => String(group.group_name || '').trim().toLowerCase() === normalizedLinkCode
-      );
-
-      if (matchedGroup?.id) {
-        resolvedGroupId = Number(matchedGroup.id);
-      } else {
-        const createdGroupResponse = await createProductGroup({
-          brand_id: Number(editForm.brand_id),
-          category_id: Number(editForm.category_id),
-          group_name: editForm.link_code.trim(),
-          short_description: editForm.link_code.trim(),
-          description: '',
-          warranty_months: 12,
-          is_featured: 0,
+      try {
+        const groupsResponse = await getProductGroups({
+          brandId: Number(editForm.brand_id),
+          categoryId: Number(editForm.category_id),
         });
 
-        resolvedGroupId = Number(createdGroupResponse?.data?.id || 0);
+        const normalizedLinkCode = linkCode.toLowerCase();
+        const matchedGroup = (groupsResponse?.data || []).find(
+          (group) => String(group.group_name || '').trim().toLowerCase() === normalizedLinkCode
+        );
+
+        if (matchedGroup?.id) {
+          resolvedGroupId = Number(matchedGroup.id);
+        } else {
+          const createdGroupResponse = await createProductGroup({
+            brand_id: Number(editForm.brand_id),
+            category_id: Number(editForm.category_id),
+            group_name: linkCode,
+            short_description: linkCode,
+            description: '',
+            warranty_months: 12,
+            is_featured: 0,
+          });
+
+          resolvedGroupId = Number(createdGroupResponse?.data?.id || 0) || null;
+        }
+      } catch (error) {
+        const message = error?.response?.data?.message || 'Không thể xử lý mã liên kết.';
+        toast.error(message);
+        return;
       }
-    } catch (error) {
-      const message = error?.response?.data?.message || 'Không thể xử lý mã liên kết.';
-      toast.error(message);
-      return;
     }
 
     const payload = {
@@ -407,8 +410,8 @@ function AdminProductList() {
       image_urls: imageUrls,
     };
 
-    if (!payload.group_id || !payload.product_name || !payload.sku || !payload.price_sale) {
-      toast.error('Vui lòng nhập đủ Mã liên kết, Tên SKU, Mã SKU và Giá bán.');
+    if (!payload.product_name || !payload.sku || !payload.price_sale) {
+      toast.error('Vui lòng nhập đủ Tên SKU, Mã SKU và Giá bán.');
       return;
     }
 
@@ -423,7 +426,7 @@ function AdminProductList() {
             ? {
                 ...item,
                 group_id: payload.group_id,
-                group_name: editForm.link_code.trim(),
+                group_name: linkCode || null,
                 product_name: payload.product_name,
                 sku: payload.sku,
                 cpu_option: payload.cpu_option,
@@ -549,8 +552,8 @@ function AdminProductList() {
                         <p className="admin-product-name">{item.product_name}</p>
                         <small>{item.sku}</small>
                       </td>
-                      <td>{item.category_name}</td>
-                      <td>{item.brand_name}</td>
+                      <td>{item.category_name || '-'}</td>
+                      <td>{item.brand_name || '-'}</td>
                       <td>{inferSegment(item.category_name)}</td>
                       <td>{item.view_count || 0}</td>
                       <td>{item.stock_quantity}</td>
@@ -636,7 +639,6 @@ function AdminProductList() {
                   onChange={(event) =>
                     setEditForm((prev) => ({ ...prev, brand_id: event.target.value }))
                   }
-                  required
                 >
                   <option value="">-- Chọn hãng --</option>
                   {masterData.brands.map((brand) => (
@@ -654,7 +656,6 @@ function AdminProductList() {
                   onChange={(event) =>
                     setEditForm((prev) => ({ ...prev, category_id: event.target.value }))
                   }
-                  required
                 >
                   <option value="">-- Chọn danh mục --</option>
                   {masterData.categories.map((category) => (
@@ -673,8 +674,7 @@ function AdminProductList() {
                   onChange={(event) =>
                     setEditForm((prev) => ({ ...prev, link_code: event.target.value }))
                   }
-                  placeholder="Ví dụ: LOQ 2024"
-                  required
+                  placeholder="Ví dụ: LOQ 2024 (có thể để trống)"
                 />
               </label>
               <label>

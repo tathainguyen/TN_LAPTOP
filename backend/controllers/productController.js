@@ -408,16 +408,18 @@ export async function createSku(req, res) {
       image_urls,
     } = req.body;
 
-    if (!group_id || !product_name || !sku || !price_sale) {
+    if (!product_name || !sku || !price_sale) {
       return res.status(400).json({
         status: 'error',
-        message: 'Thiếu trường bắt buộc: group_id, product_name, sku, price_sale.',
+        message: 'Thiếu trường bắt buộc: product_name, sku, price_sale.',
         data: null,
       });
     }
 
     const created = await createProduct({
-      groupId: Number(group_id),
+      groupId: group_id === null || group_id === undefined || group_id === ''
+        ? null
+        : Number(group_id),
       productName: product_name,
       sku,
       cpuOption: cpu_option,
@@ -484,16 +486,18 @@ export async function updateSku(req, res) {
       });
     }
 
-    if (!group_id || !product_name || !sku || !price_sale) {
+    if (!product_name || !sku || !price_sale) {
       return res.status(400).json({
         status: 'error',
-        message: 'Thiếu trường bắt buộc: group_id, product_name, sku, price_sale.',
+        message: 'Thiếu trường bắt buộc: product_name, sku, price_sale.',
         data: null,
       });
     }
 
     const updated = await updateProductById(id, {
-      groupId: Number(group_id),
+      groupId: group_id === null || group_id === undefined || group_id === ''
+        ? null
+        : Number(group_id),
       productName: product_name,
       sku,
       cpuOption: cpu_option,
