@@ -121,6 +121,7 @@ function Sidebar() {
                             <li key={child.label}>
                               <NavLink
                                 to={child.to}
+                                end
                                 className={({ isActive }) =>
                                   `admin-submenu-item ${isActive ? 'is-active' : ''}`
                                 }
@@ -140,6 +141,7 @@ function Sidebar() {
                     {item.to ? (
                       <NavLink
                         to={item.to}
+                        end
                         className={({ isActive }) =>
                           `admin-menu-item ${isActive ? 'is-active' : ''}`
                         }
