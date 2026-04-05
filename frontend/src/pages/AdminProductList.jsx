@@ -94,7 +94,6 @@ function AdminProductList() {
     vga_option: '',
     color_option: '',
     price_sale: '',
-    price_compare: '',
     stock_quantity: '',
     is_active: 1,
     image_urls_text: '',
@@ -341,10 +340,6 @@ function AdminProductList() {
         vga_option: detail.vga_option || '',
         color_option: detail.color_option || '',
         price_sale: formatCurrencyInput(detail.price_sale || ''),
-        price_compare:
-          detail.price_compare !== null && detail.price_compare !== undefined
-            ? formatCurrencyInput(detail.price_compare)
-            : '',
         stock_quantity: String(detail.stock_quantity || 0),
         is_active: Number(detail.is_active) ? 1 : 0,
         image_urls_text: (detail.images || []).map((img) => img.image_url).join('\n'),
@@ -419,8 +414,7 @@ function AdminProductList() {
       vga_option: editForm.vga_option.trim(),
       color_option: editForm.color_option.trim(),
       price_sale: parseCurrencyInputToNumber(editForm.price_sale),
-      price_compare:
-        editForm.price_compare === '' ? null : parseCurrencyInputToNumber(editForm.price_compare),
+      price_compare: null,
       stock_quantity: Number(editForm.stock_quantity || 0),
       is_active: Number(editForm.is_active) ? 1 : 0,
       image_urls: imageUrls,
@@ -451,7 +445,6 @@ function AdminProductList() {
                 vga_option: payload.vga_option,
                 color_option: payload.color_option,
                 price_sale: payload.price_sale,
-                price_compare: payload.price_compare,
                 stock_quantity: payload.stock_quantity,
                 is_active: payload.is_active,
               }
@@ -486,12 +479,12 @@ function AdminProductList() {
   }
 
   return (
-    <AdminLayout title="Quản lý Sản phẩm (Master List)">
+    <AdminLayout title="Quản lý Sản phẩm">
       <section className="admin-panel">
         <div className="admin-panel__head">
           <div>
-            <h2>Danh sách tất cả phiên bản SKU</h2>
-            <p>Lọc nhanh theo danh mục và hãng để quản trị tồn kho toàn hệ thống.</p>
+            <h2>Danh sách tất cả Sản Phẩm</h2>
+            <p>Lọc nhanh theo danh mục và hãng để quản trị tồn kho toàn bộ sản phẩm.</p>
           </div>
 
           <Link to="/admin/products/create" className="admin-primary-link">
@@ -791,7 +784,7 @@ function AdminProductList() {
                 />
               </label>
               <label>
-                Giá bán
+                Giá
                 <div className="admin-input-with-unit">
                   <input
                     type="text"
@@ -800,19 +793,6 @@ function AdminProductList() {
                     onChange={(event) => updateEditPriceField('price_sale', event.target.value)}
                     placeholder="0"
                     required
-                  />
-                  <span>VND</span>
-                </div>
-              </label>
-              <label>
-                Giá niêm yết
-                <div className="admin-input-with-unit">
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    value={editForm.price_compare}
-                    onChange={(event) => updateEditPriceField('price_compare', event.target.value)}
-                    placeholder="0"
                   />
                   <span>VND</span>
                 </div>
@@ -884,8 +864,7 @@ function AdminProductList() {
               <p><strong>VGA:</strong> {viewItem.vga_option || '-'}</p>
               <p><strong>Lưu trữ:</strong> {viewItem.storage_option || '-'}</p>
               <p><strong>Màu sắc:</strong> {viewItem.color_option || '-'}</p>
-              <p><strong>Giá bán:</strong> {formatVnd(viewItem.price_sale)}</p>
-              <p><strong>Giá niêm yết:</strong> {formatVnd(viewItem.price_compare || viewItem.price_sale)}</p>
+              <p><strong>Giá:</strong> {formatVnd(viewItem.price_sale)}</p>
               <p><strong>Tồn kho:</strong> {viewItem.stock_quantity ?? 0}</p>
               <p><strong>Trạng thái:</strong> {Number(viewItem.is_active) ? 'Đang kích hoạt' : 'Khóa'}</p>
             </div>

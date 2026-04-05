@@ -53,7 +53,6 @@ function AdminProductCreate() {
     vga_option: '',
     color_option: '',
     price_sale: '',
-    price_compare: '',
     stock_quantity: 0,
     is_active: 1,
     image_urls_text: '',
@@ -170,7 +169,7 @@ function AdminProductCreate() {
     }
 
     if (!skuForm.sku.trim() || !skuForm.price_sale) {
-      toast.error('Vui lòng nhập đủ Mã SKU và Giá bán thực tế.');
+      toast.error('Vui lòng nhập đủ Mã SKU và Giá.');
       return false;
     }
 
@@ -236,8 +235,7 @@ function AdminProductCreate() {
         vga_option: skuForm.vga_option.trim(),
         color_option: skuForm.color_option.trim(),
         price_sale: parseCurrencyInputToNumber(skuForm.price_sale),
-        price_compare:
-          skuForm.price_compare === '' ? null : parseCurrencyInputToNumber(skuForm.price_compare),
+        price_compare: null,
         stock_quantity: Number(skuForm.stock_quantity || 0),
         is_active: Number(skuForm.is_active) ? 1 : 0,
         image_urls: imageUrls,
@@ -412,27 +410,13 @@ function AdminProductCreate() {
             </label>
 
             <label>
-              Giá bán thực tế
+              Giá
               <div className="admin-input-with-unit">
                 <input
                   type="text"
                   inputMode="numeric"
                   value={skuForm.price_sale}
                   onChange={(event) => updatePriceField('price_sale', event.target.value)}
-                  placeholder="0"
-                />
-                <span>VND</span>
-              </div>
-            </label>
-
-            <label>
-              Giá niêm yết
-              <div className="admin-input-with-unit">
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  value={skuForm.price_compare}
-                  onChange={(event) => updatePriceField('price_compare', event.target.value)}
                   placeholder="0"
                 />
                 <span>VND</span>
