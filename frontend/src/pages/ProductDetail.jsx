@@ -5,6 +5,8 @@ import toast from 'react-hot-toast';
 import { getAllProducts, getProductBySlug } from '../services/productService.js';
 
 const FALLBACK_IMAGE = 'https://via.placeholder.com/1200x750?text=No+Image';
+const DETAIL_LOAD_GUARD_MS = 750;
+const recentDetailLoads = new Map();
 
 function formatVnd(value) {
   return new Intl.NumberFormat('vi-VN', {
@@ -25,6 +27,15 @@ function ProductDetail() {
 
   useEffect(() => {
     async function loadData() {
+      const now = Date.now();
+      const lastLoadAt = recentDetailLoads.get(slug) || 0;
+
+      if (now - lastLoadAt < DETAIL_LOAD_GUARD_MS) {
+        return;
+      }
+
+      recentDetailLoads.set(slug, now);
+
       try {
         setLoading(true);
 
