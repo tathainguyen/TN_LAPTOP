@@ -37,7 +37,14 @@ const menuGroups = [
           { label: 'Thêm người dùng', to: '/admin/users/create' },
         ],
       },
-      { label: 'Danh mục & Nhãn hàng', icon: FolderTree, to: '/admin/catalog-brand' },
+      {
+        label: 'Danh mục & Nhãn hàng',
+        icon: FolderTree,
+        children: [
+          { label: 'Quản lý danh mục', to: '/admin/categories' },
+          { label: 'Quản lý nhãn hàng', to: '/admin/brands' },
+        ],
+      },
       { label: 'Banner & Tin tức', icon: LayoutPanelTop },
       { label: 'Đánh giá & Bình luận', icon: MessageSquare },
     ],
@@ -79,6 +86,14 @@ function Sidebar() {
       setOpenKeys((prev) => ({ ...prev, user: true }));
     }
 
+    if (
+      location.pathname.startsWith('/admin/categories') ||
+      location.pathname.startsWith('/admin/brands') ||
+      location.pathname.startsWith('/admin/catalog-brand')
+    ) {
+      setOpenKeys((prev) => ({ ...prev, catalog: true }));
+    }
+
     if (location.pathname.startsWith('/admin/product-links')) {
       setOpenKeys((prev) => ({ ...prev, productLink: true }));
     }
@@ -108,6 +123,8 @@ function Sidebar() {
                   const subMenuKey =
                     item.label === 'Người dùng'
                       ? 'user'
+                      : item.label === 'Danh mục & Nhãn hàng'
+                        ? 'catalog'
                       : item.label === 'Quản lý Mã liên kết'
                         ? 'productLink'
                         : item.label;

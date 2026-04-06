@@ -36,13 +36,15 @@ async function generateUniqueSlug(connection, tableName, rawValue, excludeId = n
   }
 }
 
-function buildStatusClause(status) {
+function buildStatusClause(status, tableAlias = '') {
+  const alias = tableAlias ? `${tableAlias}.` : '';
+
   if (status === 'active') {
-    return ' AND is_active = 1';
+    return ` AND ${alias}is_active = 1`;
   }
 
   if (status === 'inactive') {
-    return ' AND is_active = 0';
+    return ` AND ${alias}is_active = 0`;
   }
 
   return '';
@@ -58,12 +60,23 @@ export async function getBrands({ keyword = '', status = 'all' } = {}) {
     params.push(like, like);
   }
 
-  const statusClause = buildStatusClause(status);
+  const statusClause = buildStatusClause(status, 'b');
   const [rows] = await pool.query(
-    `SELECT id, brand_name, slug, logo_url, is_active, created_at, updated_at
-    FROM brands
+    `SELECT
+      b.id,
+      b.brand_name,
+      b.slug,
+      b.logo_url,
+      b.is_active,
+      b.created_at,
+      b.updated_at,
+      COUNT(p.id) AS product_count
+    FROM brands b
+    LEFT JOIN product_groups pg ON pg.brand_id = b.id
+    LEFT JOIN products p ON p.group_id = pg.id
     WHERE ${whereParts.join(' AND ')}${statusClause}
-    ORDER BY created_at DESC`,
+    GROUP BY b.id, b.brand_name, b.slug, b.logo_url, b.is_active, b.created_at, b.updated_at
+    ORDER BY b.created_at DESC`,
     params
   );
 
@@ -107,7 +120,7 @@ export async function updateBrand(id, { brandName, logoUrl = null }) {
 
     const [result] = await connection.query(
       `UPDATE brands
-      SET brand_name = ?, slug = ?, logo_url = ?
+      SET brand_name = ?, slug = ?, logo_url = COALESCE(?, logo_url)
       WHERE id = ?`,
       [brandName, slug, logoUrl || null, Number(id)]
     );
@@ -142,7 +155,7 @@ export async function getCategories({ keyword = '', status = 'all' } = {}) {
     params.push(like, like);
   }
 
-  const statusClause = buildStatusClause(status);
+  const statusClause = buildStatusClause(status, 'c');
   const [rows] = await pool.query(
     `SELECT
       c.id,
@@ -151,9 +164,13 @@ export async function getCategories({ keyword = '', status = 'all' } = {}) {
       c.description,
       c.is_active,
       c.created_at,
-      c.updated_at
+      c.updated_at,
+      COUNT(p.id) AS product_count
     FROM categories c
+    LEFT JOIN product_groups pg ON pg.category_id = c.id
+    LEFT JOIN products p ON p.group_id = pg.id
     WHERE ${whereParts.join(' AND ')}${statusClause}
+    GROUP BY c.id, c.category_name, c.slug, c.description, c.is_active, c.created_at, c.updated_at
     ORDER BY c.created_at DESC`,
     params
   );

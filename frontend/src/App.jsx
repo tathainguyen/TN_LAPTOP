@@ -1,8 +1,9 @@
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 
 import './App.css';
+import AdminBrandList from './pages/AdminBrandList.jsx';
+import AdminCategoryList from './pages/AdminCategoryList.jsx';
 import Header from './components/Header.jsx';
-import AdminCatalogBrand from './pages/AdminCatalogBrand.jsx';
 import AdminDashboard from './pages/AdminDashboard.jsx';
 import AdminProductCreate from './pages/AdminProductCreate.jsx';
 import AdminProductLinkCreate from './pages/AdminProductLinkCreate.jsx';
@@ -34,7 +35,12 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/admin/catalog-brand" element={<AdminCatalogBrand />} />
+          <Route path="/admin/brands" element={<AdminBrandList />} />
+          <Route path="/admin/brands/create" element={<Navigate to="/admin/brands" replace />} />
+          <Route path="/admin/categories" element={<AdminCategoryList />} />
+          <Route path="/admin/categories/create" element={<Navigate to="/admin/categories" replace />} />
+          <Route path="/admin/catalog-brand" element={<Navigate to="/admin/brands" replace />} />
+          <Route path="/admin/catalog-brand/create" element={<Navigate to="/admin/brands/create" replace />} />
           <Route path="/admin/users" element={<AdminUserList />} />
           <Route path="/admin/users/create" element={<AdminUserCreate />} />
           <Route path="/admin/products" element={<AdminProductList />} />
