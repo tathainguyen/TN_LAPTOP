@@ -47,7 +47,14 @@ const menuGroups = [
     items: [
       { label: 'Nhập hàng', icon: PackagePlus },
       { label: 'Quản lý Sản phẩm', icon: Boxes, to: '/admin/products' },
-      { label: 'Quản lý Mã liên kết', icon: Receipt, to: '/admin/product-links' },
+      {
+        label: 'Quản lý Mã liên kết',
+        icon: Receipt,
+        children: [
+          { label: 'Danh sách mã liên kết', to: '/admin/product-links' },
+          { label: 'Tạo mã liên kết', to: '/admin/product-links/create' },
+        ],
+      },
       { label: 'Nhà cung cấp', icon: ShieldCheck },
     ],
   },
@@ -70,6 +77,10 @@ function Sidebar() {
   useEffect(() => {
     if (location.pathname.startsWith('/admin/users')) {
       setOpenKeys((prev) => ({ ...prev, user: true }));
+    }
+
+    if (location.pathname.startsWith('/admin/product-links')) {
+      setOpenKeys((prev) => ({ ...prev, productLink: true }));
     }
   }, [location.pathname]);
 
@@ -94,7 +105,12 @@ function Sidebar() {
                 const Icon = item.icon;
 
                 if (item.children?.length) {
-                  const subMenuKey = item.label === 'Người dùng' ? 'user' : item.label;
+                  const subMenuKey =
+                    item.label === 'Người dùng'
+                      ? 'user'
+                      : item.label === 'Quản lý Mã liên kết'
+                        ? 'productLink'
+                        : item.label;
                   const isOpen = Boolean(openKeys[subMenuKey]);
                   const isParentActive = item.children.some((child) =>
                     location.pathname.startsWith(child.to)

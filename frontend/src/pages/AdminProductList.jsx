@@ -1020,6 +1020,7 @@ function AdminProductList() {
               <p><strong>Tên:</strong> {viewItem.product_name || '-'}</p>
               <p><strong>Mã SKU:</strong> {viewItem.sku || '-'}</p>
               <p><strong>Mã liên kết:</strong> {viewItem.group_name || '-'}</p>
+              <p><strong>Nổi bật:</strong> {Number(viewItem.is_featured) ? 'Có' : 'Không'}</p>
               <p><strong>Hãng:</strong> {viewItem.brand_name || '-'}</p>
               <p><strong>Danh mục:</strong> {viewItem.category_name || '-'}</p>
               <p><strong>CPU:</strong> {viewItem.cpu_option || '-'}</p>

@@ -5,7 +5,8 @@ import Header from './components/Header.jsx';
 import AdminCatalogBrand from './pages/AdminCatalogBrand.jsx';
 import AdminDashboard from './pages/AdminDashboard.jsx';
 import AdminProductCreate from './pages/AdminProductCreate.jsx';
-import AdminProductLinkCode from './pages/AdminProductLinkCode.jsx';
+import AdminProductLinkCreate from './pages/AdminProductLinkCreate.jsx';
+import AdminProductLinkList from './pages/AdminProductLinkList.jsx';
 import AdminProductList from './pages/AdminProductList.jsx';
 import AdminUserCreate from './pages/AdminUserCreate.jsx';
 import AdminUserList from './pages/AdminUserList.jsx';
@@ -38,7 +39,8 @@ function App() {
           <Route path="/admin/users/create" element={<AdminUserCreate />} />
           <Route path="/admin/products" element={<AdminProductList />} />
           <Route path="/admin/products/create" element={<AdminProductCreate />} />
-          <Route path="/admin/product-links" element={<AdminProductLinkCode />} />
+          <Route path="/admin/product-links" element={<AdminProductLinkList />} />
+          <Route path="/admin/product-links/create" element={<AdminProductLinkCreate />} />
           <Route path="/product" element={<Product />} />
           <Route path="/product/:slug" element={<ProductDetail />} />
           <Route path="/account" element={<CustomerAccountLayout />}>
