@@ -84,6 +84,19 @@ function readFileAsDataUrl(file) {
   });
 }
 
+function getImageItemKey(item) {
+  if (item?.kind === 'existing') {
+    return `existing:${item.url}`;
+  }
+
+  if (item?.kind === 'file') {
+    const file = item.file;
+    return `file:${getFileIdentity(file)}`;
+  }
+
+  return '';
+}
+
 function AdminProductList() {
   const [loading, setLoading] = useState(true);
   const [submittingId, setSubmittingId] = useState(null);
@@ -107,8 +120,7 @@ function AdminProductList() {
   });
 
   const [editItem, setEditItem] = useState(null);
-  const [editImageFiles, setEditImageFiles] = useState([]);
-  const [editPreviewUrls, setEditPreviewUrls] = useState([]);
+  const [editImages, setEditImages] = useState([]);
   const [viewItem, setViewItem] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [editForm, setEditForm] = useState({
@@ -371,62 +383,54 @@ function AdminProductList() {
         price_sale: formatCurrencyInput(detail.price_sale || ''),
         stock_quantity: String(detail.stock_quantity || 0),
         is_active: Number(detail.is_active) ? 1 : 0,
-        image_urls_text: (detail.images || []).map((img) => img.image_url).join('\n'),
       });
-      setEditImageFiles([]);
-      setEditPreviewUrls((prev) => {
-        prev.forEach((url) => URL.revokeObjectURL(url));
-        return [];
-      });
+
+      const initialImages = (detail.images || [])
+        .map((img) => String(img?.image_url || '').trim())
+        .filter(Boolean)
+        .map((url) => ({ kind: 'existing', url }));
+
+      setEditImages(initialImages);
     } catch (error) {
       const message = error?.response?.data?.message || 'Không thể mở form chỉnh sửa.';
       toast.error(message);
     }
   }
 
-  function handleEditFilesChange(event) {
+  async function handleEditFilesChange(event) {
     const files = Array.from(event.target.files || []);
 
     if (files.length === 0) {
       return;
     }
 
-    setEditImageFiles((prev) => {
-      const existed = new Set(prev.map((file) => getFileIdentity(file)));
-      const newlyAddedFiles = files.filter((file) => !existed.has(getFileIdentity(file)));
-      return [...prev, ...newlyAddedFiles];
+    const readableFiles = [];
+    const filePreviews = await Promise.all(
+      files.map(async (file) => ({
+        file,
+        preview: await readFileAsDataUrl(file),
+      }))
+    );
+
+    setEditImages((prev) => {
+      const existed = new Set(prev.map((item) => getImageItemKey(item)));
+      const nextItems = filePreviews
+        .filter(({ file }) => !existed.has(`file:${getFileIdentity(file)}`))
+        .map(({ file, preview }) => ({
+          kind: 'file',
+          file,
+          preview,
+        }));
+
+      return [...prev, ...nextItems];
     });
 
     event.target.value = '';
   }
 
-  useEffect(() => {
-    let cancelled = false;
-
-    async function buildPreviews() {
-      if (editImageFiles.length === 0) {
-        setEditPreviewUrls([]);
-        return;
-      }
-
-      try {
-        const urls = await Promise.all(editImageFiles.map((file) => readFileAsDataUrl(file)));
-        if (!cancelled) {
-          setEditPreviewUrls(urls.filter(Boolean));
-        }
-      } catch {
-        if (!cancelled) {
-          setEditPreviewUrls([]);
-        }
-      }
-    }
-
-    buildPreviews();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [editImageFiles]);
+  function removeEditImage(index) {
+    setEditImages((prev) => prev.filter((_, currentIndex) => currentIndex !== index));
+  }
 
   async function handleSubmitEdit(event) {
     event.preventDefault();
@@ -435,16 +439,17 @@ function AdminProductList() {
       return;
     }
 
-    const manualImageUrls = editForm.image_urls_text
-      .split('\n')
-      .map((line) => line.trim())
+    const existingImageUrls = editImages
+      .filter((item) => item.kind === 'existing')
+      .map((item) => item.url)
       .filter(Boolean);
 
+    const fileItems = editImages.filter((item) => item.kind === 'file');
     let uploadedImageUrls = [];
 
-    if (editImageFiles.length > 0) {
+    if (fileItems.length > 0) {
       try {
-        const uploadResponse = await uploadProductImages(editImageFiles);
+        const uploadResponse = await uploadProductImages(fileItems.map((item) => item.file));
         uploadedImageUrls = uploadResponse?.data?.image_urls || [];
       } catch (error) {
         const message = error?.response?.data?.message || 'Không thể upload ảnh sản phẩm.';
@@ -453,7 +458,7 @@ function AdminProductList() {
       }
     }
 
-    const imageUrls = [...manualImageUrls, ...uploadedImageUrls];
+    const imageUrls = [...existingImageUrls, ...uploadedImageUrls];
 
     const linkCode = String(editForm.link_code || '').trim();
     let resolvedGroupId = null;
@@ -522,11 +527,7 @@ function AdminProductList() {
       setSubmittingId(editItem.id);
       await updateProduct(editItem.id, payload);
       setEditItem(null);
-      setEditImageFiles([]);
-      setEditPreviewUrls((prev) => {
-        prev.forEach((url) => URL.revokeObjectURL(url));
-        return [];
-      });
+      setEditImages([]);
 
       setProducts((prev) =>
         prev.map((item) =>
@@ -933,7 +934,7 @@ function AdminProductList() {
                 </select>
               </label>
               <label className="admin-form-grid__full">
-                Upload ảnh mới (Cloudinary)
+                Thêm ảnh mới (Cloudinary)
                 <input
                   type="file"
                   accept="image/*"
@@ -943,24 +944,35 @@ function AdminProductList() {
                 />
               </label>
 
-              {editPreviewUrls.length > 0 ? (
-                <div className="admin-form-grid__full admin-image-preview-grid">
-                  {editPreviewUrls.map((url) => (
-                    <img key={url} src={url} alt="Preview" className="admin-image-preview-item" />
-                  ))}
+              <div className="admin-form-grid__full admin-edit-image-panel">
+                <div className="admin-edit-image-panel__head">
+                  <div>
+                    <h4>Ảnh sản phẩm</h4>
+                    <p>Ảnh đầu tiên là ảnh chính. Nhấn dấu X để bỏ ảnh không dùng.</p>
+                  </div>
                 </div>
-              ) : null}
 
-              <label className="admin-form-grid__full">
-                Ảnh sản phẩm (mỗi dòng 1 URL)
-                <textarea
-                  rows={4}
-                  value={editForm.image_urls_text}
-                  onChange={(event) =>
-                    setEditForm((prev) => ({ ...prev, image_urls_text: event.target.value }))
-                  }
-                />
-              </label>
+                {editImages.length > 0 ? (
+                  <div className="admin-edit-image-grid">
+                    {editImages.map((item, index) => (
+                      <div className="admin-edit-image-card" key={`${getImageItemKey(item)}-${index + 1}`}>
+                        <button
+                          type="button"
+                          className="admin-edit-image-remove"
+                          onClick={() => removeEditImage(index)}
+                          disabled={submittingId === editItem.id}
+                          aria-label="Xóa ảnh"
+                        >
+                          ×
+                        </button>
+                        <img src={item.kind === 'existing' ? item.url : item.preview} alt={`Ảnh ${index + 1}`} />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="admin-edit-image-empty">Chưa có ảnh nào. Hãy tải lên ảnh chính trước.</p>
+                )}
+              </div>
 
               <div className="admin-form-actions">
                 <button type="button" onClick={() => setEditItem(null)}>
