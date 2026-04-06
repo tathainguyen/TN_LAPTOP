@@ -1791,6 +1791,13 @@
   font-weight: 700;
 }
 
+.detail-views {
+  margin: 6px 0 0;
+  color: #9fb2d7;
+  font-size: 13px;
+  font-weight: 700;
+}
+
 .detail-price-wrap {
   display: flex;
   align-items: baseline;

@@ -127,6 +127,7 @@ function ProductDetail() {
         <div className="detail-info">
           <p className="detail-kicker">{product.brand_name} | {product.group_name}</p>
           <h1>{product.product_name}</h1>
+          <p className="detail-views">Lượt xem: {Number(product.view_count || 0).toLocaleString('vi-VN')}</p>
 
           <div className="detail-price-wrap">
             <p className="detail-price">{formatVnd(product.price_sale)}</p>

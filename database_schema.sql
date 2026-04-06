@@ -454,23 +454,6 @@ INSERT INTO `product_images` (`id`, `group_id`, `product_id`, `image_url`, `is_p
 (32, 21, 139, 'https://res.cloudinary.com/dc4ebrhks/image/upload/v1775491533/tn-laptop/products/product-1775491515426-448401057.jpg', 0, 5, '2026-04-06 16:05:17'),
 (33, 21, 139, 'https://res.cloudinary.com/dc4ebrhks/image/upload/v1775491532/tn-laptop/products/product-1775491515432-771299870.jpg', 0, 6, '2026-04-06 16:05:17');
 
--- --------------------------------------------------------
-
---
--- Cấu trúc bảng cho bảng `product_relations`
---
-
-DROP TABLE IF EXISTS `product_relations`;
-CREATE TABLE `product_relations` (
-  `id` bigint(20) UNSIGNED NOT NULL,
-  `product_a_id` bigint(20) UNSIGNED NOT NULL,
-  `product_b_id` bigint(20) UNSIGNED NOT NULL,
-  `sort_order` int(11) NOT NULL DEFAULT 0,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
 --
 -- Cấu trúc bảng cho bảng `product_specs`
 --
@@ -909,15 +892,6 @@ ALTER TABLE `product_images`
   ADD KEY `idx_product_images_product_id` (`product_id`);
 
 --
--- Chỉ mục cho bảng `product_relations`
---
-ALTER TABLE `product_relations`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `uk_product_relations_pair` (`product_a_id`,`product_b_id`),
-  ADD KEY `idx_product_relations_product_a_id` (`product_a_id`),
-  ADD KEY `idx_product_relations_product_b_id` (`product_b_id`);
-
---
 -- Chỉ mục cho bảng `product_specs`
 --
 ALTER TABLE `product_specs`
@@ -1133,12 +1107,6 @@ ALTER TABLE `product_images`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
 
 --
--- AUTO_INCREMENT cho bảng `product_relations`
---
-ALTER TABLE `product_relations`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT cho bảng `product_specs`
 --
 ALTER TABLE `product_specs`
@@ -1329,13 +1297,6 @@ ALTER TABLE `product_groups`
 ALTER TABLE `product_images`
   ADD CONSTRAINT `fk_product_images_group_id` FOREIGN KEY (`group_id`) REFERENCES `product_groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_product_images_product_id` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Các ràng buộc cho bảng `product_relations`
---
-ALTER TABLE `product_relations`
-  ADD CONSTRAINT `fk_product_relations_product_a_id` FOREIGN KEY (`product_a_id`) REFERENCES `products` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `fk_product_relations_product_b_id` FOREIGN KEY (`product_b_id`) REFERENCES `products` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Các ràng buộc cho bảng `product_specs`

@@ -12,6 +12,7 @@ import {
   getProductBySlug,
   getProductGroups,
   getProductImages,
+  incrementProductGroupViewCount,
   updateProductGroupById,
   updateProductGroupStatusById,
   updateProductById,
@@ -676,6 +677,14 @@ export async function getProductDetail(req, res) {
         message: 'Không tìm thấy sản phẩm.',
         data: null,
       });
+    }
+
+    if (product.group_id) {
+      try {
+        await incrementProductGroupViewCount(product.group_id);
+      } catch (incrementError) {
+        console.error('❌ Lỗi incrementProductGroupViewCount:', incrementError);
+      }
     }
 
     const images = await getProductImages(product.id);

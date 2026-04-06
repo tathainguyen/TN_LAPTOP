@@ -471,6 +471,15 @@ export async function countProductsByGroupId(id) {
   return Number(rows[0]?.total || 0);
 }
 
+export async function incrementProductGroupViewCount(id) {
+  const [result] = await pool.query(
+    'UPDATE product_groups SET view_count = view_count + 1 WHERE id = ?',
+    [id]
+  );
+
+  return result.affectedRows > 0;
+}
+
 export async function deleteProductGroupById(id) {
   const [result] = await pool.query('DELETE FROM product_groups WHERE id = ?', [id]);
 
