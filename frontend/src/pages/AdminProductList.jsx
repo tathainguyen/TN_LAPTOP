@@ -331,7 +331,7 @@ function AdminProductList() {
     try {
       setSubmittingId(deleteTarget.id);
       await deleteProduct(deleteTarget.id);
-      toast.success('Đã xoá SKU.');
+      toast.success('Đã xoá Sản Phẩm.');
       setDeleteTarget(null);
 
       if (products.length === 1 && pagination.page > 1) {
@@ -772,7 +772,7 @@ function AdminProductList() {
         <div className="admin-modal-overlay" onClick={() => setEditItem(null)} role="presentation">
           <article className="admin-modal admin-modal--large" onClick={(event) => event.stopPropagation()}>
             <header>
-              <h3>Chỉnh sửa SKU</h3>
+              <h3>Chỉnh sửa Sản Phẩm</h3>
               <button type="button" onClick={() => setEditItem(null)}>Đóng</button>
             </header>
 
