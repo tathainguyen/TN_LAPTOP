@@ -71,6 +71,19 @@ function getDetailImageUrls(item) {
   return fallback ? [fallback] : [];
 }
 
+function getFileIdentity(file) {
+  return [file.name, file.size, file.lastModified, file.type].join('::');
+}
+
+function readFileAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ''));
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 function AdminProductList() {
   const [loading, setLoading] = useState(true);
   const [submittingId, setSubmittingId] = useState(null);
@@ -373,16 +386,47 @@ function AdminProductList() {
 
   function handleEditFilesChange(event) {
     const files = Array.from(event.target.files || []);
-    setEditImageFiles(files);
-    setEditPreviewUrls((prev) => {
-      prev.forEach((url) => URL.revokeObjectURL(url));
-      return files.map((file) => URL.createObjectURL(file));
+
+    if (files.length === 0) {
+      return;
+    }
+
+    setEditImageFiles((prev) => {
+      const existed = new Set(prev.map((file) => getFileIdentity(file)));
+      const newlyAddedFiles = files.filter((file) => !existed.has(getFileIdentity(file)));
+      return [...prev, ...newlyAddedFiles];
     });
+
+    event.target.value = '';
   }
 
-  useEffect(() => () => {
-    editPreviewUrls.forEach((url) => URL.revokeObjectURL(url));
-  }, [editPreviewUrls]);
+  useEffect(() => {
+    let cancelled = false;
+
+    async function buildPreviews() {
+      if (editImageFiles.length === 0) {
+        setEditPreviewUrls([]);
+        return;
+      }
+
+      try {
+        const urls = await Promise.all(editImageFiles.map((file) => readFileAsDataUrl(file)));
+        if (!cancelled) {
+          setEditPreviewUrls(urls.filter(Boolean));
+        }
+      } catch {
+        if (!cancelled) {
+          setEditPreviewUrls([]);
+        }
+      }
+    }
+
+    buildPreviews();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [editImageFiles]);
 
   async function handleSubmitEdit(event) {
     event.preventDefault();
@@ -409,7 +453,7 @@ function AdminProductList() {
       }
     }
 
-    const imageUrls = [...uploadedImageUrls, ...manualImageUrls];
+    const imageUrls = [...manualImageUrls, ...uploadedImageUrls];
 
     const linkCode = String(editForm.link_code || '').trim();
     let resolvedGroupId = null;

@@ -678,10 +678,15 @@ export async function getProductDetail(req, res) {
       });
     }
 
+    const images = await getProductImages(product.id);
+
     return res.status(200).json({
       status: 'success',
       message: 'Lấy chi tiết sản phẩm thành công.',
-      data: product,
+      data: {
+        ...product,
+        images,
+      },
     });
   } catch (error) {
     console.error('❌ Lỗi getProductDetail:', error);

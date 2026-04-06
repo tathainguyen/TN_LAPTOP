@@ -4,11 +4,7 @@ import toast from 'react-hot-toast';
 
 import { getAllProducts, getProductBySlug } from '../services/productService.js';
 
-const IMAGE_SLIDES = [
-  'https://images.unsplash.com/photo-1593640408182-31c70c8268f5?auto=format&fit=crop&w=1400&q=80',
-  'https://images.unsplash.com/photo-1611078489935-0cb964de46d6?auto=format&fit=crop&w=1400&q=80',
-  'https://images.unsplash.com/photo-1542393545-10f5cde2c810?auto=format&fit=crop&w=1400&q=80',
-];
+const FALLBACK_IMAGE = 'https://via.placeholder.com/1200x750?text=No+Image';
 
 function formatVnd(value) {
   return new Intl.NumberFormat('vi-VN', {
@@ -68,7 +64,29 @@ function ProductDetail() {
     loadData();
   }, [slug, navigate]);
 
-  const currentImage = useMemo(() => IMAGE_SLIDES[activeImageIndex], [activeImageIndex]);
+  const imageSlides = useMemo(() => {
+    if (!product) {
+      return [FALLBACK_IMAGE];
+    }
+
+    const imageList = (product.images || [])
+      .map((item) => String(item?.image_url || '').trim())
+      .filter(Boolean);
+
+    if (imageList.length > 0) {
+      return imageList;
+    }
+
+    const primary = String(product.primary_image || '').trim();
+    return primary ? [primary] : [FALLBACK_IMAGE];
+  }, [product]);
+
+  useEffect(() => {
+    setActiveImageIndex(0);
+  }, [slug, imageSlides.length]);
+
+  const safeIndex = activeImageIndex >= imageSlides.length ? 0 : activeImageIndex;
+  const currentImage = imageSlides[safeIndex] || FALLBACK_IMAGE;
 
   if (loading) {
     return (
@@ -93,11 +111,11 @@ function ProductDetail() {
           <img src={currentImage} alt={product.product_name} className="detail-main-image" />
 
           <div className="detail-thumbs">
-            {IMAGE_SLIDES.map((img, idx) => (
+            {imageSlides.map((img, idx) => (
               <button
-                key={img}
+                key={`${img}-${idx + 1}`}
                 type="button"
-                className={`detail-thumb ${activeImageIndex === idx ? 'active' : ''}`}
+                className={`detail-thumb ${safeIndex === idx ? 'active' : ''}`}
                 onClick={() => setActiveImageIndex(idx)}
               >
                 <img src={img} alt={`Ảnh ${idx + 1}`} />

@@ -26,6 +26,19 @@ function parseCurrencyInputToNumber(value) {
   return digits ? Number(digits) : 0;
 }
 
+function getFileIdentity(file) {
+  return [file.name, file.size, file.lastModified, file.type].join('::');
+}
+
+function readFileAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ''));
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 function AdminProductCreate() {
   const navigate = useNavigate();
 
@@ -164,16 +177,46 @@ function AdminProductCreate() {
   function handleImageFilesChange(event) {
     const files = Array.from(event.target.files || []);
 
-    setSelectedImageFiles(files);
-    setPreviewUrls((prev) => {
-      prev.forEach((url) => URL.revokeObjectURL(url));
-      return files.map((file) => URL.createObjectURL(file));
+    if (files.length === 0) {
+      return;
+    }
+
+    setSelectedImageFiles((prev) => {
+      const existed = new Set(prev.map((file) => getFileIdentity(file)));
+      const newlyAddedFiles = files.filter((file) => !existed.has(getFileIdentity(file)));
+      return [...prev, ...newlyAddedFiles];
     });
+
+    event.target.value = '';
   }
 
-  useEffect(() => () => {
-    previewUrls.forEach((url) => URL.revokeObjectURL(url));
-  }, [previewUrls]);
+  useEffect(() => {
+    let cancelled = false;
+
+    async function buildPreviews() {
+      if (selectedImageFiles.length === 0) {
+        setPreviewUrls([]);
+        return;
+      }
+
+      try {
+        const urls = await Promise.all(selectedImageFiles.map((file) => readFileAsDataUrl(file)));
+        if (!cancelled) {
+          setPreviewUrls(urls.filter(Boolean));
+        }
+      } catch {
+        if (!cancelled) {
+          setPreviewUrls([]);
+        }
+      }
+    }
+
+    buildPreviews();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedImageFiles]);
 
   function validateForm() {
     if (
@@ -479,6 +522,10 @@ function AdminProductCreate() {
                 onChange={handleImageFilesChange}
               />
             </label>
+
+            <p className="admin-helper-text admin-form-grid__full" style={{ marginTop: -4 }}>
+              Bạn có thể chọn ảnh nhiều lần. Ảnh thêm đầu tiên sẽ là ảnh chính, các ảnh chọn sau là ảnh phụ.
+            </p>
 
             {previewUrls.length > 0 ? (
               <div className="admin-form-grid__full admin-image-preview-grid">
