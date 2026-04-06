@@ -631,6 +631,40 @@ export async function deleteSku(req, res) {
   }
 }
 
+export async function uploadSkuImages(req, res) {
+  try {
+    const files = req.files || [];
+
+    if (!Array.isArray(files) || files.length === 0) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Vui lòng chọn ít nhất 1 ảnh để upload.',
+        data: null,
+      });
+    }
+
+    const imageUrls = files
+      .map((file) => file?.path || file?.secure_url)
+      .filter(Boolean);
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Upload ảnh thành công.',
+      data: {
+        image_urls: imageUrls,
+      },
+    });
+  } catch (error) {
+    console.error('❌ Lỗi uploadSkuImages:', error);
+
+    return res.status(500).json({
+      status: 'error',
+      message: 'Không thể upload ảnh sản phẩm.',
+      data: null,
+    });
+  }
+}
+
 export async function getProductDetail(req, res) {
   try {
     const { slug } = req.params;

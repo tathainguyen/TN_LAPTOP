@@ -9,6 +9,7 @@ import {
   createProductGroup,
   getProductGroups,
   getProductMasterData,
+  uploadProductImages,
 } from '../services/productService.js';
 
 function formatCurrencyInput(value) {
@@ -30,6 +31,8 @@ function AdminProductCreate() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [selectedImageFiles, setSelectedImageFiles] = useState([]);
+  const [previewUrls, setPreviewUrls] = useState([]);
   const [masterData, setMasterData] = useState({
     brands: [],
     categories: [],
@@ -158,6 +161,20 @@ function AdminProductCreate() {
     }));
   }
 
+  function handleImageFilesChange(event) {
+    const files = Array.from(event.target.files || []);
+
+    setSelectedImageFiles(files);
+    setPreviewUrls((prev) => {
+      prev.forEach((url) => URL.revokeObjectURL(url));
+      return files.map((file) => URL.createObjectURL(file));
+    });
+  }
+
+  useEffect(() => () => {
+    previewUrls.forEach((url) => URL.revokeObjectURL(url));
+  }, [previewUrls]);
+
   function validateForm() {
     if (
       !productForm.brand_id ||
@@ -220,10 +237,19 @@ function AdminProductCreate() {
         }
       }
 
-      const imageUrls = skuForm.image_urls_text
+      const manualImageUrls = skuForm.image_urls_text
         .split('\n')
         .map((line) => line.trim())
         .filter(Boolean);
+
+      let uploadedImageUrls = [];
+
+      if (selectedImageFiles.length > 0) {
+        const uploadResponse = await uploadProductImages(selectedImageFiles);
+        uploadedImageUrls = uploadResponse?.data?.image_urls || [];
+      }
+
+      const imageUrls = [...uploadedImageUrls, ...manualImageUrls];
 
       await createProduct({
         group_id: groupId,
@@ -443,6 +469,24 @@ function AdminProductCreate() {
                 <option value={0}>Khóa</option>
               </select>
             </label>
+
+            <label className="admin-form-grid__full">
+              Upload ảnh từ máy (Cloudinary)
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleImageFilesChange}
+              />
+            </label>
+
+            {previewUrls.length > 0 ? (
+              <div className="admin-form-grid__full admin-image-preview-grid">
+                {previewUrls.map((url) => (
+                  <img key={url} src={url} alt="Preview" className="admin-image-preview-item" />
+                ))}
+              </div>
+            ) : null}
 
             <label className="admin-form-grid__full">
               Upload ảnh (nhập URL, mỗi dòng 1 ảnh)

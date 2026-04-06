@@ -12,9 +12,11 @@ import {
 	getProducts,
 	toggleGroupStatus,
 	toggleSkuStatus,
+	uploadSkuImages,
 	updateGroup,
 	updateSku,
 } from '../controllers/productController.js';
+import { uploadProductImages } from '../middlewares/uploadMiddleware.js';
 
 const router = Router();
 
@@ -24,6 +26,7 @@ router.post('/admin/groups', createGroup);
 router.put('/admin/groups/:id', updateGroup);
 router.patch('/admin/groups/:id/status', toggleGroupStatus);
 router.delete('/admin/groups/:id', deleteGroup);
+router.post('/admin/upload-images', uploadProductImages.array('images', 10), uploadSkuImages);
 router.get('/admin/:id', getProductByIdDetail);
 router.post('/admin', createSku);
 router.put('/admin/:id', updateSku);

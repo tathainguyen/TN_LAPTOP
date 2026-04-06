@@ -10,6 +10,7 @@ import {
   getProductById,
   getProductMasterData,
   getProductGroups,
+  uploadProductImages,
   updateProduct,
   updateProductStatus,
 } from '../services/productService.js';
@@ -57,6 +58,19 @@ function inferSegment(categoryName) {
   return categoryName;
 }
 
+function getDetailImageUrls(item) {
+  const urls = (item?.images || [])
+    .map((image) => String(image?.image_url || '').trim())
+    .filter(Boolean);
+
+  if (urls.length > 0) {
+    return urls;
+  }
+
+  const fallback = String(item?.primary_image || '').trim();
+  return fallback ? [fallback] : [];
+}
+
 function AdminProductList() {
   const [loading, setLoading] = useState(true);
   const [submittingId, setSubmittingId] = useState(null);
@@ -80,6 +94,8 @@ function AdminProductList() {
   });
 
   const [editItem, setEditItem] = useState(null);
+  const [editImageFiles, setEditImageFiles] = useState([]);
+  const [editPreviewUrls, setEditPreviewUrls] = useState([]);
   const [viewItem, setViewItem] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [editForm, setEditForm] = useState({
@@ -344,11 +360,29 @@ function AdminProductList() {
         is_active: Number(detail.is_active) ? 1 : 0,
         image_urls_text: (detail.images || []).map((img) => img.image_url).join('\n'),
       });
+      setEditImageFiles([]);
+      setEditPreviewUrls((prev) => {
+        prev.forEach((url) => URL.revokeObjectURL(url));
+        return [];
+      });
     } catch (error) {
       const message = error?.response?.data?.message || 'Không thể mở form chỉnh sửa.';
       toast.error(message);
     }
   }
+
+  function handleEditFilesChange(event) {
+    const files = Array.from(event.target.files || []);
+    setEditImageFiles(files);
+    setEditPreviewUrls((prev) => {
+      prev.forEach((url) => URL.revokeObjectURL(url));
+      return files.map((file) => URL.createObjectURL(file));
+    });
+  }
+
+  useEffect(() => () => {
+    editPreviewUrls.forEach((url) => URL.revokeObjectURL(url));
+  }, [editPreviewUrls]);
 
   async function handleSubmitEdit(event) {
     event.preventDefault();
@@ -357,10 +391,25 @@ function AdminProductList() {
       return;
     }
 
-    const imageUrls = editForm.image_urls_text
+    const manualImageUrls = editForm.image_urls_text
       .split('\n')
       .map((line) => line.trim())
       .filter(Boolean);
+
+    let uploadedImageUrls = [];
+
+    if (editImageFiles.length > 0) {
+      try {
+        const uploadResponse = await uploadProductImages(editImageFiles);
+        uploadedImageUrls = uploadResponse?.data?.image_urls || [];
+      } catch (error) {
+        const message = error?.response?.data?.message || 'Không thể upload ảnh sản phẩm.';
+        toast.error(message);
+        return;
+      }
+    }
+
+    const imageUrls = [...uploadedImageUrls, ...manualImageUrls];
 
     const linkCode = String(editForm.link_code || '').trim();
     let resolvedGroupId = null;
@@ -429,6 +478,11 @@ function AdminProductList() {
       setSubmittingId(editItem.id);
       await updateProduct(editItem.id, payload);
       setEditItem(null);
+      setEditImageFiles([]);
+      setEditPreviewUrls((prev) => {
+        prev.forEach((url) => URL.revokeObjectURL(url));
+        return [];
+      });
 
       setProducts((prev) =>
         prev.map((item) =>
@@ -447,6 +501,7 @@ function AdminProductList() {
                 price_sale: payload.price_sale,
                 stock_quantity: payload.stock_quantity,
                 is_active: payload.is_active,
+                primary_image: imageUrls[0] || item.primary_image || null,
               }
             : item
         )
@@ -553,6 +608,7 @@ function AdminProductList() {
               <thead>
                 <tr>
                   <th>STT</th>
+                  <th>Ảnh</th>
                   <th>Tên sản phẩm</th>
                   <th>Danh mục</th>
                   <th>Hãng</th>
@@ -566,7 +622,7 @@ function AdminProductList() {
               <tbody>
                 {products.length === 0 ? (
                   <tr>
-                    <td colSpan={9} className="admin-empty">
+                    <td colSpan={10} className="admin-empty">
                       Không có SKU phù hợp bộ lọc.
                     </td>
                   </tr>
@@ -574,6 +630,17 @@ function AdminProductList() {
                   products.map((item, index) => (
                     <tr key={item.id}>
                       <td>{(pagination.page - 1) * pagination.limit + index + 1}</td>
+                      <td>
+                        {item.primary_image ? (
+                          <img
+                            src={item.primary_image}
+                            alt={item.product_name}
+                            className="admin-table-thumb"
+                          />
+                        ) : (
+                          <div className="admin-table-thumb admin-table-thumb--empty">No Img</div>
+                        )}
+                      </td>
                       <td>
                         <p className="admin-product-name">{item.product_name}</p>
                         <small>{item.sku}</small>
@@ -822,6 +889,25 @@ function AdminProductList() {
                 </select>
               </label>
               <label className="admin-form-grid__full">
+                Upload ảnh mới (Cloudinary)
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleEditFilesChange}
+                  disabled={submittingId === editItem.id}
+                />
+              </label>
+
+              {editPreviewUrls.length > 0 ? (
+                <div className="admin-form-grid__full admin-image-preview-grid">
+                  {editPreviewUrls.map((url) => (
+                    <img key={url} src={url} alt="Preview" className="admin-image-preview-item" />
+                  ))}
+                </div>
+              ) : null}
+
+              <label className="admin-form-grid__full">
                 Ảnh sản phẩm (mỗi dòng 1 URL)
                 <textarea
                   rows={4}
@@ -867,6 +953,19 @@ function AdminProductList() {
               <p><strong>Giá:</strong> {formatVnd(viewItem.price_sale)}</p>
               <p><strong>Tồn kho:</strong> {viewItem.stock_quantity ?? 0}</p>
               <p><strong>Trạng thái:</strong> {Number(viewItem.is_active) ? 'Đang kích hoạt' : 'Khóa'}</p>
+            </div>
+
+            <div className="admin-view-gallery-wrap">
+              <h4>Ảnh sản phẩm</h4>
+              {getDetailImageUrls(viewItem).length > 0 ? (
+                <div className="admin-view-gallery-grid">
+                  {getDetailImageUrls(viewItem).map((url, index) => (
+                    <img key={`${url}-${index + 1}`} src={url} alt={`${viewItem.product_name || 'product'}-${index + 1}`} className="admin-view-gallery-item" />
+                  ))}
+                </div>
+              ) : (
+                <p className="admin-view-gallery-empty">Chưa có ảnh cho sản phẩm này.</p>
+              )}
             </div>
           </article>
         </div>
