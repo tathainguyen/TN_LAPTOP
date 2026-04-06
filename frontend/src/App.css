@@ -437,14 +437,14 @@
 .admin-layout {
   display: grid;
   grid-template-columns: 290px 1fr;
-  min-height: calc(100vh - 106px);
+  min-height: 100vh;
   background: #f5f7fb;
 }
 
 .admin-sidebar {
   position: sticky;
-  top: 106px;
-  height: calc(100vh - 106px);
+  top: 0;
+  height: 100vh;
   overflow-y: auto;
   background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
   color: #dbe7ff;
@@ -1218,22 +1218,6 @@
   margin: 10px 0 0;
   color: #4f6d95;
   font-size: 12px;
-}
-
-.admin-image-preview-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-  gap: 10px;
-  margin-top: -2px;
-}
-
-.admin-image-preview-item {
-  width: 100%;
-  height: 90px;
-  border-radius: 10px;
-  border: 1px solid #dbe4f0;
-  object-fit: cover;
-  background: #fff;
 }
 
 .admin-step.is-active,

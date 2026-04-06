@@ -11,6 +11,7 @@ import {
   getProductMasterData,
   getProductGroups,
   uploadProductImages,
+  updateProductGroup,
   updateProduct,
   updateProductStatus,
 } from '../services/productService.js';
@@ -127,6 +128,7 @@ function AdminProductList() {
     brand_id: '',
     category_id: '',
     link_code: '',
+    is_featured: 0,
     product_name: '',
     sku: '',
     cpu_option: '',
@@ -137,7 +139,6 @@ function AdminProductList() {
     price_sale: '',
     stock_quantity: '',
     is_active: 1,
-    image_urls_text: '',
   });
 
   useEffect(() => {
@@ -373,6 +374,7 @@ function AdminProductList() {
         brand_id: String(detail.brand_id || ''),
         category_id: String(detail.category_id || ''),
         link_code: detail.group_name || '',
+        is_featured: Number(detail.is_featured) ? 1 : 0,
         product_name: detail.product_name || '',
         sku: detail.sku || '',
         cpu_option: detail.cpu_option || '',
@@ -469,6 +471,16 @@ function AdminProductList() {
         return;
       }
 
+      const groupPayload = {
+        brand_id: Number(editForm.brand_id),
+        category_id: Number(editForm.category_id),
+        group_name: linkCode,
+        short_description: editItem.group_short_description || editItem.product_name || linkCode,
+        description: editItem.group_description || '',
+        warranty_months: Number(editItem.warranty_months || 12),
+        is_featured: Number(editForm.is_featured) ? 1 : 0,
+      };
+
       try {
         const groupsResponse = await getProductGroups({
           brandId: Number(editForm.brand_id),
@@ -482,15 +494,10 @@ function AdminProductList() {
 
         if (matchedGroup?.id) {
           resolvedGroupId = Number(matchedGroup.id);
+          await updateProductGroup(resolvedGroupId, groupPayload);
         } else {
           const createdGroupResponse = await createProductGroup({
-            brand_id: Number(editForm.brand_id),
-            category_id: Number(editForm.category_id),
-            group_name: linkCode,
-            short_description: linkCode,
-            description: '',
-            warranty_months: 12,
-            is_featured: 0,
+            ...groupPayload,
           });
 
           resolvedGroupId = Number(createdGroupResponse?.data?.id || 0) || null;
@@ -823,6 +830,20 @@ function AdminProductList() {
                   placeholder="Ví dụ: LOQ 2024 (có thể để trống)"
                 />
               </label>
+
+              <label>
+                Nổi bật
+                <select
+                  value={editForm.is_featured}
+                  onChange={(event) =>
+                    setEditForm((prev) => ({ ...prev, is_featured: Number(event.target.value) }))
+                  }
+                >
+                  <option value={0}>Không</option>
+                  <option value={1}>Có</option>
+                </select>
+              </label>
+
               <label>
                 Tên
                 <input

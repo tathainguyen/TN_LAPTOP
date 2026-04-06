@@ -71,7 +71,6 @@ function AdminProductCreate() {
     price_sale: '',
     stock_quantity: 0,
     is_active: 1,
-    image_urls_text: '',
   });
 
   useEffect(() => {
@@ -190,6 +189,10 @@ function AdminProductCreate() {
     event.target.value = '';
   }
 
+  function removeSelectedImage(indexToRemove) {
+    setSelectedImageFiles((prev) => prev.filter((_, index) => index !== indexToRemove));
+  }
+
   useEffect(() => {
     let cancelled = false;
 
@@ -280,11 +283,6 @@ function AdminProductCreate() {
         }
       }
 
-      const manualImageUrls = skuForm.image_urls_text
-        .split('\n')
-        .map((line) => line.trim())
-        .filter(Boolean);
-
       let uploadedImageUrls = [];
 
       if (selectedImageFiles.length > 0) {
@@ -292,7 +290,7 @@ function AdminProductCreate() {
         uploadedImageUrls = uploadResponse?.data?.image_urls || [];
       }
 
-      const imageUrls = [...uploadedImageUrls, ...manualImageUrls];
+      const imageUrls = [...uploadedImageUrls];
 
       await createProduct({
         group_id: groupId,
@@ -527,23 +525,36 @@ function AdminProductCreate() {
               Bạn có thể chọn ảnh nhiều lần. Ảnh thêm đầu tiên sẽ là ảnh chính, các ảnh chọn sau là ảnh phụ.
             </p>
 
-            {previewUrls.length > 0 ? (
-              <div className="admin-form-grid__full admin-image-preview-grid">
-                {previewUrls.map((url) => (
-                  <img key={url} src={url} alt="Preview" className="admin-image-preview-item" />
-                ))}
+            <div className="admin-form-grid__full admin-edit-image-panel">
+              <div className="admin-edit-image-panel__head">
+                <div>
+                  <h4>Ảnh sản phẩm</h4>
+                  <p>Ảnh đầu tiên là ảnh chính. Nhấn dấu X để bỏ ảnh không dùng.</p>
+                </div>
               </div>
-            ) : null}
 
-            <label className="admin-form-grid__full">
-              Upload ảnh (nhập URL, mỗi dòng 1 ảnh)
-              <textarea
-                rows={5}
-                value={skuForm.image_urls_text}
-                onChange={(event) => updateSkuForm('image_urls_text', event.target.value)}
-                placeholder="https://example.com/image-1.jpg"
-              />
-            </label>
+              {previewUrls.length > 0 ? (
+                <div className="admin-edit-image-grid">
+                  {previewUrls.map((url, index) => (
+                    <div className="admin-edit-image-card" key={`${url}-${index + 1}`}>
+                      <button
+                        type="button"
+                        className="admin-edit-image-remove"
+                        onClick={() => removeSelectedImage(index)}
+                        aria-label="Xóa ảnh"
+                      >
+                        ×
+                      </button>
+                      <img src={url} alt={`Preview ${index + 1}`} />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="admin-edit-image-empty">
+                  Chưa có ảnh nào. Hãy tải ảnh từ máy để xem trước ở đây.
+                </div>
+              )}
+            </div>
           </div>
 
           <p className="admin-helper-text">
