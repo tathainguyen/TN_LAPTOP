@@ -98,7 +98,7 @@ function CustomerAccountLayout() {
         </aside>
 
         <section className="customer-account-center">
-          <Outlet context={{ user }} />
+          <Outlet context={{ user, setUser }} />
         </section>
 
         <aside className="customer-account-right">

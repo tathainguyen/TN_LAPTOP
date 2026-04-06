@@ -245,3 +245,226 @@ export async function createUser(userData) {
 
   return result.insertId;
 }
+
+export async function updateUserProfile(userId, profileData) {
+  const {
+    fullName,
+    phone,
+    gender,
+    dateOfBirth,
+    avatarUrl,
+  } = profileData;
+
+  const updates = [];
+  const params = [];
+
+  if (fullName !== undefined) {
+    updates.push('full_name = ?');
+    params.push(fullName);
+  }
+  if (phone !== undefined) {
+    updates.push('phone = ?');
+    params.push(phone);
+  }
+  if (gender !== undefined) {
+    updates.push('gender = ?');
+    params.push(gender);
+  }
+  if (dateOfBirth !== undefined) {
+    updates.push('date_of_birth = ?');
+    params.push(dateOfBirth);
+  }
+  if (avatarUrl !== undefined) {
+    updates.push('avatar_url = ?');
+    params.push(avatarUrl);
+  }
+
+  if (updates.length === 0) {
+    return false;
+  }
+
+  params.push(Number(userId));
+
+  const [result] = await pool.query(
+    `UPDATE users SET ${updates.join(', ')} WHERE id = ?`,
+    params
+  );
+
+  return result.affectedRows > 0;
+}
+
+export async function changePassword(userId, passwordHash) {
+  const [result] = await pool.query(
+    'UPDATE users SET password_hash = ? WHERE id = ?',
+    [passwordHash, Number(userId)]
+  );
+
+  return result.affectedRows > 0;
+}
+
+export async function getUserPasswordHash(userId) {
+  const [rows] = await pool.query(
+    'SELECT password_hash FROM users WHERE id = ? LIMIT 1',
+    [Number(userId)]
+  );
+
+  return rows[0]?.password_hash || null;
+}
+
+// Address functions
+export async function getAddressesByUserId(userId) {
+  const [rows] = await pool.query(
+    `SELECT 
+      id,
+      user_id,
+      recipient_name,
+      recipient_phone,
+      province,
+      district,
+      ward,
+      address_line,
+      address_note,
+      is_default,
+      created_at,
+      updated_at
+    FROM user_addresses
+    WHERE user_id = ?
+    ORDER BY is_default DESC, created_at DESC`,
+    [Number(userId)]
+  );
+
+  return rows;
+}
+
+export async function createAddress(userId, addressData) {
+  const {
+    recipientName,
+    recipientPhone,
+    province,
+    district,
+    ward,
+    addressLine,
+    addressNote = null,
+    isDefault = 0,
+  } = addressData;
+
+  // If this is the default, unset other defaults
+  if (isDefault) {
+    await pool.query(
+      'UPDATE user_addresses SET is_default = 0 WHERE user_id = ?',
+      [Number(userId)]
+    );
+  }
+
+  const [result] = await pool.execute(
+    `INSERT INTO user_addresses (
+      user_id,
+      recipient_name,
+      recipient_phone,
+      province,
+      district,
+      ward,
+      address_line,
+      address_note,
+      is_default
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+      Number(userId),
+      recipientName,
+      recipientPhone,
+      province,
+      district,
+      ward,
+      addressLine,
+      addressNote,
+      isDefault ? 1 : 0,
+    ]
+  );
+
+  return result.insertId;
+}
+
+export async function updateAddress(userId, addressId, addressData) {
+  const {
+    recipientName,
+    recipientPhone,
+    province,
+    district,
+    ward,
+    addressLine,
+    addressNote,
+    isDefault,
+  } = addressData;
+
+  const updates = [];
+  const params = [];
+
+  if (recipientName !== undefined) {
+    updates.push('recipient_name = ?');
+    params.push(recipientName);
+  }
+  if (recipientPhone !== undefined) {
+    updates.push('recipient_phone = ?');
+    params.push(recipientPhone);
+  }
+  if (province !== undefined) {
+    updates.push('province = ?');
+    params.push(province);
+  }
+  if (district !== undefined) {
+    updates.push('district = ?');
+    params.push(district);
+  }
+  if (ward !== undefined) {
+    updates.push('ward = ?');
+    params.push(ward);
+  }
+  if (addressLine !== undefined) {
+    updates.push('address_line = ?');
+    params.push(addressLine);
+  }
+  if (addressNote !== undefined) {
+    updates.push('address_note = ?');
+    params.push(addressNote);
+  }
+  if (isDefault !== undefined && isDefault) {
+    updates.push('is_default = 1');
+    // Unset other defaults
+    await pool.query(
+      'UPDATE user_addresses SET is_default = 0 WHERE user_id = ? AND id != ?',
+      [Number(userId), Number(addressId)]
+    );
+  }
+
+  if (updates.length === 0) {
+    return false;
+  }
+
+  params.push(Number(userId));
+  params.push(Number(addressId));
+
+  const [result] = await pool.query(
+    `UPDATE user_addresses SET ${updates.join(', ')} WHERE user_id = ? AND id = ?`,
+    params
+  );
+
+  return result.affectedRows > 0;
+}
+
+export async function deleteAddress(userId, addressId) {
+  const [result] = await pool.query(
+    'DELETE FROM user_addresses WHERE id = ? AND user_id = ?',
+    [Number(addressId), Number(userId)]
+  );
+
+  return result.affectedRows > 0;
+}
+
+export async function getAddressById(userId, addressId) {
+  const [rows] = await pool.query(
+    `SELECT * FROM user_addresses WHERE id = ? AND user_id = ? LIMIT 1`,
+    [Number(addressId), Number(userId)]
+  );
+
+  return rows[0] || null;
+}

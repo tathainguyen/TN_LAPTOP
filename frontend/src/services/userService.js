@@ -38,3 +38,14 @@ export async function updateUserStatus(id, userStatus) {
   });
   return response.data;
 }
+
+// Customer profile and password functions
+export async function updateUserProfile(userId, payload) {
+  const response = await userApi.put(`/customer/${userId}/profile`, payload);
+  return response.data;
+}
+
+export async function changeUserPassword(userId, payload) {
+  const response = await userApi.post(`/customer/${userId}/password`, payload);
+  return response.data;
+}

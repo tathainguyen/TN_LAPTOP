@@ -1,13 +1,16 @@
 import bcrypt from 'bcryptjs';
 
 import {
+  changePassword,
   createUser,
   findRoleById,
   findUserByEmail,
   getRoles,
   getUserById,
+  getUserPasswordHash,
   getUsers,
   updateUserById,
+  updateUserProfile,
   updateUserStatusById,
 } from '../models/userModel.js';
 
@@ -351,6 +354,180 @@ export async function toggleUserStatus(req, res) {
     return res.status(500).json({
       status: 'error',
       message: 'Không thể đổi trạng thái người dùng.',
+      data: null,
+    });
+  }
+}
+
+export async function updateUserProfileItem(req, res) {
+  try {
+    const userId = Number(req.params.userId);
+    const {
+      full_name,
+      phone,
+      gender,
+      date_of_birth,
+      avatar_url,
+    } = req.body;
+
+    if (!Number.isInteger(userId) || userId <= 0) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'ID người dùng không hợp lệ.',
+        data: null,
+      });
+    }
+
+    const user = await getUserById(userId);
+    if (!user) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Không tìm thấy người dùng.',
+        data: null,
+      });
+    }
+
+    if (full_name && !String(full_name).trim()) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Tên đầy đủ không được để trống.',
+        data: null,
+      });
+    }
+
+    if (gender && !['MALE', 'FEMALE', 'OTHER'].includes(String(gender))) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Giới tính không hợp lệ.',
+        data: null,
+      });
+    }
+
+    const profileData = {};
+    if (full_name !== undefined) profileData.fullName = String(full_name).trim();
+    if (phone !== undefined) profileData.phone = phone ? String(phone).trim() : null;
+    if (gender !== undefined) profileData.gender = gender || null;
+    if (date_of_birth !== undefined) profileData.dateOfBirth = date_of_birth || null;
+    if (avatar_url !== undefined) profileData.avatarUrl = avatar_url || null;
+
+    const updated = await updateUserProfile(userId, profileData);
+
+    if (!updated) {
+      return res.status(500).json({
+        status: 'error',
+        message: 'Không thể cập nhật thông tin cá nhân.',
+        data: null,
+      });
+    }
+
+    const updatedUser = await getUserById(userId);
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Cập nhật thông tin cá nhân thành công.',
+      data: updatedUser,
+    });
+  } catch (error) {
+    console.error('❌ Lỗi updateUserProfileItem:', error);
+
+    return res.status(500).json({
+      status: 'error',
+      message: 'Không thể cập nhật thông tin cá nhân.',
+      data: null,
+    });
+  }
+}
+
+export async function changeUserPassword(req, res) {
+  try {
+    const userId = Number(req.params.userId);
+    const {
+      current_password,
+      new_password,
+      confirm_password,
+    } = req.body;
+
+    if (!Number.isInteger(userId) || userId <= 0) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'ID người dùng không hợp lệ.',
+        data: null,
+      });
+    }
+
+    if (!current_password || !new_password || !confirm_password) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Vui lòng nhập đủ thông tin mật khẩu.',
+        data: null,
+      });
+    }
+
+    if (new_password !== confirm_password) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Mật khẩu mới và xác nhận mật khẩu chưa khớp.',
+        data: null,
+      });
+    }
+
+    if (String(new_password).length < 6) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Mật khẩu mới phải có ít nhất 6 ký tự.',
+        data: null,
+      });
+    }
+
+    const user = await getUserById(userId);
+    if (!user) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Không tìm thấy người dùng.',
+        data: null,
+      });
+    }
+
+    const passwordHash = await getUserPasswordHash(userId);
+    if (!passwordHash) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Tài khoản này không có mật khẩu (thường dùng GG/FB login).',
+        data: null,
+      });
+    }
+
+    const isPasswordMatch = await bcrypt.compare(String(current_password), passwordHash);
+    if (!isPasswordMatch) {
+      return res.status(401).json({
+        status: 'error',
+        message: 'Mật khẩu hiện tại không đúng.',
+        data: null,
+      });
+    }
+
+    const newPasswordHash = await bcrypt.hash(String(new_password), 10);
+    const updated = await changePassword(userId, newPasswordHash);
+
+    if (!updated) {
+      return res.status(500).json({
+        status: 'error',
+        message: 'Không thể đổi mật khẩu.',
+        data: null,
+      });
+    }
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Đổi mật khẩu thành công.',
+      data: null,
+    });
+  } catch (error) {
+    console.error('❌ Lỗi changeUserPassword:', error);
+
+    return res.status(500).json({
+      status: 'error',
+      message: 'Không thể đổi mật khẩu.',
       data: null,
     });
   }

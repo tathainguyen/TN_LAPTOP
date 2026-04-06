@@ -1,7 +1,11 @@
 import { useState } from 'react';
+import { useOutletContext } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { changeUserPassword } from '../services/userService.js';
 
 function CustomerPassword() {
+  const { user } = useOutletContext();
+  const [isLoading, setIsLoading] = useState(false);
   const [form, setForm] = useState({
     currentPassword: '',
     newPassword: '',
@@ -12,7 +16,7 @@ function CustomerPassword() {
     setForm((prev) => ({ ...prev, [field]: value }));
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
 
     if (!form.currentPassword || !form.newPassword || !form.confirmPassword) {
@@ -25,8 +29,37 @@ function CustomerPassword() {
       return;
     }
 
-    toast.success('Demo giao diện: Đổi mật khẩu thành công (chức năng thật sẽ làm sau).');
-    setForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    if (form.newPassword.length < 6) {
+      toast.error('Mật khẩu mới phải có ít nhất 6 ký tự.');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const payload = {
+        current_password: form.currentPassword,
+        new_password: form.newPassword,
+        confirm_password: form.confirmPassword,
+      };
+
+      console.log('📤 Gửi request đổi mật khẩu');
+      const response = await changeUserPassword(user.id, payload);
+      console.log('📥 Response từ server:', response);
+
+      if (response.status === 'success') {
+        toast.success('Đổi mật khẩu thành công.');
+        setForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      } else {
+        toast.error(response.message || 'Đổi mật khẩu thất bại.');
+      }
+    } catch (error) {
+      console.error('❌ Lỗi đổi mật khẩu:', error);
+      const errMsg = error.response?.data?.message || error.message || 'Không thể đổi mật khẩu.';
+      toast.error(errMsg);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -40,6 +73,7 @@ function CustomerPassword() {
             type="password"
             value={form.currentPassword}
             onChange={(event) => updateField('currentPassword', event.target.value)}
+            disabled={isLoading}
           />
         </label>
 
@@ -49,6 +83,7 @@ function CustomerPassword() {
             type="password"
             value={form.newPassword}
             onChange={(event) => updateField('newPassword', event.target.value)}
+            disabled={isLoading}
           />
         </label>
 
@@ -58,11 +93,14 @@ function CustomerPassword() {
             type="password"
             value={form.confirmPassword}
             onChange={(event) => updateField('confirmPassword', event.target.value)}
+            disabled={isLoading}
           />
         </label>
 
         <div className="customer-form-actions">
-          <button type="submit">Cập nhật mật khẩu</button>
+          <button type="submit" disabled={isLoading}>
+            {isLoading ? 'Đang cập nhật...' : 'Cập nhật mật khẩu'}
+          </button>
         </div>
       </form>
     </section>
