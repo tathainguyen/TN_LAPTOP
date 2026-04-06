@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { X } from 'lucide-react';
 import { getAddresses, createAddress, updateAddress, deleteAddress } from '../services/addressService.js';
 
 const ADDRESS_DATA = {
@@ -83,6 +84,7 @@ function CustomerAddresses() {
   const [isLoading, setIsLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const [form, setForm] = useState({
     recipient_name: '',
     recipient_phone: '',
@@ -94,19 +96,21 @@ function CustomerAddresses() {
     is_default: false,
   });
 
-  const provinceOptions = filterSuggestions(Object.keys(ADDRESS_DATA), form.province);
-  const selectedProvince = Object.keys(ADDRESS_DATA).find(
-    (province) => normalizeText(province) === normalizeText(form.province),
+  const provinceOptions = useMemo(() => filterSuggestions(Object.keys(ADDRESS_DATA), form.province), [form.province]);
+  const selectedProvince = useMemo(
+    () => Object.keys(ADDRESS_DATA).find((province) => normalizeText(province) === normalizeText(form.province)),
+    [form.province]
   );
   const districtSource = selectedProvince ? Object.keys(ADDRESS_DATA[selectedProvince]) : FALLBACK_DISTRICTS;
-  const districtOptions = filterSuggestions(districtSource, form.district);
-  const selectedDistrict = selectedProvince
-    ? Object.keys(ADDRESS_DATA[selectedProvince]).find(
-        (district) => normalizeText(district) === normalizeText(form.district),
-      )
-    : null;
+  const districtOptions = useMemo(() => filterSuggestions(districtSource, form.district), [districtSource, form.district]);
+  const selectedDistrict = useMemo(
+    () => (selectedProvince
+      ? Object.keys(ADDRESS_DATA[selectedProvince]).find((district) => normalizeText(district) === normalizeText(form.district))
+      : null),
+    [selectedProvince, form.district]
+  );
   const wardSource = selectedProvince && selectedDistrict ? ADDRESS_DATA[selectedProvince][selectedDistrict] : FALLBACK_WARDS;
-  const wardOptions = filterSuggestions(wardSource, form.ward);
+  const wardOptions = useMemo(() => filterSuggestions(wardSource, form.ward), [wardSource, form.ward]);
 
   useEffect(() => {
     if (user?.id) {
@@ -166,6 +170,39 @@ function CustomerAddresses() {
     });
     setEditingId(address.id);
     setShowForm(true);
+  }
+
+  function requestDelete(address) {
+    setDeleteTarget(address);
+  }
+
+  function closeDeleteModal() {
+    setDeleteTarget(null);
+  }
+
+  async function confirmDelete() {
+    if (!deleteTarget) {
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await deleteAddress(user.id, deleteTarget.id);
+
+      if (response.status === 'success') {
+        toast.success('Xóa địa chỉ thành công.');
+        setDeleteTarget(null);
+        await loadAddresses();
+      } else {
+        toast.error(response.message || 'Xóa địa chỉ thất bại.');
+      }
+    } catch (error) {
+      console.error('❌ Lỗi xóa địa chỉ:', error);
+      toast.error(error.response?.data?.message || 'Không thể xóa địa chỉ.');
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   async function handleSubmit(event) {
@@ -232,30 +269,6 @@ function CustomerAddresses() {
     }
   }
 
-  async function handleDelete(addressId) {
-    if (!window.confirm('Bạn có chắc chắn muốn xóa địa chỉ này?')) {
-      return;
-    }
-
-    setIsLoading(true);
-
-    try {
-      const response = await deleteAddress(user.id, addressId);
-
-      if (response.status === 'success') {
-        toast.success('Xóa địa chỉ thành công.');
-        await loadAddresses();
-      } else {
-        toast.error(response.message || 'Xóa địa chỉ thất bại.');
-      }
-    } catch (error) {
-      console.error('❌ Lỗi xóa địa chỉ:', error);
-      toast.error(error.response?.data?.message || 'Không thể xóa địa chỉ.');
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
   return (
     <section className="customer-card">
       <div className="customer-card-head">
@@ -270,118 +283,136 @@ function CustomerAddresses() {
       </div>
 
       {showForm && (
-        <form 
-          className="customer-address-form" 
-          onSubmit={handleSubmit}
-          style={{ marginBottom: '2rem', padding: '1rem', border: '1px solid #e0e0e0', borderRadius: '4px' }}
-        >
-          <label>
-            Tên người nhận
-            <input
-              type="text"
-              value={form.recipient_name}
-              onChange={(e) => updateField('recipient_name', e.target.value)}
-              disabled={isLoading}
-            />
-          </label>
+        <form className="customer-address-form-panel" onSubmit={handleSubmit}>
+          <div className="customer-address-form-header">
+            <div>
+              <h3>{editingId ? 'Cập nhật địa chỉ' : 'Thêm địa chỉ mới'}</h3>
+              <p>Nhập thông tin rõ ràng để đặt hàng và giao nhận chính xác hơn.</p>
+            </div>
+            <button type="button" className="customer-address-close-btn" onClick={resetForm} disabled={isLoading} aria-label="Đóng form địa chỉ">
+              <X size={18} />
+            </button>
+          </div>
 
-          <label>
-            Số điện thoại
-            <input
-              type="text"
-              value={form.recipient_phone}
-              onChange={(e) => updateField('recipient_phone', e.target.value)}
-              disabled={isLoading}
-            />
-          </label>
+          <div className="customer-address-grid">
+            <label>
+              Tên người nhận
+              <input
+                type="text"
+                value={form.recipient_name}
+                onChange={(e) => updateField('recipient_name', e.target.value)}
+                placeholder="Ví dụ: Nguyễn Văn A"
+                disabled={isLoading}
+              />
+            </label>
 
-          <label>
-            Tỉnh/Thành phố
-            <input
-              type="text"
-              value={form.province}
-              onChange={(e) => updateField('province', e.target.value)}
-              list="province-suggestions"
-              autoComplete="off"
-              disabled={isLoading}
-            />
-          </label>
+            <label>
+              Số điện thoại
+              <input
+                type="text"
+                value={form.recipient_phone}
+                onChange={(e) => updateField('recipient_phone', e.target.value)}
+                placeholder="0912 345 678"
+                disabled={isLoading}
+              />
+            </label>
 
-          <datalist id="province-suggestions">
-            {provinceOptions.map((province) => (
-              <option key={province} value={province} />
-            ))}
-          </datalist>
+            <label>
+              Tỉnh/Thành phố
+              <input
+                type="text"
+                value={form.province}
+                onChange={(e) => updateField('province', e.target.value)}
+                list="province-suggestions"
+                autoComplete="off"
+                placeholder="TP. Hồ Chí Minh, Hà Nội..."
+                disabled={isLoading}
+              />
+              
+            </label>
 
-          <label>
-            Quận/Huyện
-            <input
-              type="text"
-              value={form.district}
-              onChange={(e) => updateField('district', e.target.value)}
-              list="district-suggestions"
-              autoComplete="off"
-              disabled={isLoading}
-            />
-          </label>
+            <datalist id="province-suggestions">
+              {provinceOptions.map((province) => (
+                <option key={province} value={province} />
+              ))}
+            </datalist>
 
-          <datalist id="district-suggestions">
-            {districtOptions.map((district) => (
-              <option key={district} value={district} />
-            ))}
-          </datalist>
+            <label>
+              Quận/Huyện
+              <input
+                type="text"
+                value={form.district}
+                onChange={(e) => updateField('district', e.target.value)}
+                list="district-suggestions"
+                autoComplete="off"
+                placeholder={selectedProvince ? 'Nhập hoặc chọn quận/huyện' : 'Chọn tỉnh/thành trước'}
+                disabled={isLoading || !form.province.trim()}
+              />
+             
+            </label>
 
-          <label>
-            Phường/Xã
-            <input
-              type="text"
-              value={form.ward}
-              onChange={(e) => updateField('ward', e.target.value)}
-              list="ward-suggestions"
-              autoComplete="off"
-              disabled={isLoading}
-            />
-          </label>
+            <datalist id="district-suggestions">
+              {districtOptions.map((district) => (
+                <option key={district} value={district} />
+              ))}
+            </datalist>
 
-          <datalist id="ward-suggestions">
-            {wardOptions.map((ward) => (
-              <option key={ward} value={ward} />
-            ))}
-          </datalist>
+            <label>
+              Phường/Xã
+              <input
+                type="text"
+                value={form.ward}
+                onChange={(e) => updateField('ward', e.target.value)}
+                list="ward-suggestions"
+                autoComplete="off"
+                placeholder={selectedDistrict ? 'Nhập hoặc chọn phường/xã' : 'Chọn quận/huyện trước'}
+                disabled={isLoading || !form.district.trim()}
+              />
+              
+            </label>
 
-          <label>
-            Địa chỉ chi tiết
-            <input
-              type="text"
-              value={form.address_line}
-              onChange={(e) => updateField('address_line', e.target.value)}
-              disabled={isLoading}
-            />
-          </label>
+            <datalist id="ward-suggestions">
+              {wardOptions.map((ward) => (
+                <option key={ward} value={ward} />
+              ))}
+            </datalist>
 
-          <label>
-            Ghi chú (Tùy chọn)
-            <input
-              type="text"
-              value={form.address_note}
-              onChange={(e) => updateField('address_note', e.target.value)}
-              disabled={isLoading}
-            />
-          </label>
+            <label className="customer-address-span-2">
+              Địa chỉ chi tiết
+              <input
+                type="text"
+                value={form.address_line}
+                onChange={(e) => updateField('address_line', e.target.value)}
+                placeholder="Số nhà, tên đường, tòa nhà..."
+                disabled={isLoading}
+              />
+            </label>
 
-          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <input
-              type="checkbox"
-              checked={form.is_default}
-              onChange={(e) => updateField('is_default', e.target.checked)}
-              disabled={isLoading}
-            />
-            Đặt làm địa chỉ mặc định
-          </label>
+            <label className="customer-address-span-2">
+              Ghi chú
+              <input
+                type="text"
+                value={form.address_note}
+                onChange={(e) => updateField('address_note', e.target.value)}
+                placeholder="Ví dụ: Giao giờ hành chính, gọi trước khi đến"
+                disabled={isLoading}
+              />
+            </label>
 
-          <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+            <label className="customer-checkbox-row customer-address-span-2">
+              <input
+                type="checkbox"
+                checked={form.is_default}
+                onChange={(e) => updateField('is_default', e.target.checked)}
+                disabled={isLoading}
+              />
+              <span>Đặt làm địa chỉ mặc định</span>
+            </label>
+          </div>
+
+          <div className="customer-form-actions customer-address-actions">
             <button type="submit" disabled={isLoading}>
-              {isLoading ? (editingId ? 'Đang cập nhật...' : 'Đang thêm...') : (editingId ? 'Cập nhật' : 'Thêm')}
+              {isLoading ? (editingId ? 'Đang cập nhật...' : 'Đang thêm...') : (editingId ? 'Cập nhật địa chỉ' : 'Thêm địa chỉ')}
             </button>
           </div>
         </form>
@@ -401,29 +432,37 @@ function CustomerAddresses() {
               </p>
               {address.address_note && <p style={{ fontSize: '0.9em', color: '#666' }}>Ghi chú: {address.address_note}</p>}
               <div>
-                <button 
-                  type="button" 
-                  onClick={() => handleEditClick(address)}
-                  disabled={isLoading}
-                >
+                <button type="button" onClick={() => handleEditClick(address)} disabled={isLoading}>
                   Sửa
                 </button>
-                <button 
-                  type="button" 
-                  onClick={() => handleDelete(address.id)}
-                  disabled={isLoading}
-                >
+                <button type="button" onClick={() => requestDelete(address)} disabled={isLoading}>
                   Xóa
                 </button>
               </div>
             </article>
           ))
-        ) : (
-          <p style={{ textAlign: 'center', color: '#999', padding: '2rem' }}>
-            Chưa có địa chỉ nào. Hãy thêm một địa chỉ mới!
-          </p>
-        )}
+        ) : <p style={{ textAlign: 'center', color: '#999', padding: '2rem' }}>Chưa có địa chỉ nào. Hãy thêm một địa chỉ mới!</p>}
       </div>
+
+      {deleteTarget ? (
+        <div className="customer-delete-modal-overlay" role="presentation" onClick={closeDeleteModal}>
+          <div className="customer-delete-modal" role="dialog" aria-modal="true" aria-labelledby="delete-address-title" onClick={(event) => event.stopPropagation()}>
+            <h3 id="delete-address-title">Xác nhận xóa địa chỉ</h3>
+            <p>
+              Bạn có chắc muốn xóa địa chỉ của <strong>{deleteTarget.recipient_name}</strong> không?
+              Hành động này không thể hoàn tác.
+            </p>
+            <div className="customer-delete-modal-actions">
+              <button type="button" className="customer-delete-cancel-btn" onClick={closeDeleteModal} disabled={isLoading}>
+                Hủy
+              </button>
+              <button type="button" className="customer-delete-confirm-btn" onClick={confirmDelete} disabled={isLoading}>
+                {isLoading ? 'Đang xóa...' : 'Xóa địa chỉ'}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }
