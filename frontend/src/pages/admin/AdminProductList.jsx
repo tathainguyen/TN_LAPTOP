@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
-import AdminLayout from '../layouts/AdminLayout.jsx';
+import AdminLayout from '../../layouts/AdminLayout.jsx';
 import {
   createProductGroup,
   deleteProduct,
@@ -14,7 +14,7 @@ import {
   updateProductGroup,
   updateProduct,
   updateProductStatus,
-} from '../services/productService.js';
+} from '../../services/productService.js';
 
 const LIMIT = 10;
 
@@ -1082,3 +1082,4 @@ function AdminProductList() {
 }
 
 export default AdminProductList;
+

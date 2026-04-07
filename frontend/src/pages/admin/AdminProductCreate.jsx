@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
-import AdminLayout from '../layouts/AdminLayout.jsx';
+import AdminLayout from '../../layouts/AdminLayout.jsx';
 import {
   getAllProducts,
   createProduct,
@@ -10,7 +10,7 @@ import {
   getProductGroups,
   getProductMasterData,
   uploadProductImages,
-} from '../services/productService.js';
+} from '../../services/productService.js';
 
 function formatCurrencyInput(value) {
   const digits = String(value || '').replace(/\D/g, '');
@@ -576,3 +576,4 @@ function AdminProductCreate() {
 }
 
 export default AdminProductCreate;
+

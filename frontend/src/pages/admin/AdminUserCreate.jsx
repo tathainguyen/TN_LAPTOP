@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
-import AdminLayout from '../layouts/AdminLayout.jsx';
-import { createAdminUser, getUserMasterData } from '../services/userService.js';
+import AdminLayout from '../../layouts/AdminLayout.jsx';
+import { createAdminUser, getUserMasterData } from '../../services/userService.js';
 
 const initialForm = {
   full_name: '',
@@ -244,3 +244,4 @@ function AdminUserCreate() {
 }
 
 export default AdminUserCreate;
+

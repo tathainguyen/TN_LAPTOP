@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
-import { loginUser } from '../services/authService.js';
+import { loginUser } from '../../services/authService.js';
 
 function Login() {
   const navigate = useNavigate();
@@ -118,3 +118,4 @@ function Login() {
 }
 
 export default Login;
+

@@ -1,4 +1,4 @@
-import AdminLayout from '../layouts/AdminLayout.jsx';
+import AdminLayout from '../../layouts/AdminLayout.jsx';
 
 function AdminDashboard() {
   return (
@@ -22,3 +22,4 @@ function AdminDashboard() {
 }
 
 export default AdminDashboard;
+

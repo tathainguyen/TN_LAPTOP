@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { updateUserProfile } from '../services/userService.js';
+import { updateUserProfile } from '../../services/userService.js';
 
 function splitName(fullName) {
   const chunks = String(fullName || '').trim().split(/\s+/).filter(Boolean);
@@ -184,3 +184,4 @@ function CustomerProfile() {
 }
 
 export default CustomerProfile;
+

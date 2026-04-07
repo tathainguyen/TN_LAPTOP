@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
-import AdminLayout from '../layouts/AdminLayout.jsx';
+import AdminLayout from '../../layouts/AdminLayout.jsx';
 import {
   createBrand,
   deleteBrand,
   getBrands,
   toggleBrandStatus,
   updateBrand,
-} from '../services/catalogService.js';
+} from '../../services/catalogService.js';
 
 function AdminBrandList() {
   const [loading, setLoading] = useState(true);

@@ -2,12 +2,12 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
-import AdminLayout from '../layouts/AdminLayout.jsx';
+import AdminLayout from '../../layouts/AdminLayout.jsx';
 import {
   createCategory,
   getCategories,
   updateCategory,
-} from '../services/catalogService.js';
+} from '../../services/catalogService.js';
 
 function AdminCategoryCreate() {
   const navigate = useNavigate();

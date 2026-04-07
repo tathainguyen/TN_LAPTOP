@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
-import { getAllProducts, getProductBySlug } from '../services/productService.js';
+import { getAllProducts, getProductBySlug } from '../../services/productService.js';
 
 const FALLBACK_IMAGE = 'https://via.placeholder.com/1200x750?text=No+Image';
 const DETAIL_LOAD_GUARD_MS = 750;
@@ -189,3 +189,4 @@ function ProductDetail() {
 }
 
 export default ProductDetail;
+

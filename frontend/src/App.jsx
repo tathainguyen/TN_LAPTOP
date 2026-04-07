@@ -1,27 +1,27 @@
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 
 import './App.css';
-import AdminBrandList from './pages/AdminBrandList.jsx';
-import AdminCategoryList from './pages/AdminCategoryList.jsx';
+import AdminBrandList from './pages/admin/AdminBrandList.jsx';
+import AdminCategoryList from './pages/admin/AdminCategoryList.jsx';
 import Header from './components/Header.jsx';
-import AdminDashboard from './pages/AdminDashboard.jsx';
-import AdminProductCreate from './pages/AdminProductCreate.jsx';
-import AdminProductLinkCreate from './pages/AdminProductLinkCreate.jsx';
-import AdminProductLinkList from './pages/AdminProductLinkList.jsx';
-import AdminProductList from './pages/AdminProductList.jsx';
-import AdminUserCreate from './pages/AdminUserCreate.jsx';
-import AdminUserList from './pages/AdminUserList.jsx';
-import CustomerAccountLayout from './pages/CustomerAccountLayout.jsx';
-import CustomerAddresses from './pages/CustomerAddresses.jsx';
-import CustomerOrders from './pages/CustomerOrders.jsx';
-import CustomerPassword from './pages/CustomerPassword.jsx';
-import CustomerProfile from './pages/CustomerProfile.jsx';
-import CustomerVouchers from './pages/CustomerVouchers.jsx';
-import Home from './pages/Home.jsx';
-import Login from './pages/Login.jsx';
-import Product from './pages/Product.jsx';
-import ProductDetail from './pages/ProductDetail.jsx';
-import Register from './pages/Register.jsx';
+import AdminDashboard from './pages/admin/AdminDashboard.jsx';
+import AdminProductCreate from './pages/admin/AdminProductCreate.jsx';
+import AdminProductLinkCreate from './pages/admin/AdminProductLinkCreate.jsx';
+import AdminProductLinkList from './pages/admin/AdminProductLinkList.jsx';
+import AdminProductList from './pages/admin/AdminProductList.jsx';
+import AdminUserCreate from './pages/admin/AdminUserCreate.jsx';
+import AdminUserList from './pages/admin/AdminUserList.jsx';
+import CustomerAccountLayout from './pages/customer/CustomerAccountLayout.jsx';
+import CustomerAddresses from './pages/customer/CustomerAddresses.jsx';
+import CustomerOrders from './pages/customer/CustomerOrders.jsx';
+import CustomerPassword from './pages/customer/CustomerPassword.jsx';
+import CustomerProfile from './pages/customer/CustomerProfile.jsx';
+import CustomerVouchers from './pages/customer/CustomerVouchers.jsx';
+import Home from './pages/store/Home.jsx';
+import Login from './pages/auth/Login.jsx';
+import Product from './pages/store/Product.jsx';
+import ProductDetail from './pages/store/ProductDetail.jsx';
+import Register from './pages/auth/Register.jsx';
 
 function App() {
   const location = useLocation();

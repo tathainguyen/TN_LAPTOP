@@ -2,13 +2,13 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
-import AdminLayout from '../layouts/AdminLayout.jsx';
+import AdminLayout from '../../layouts/AdminLayout.jsx';
 import {
   createProductGroup,
   getProductMasterData,
   getProductGroups,
   updateProductGroup,
-} from '../services/productService.js';
+} from '../../services/productService.js';
 
 function normalizeText(value) {
   return String(value || '').trim().toLowerCase();

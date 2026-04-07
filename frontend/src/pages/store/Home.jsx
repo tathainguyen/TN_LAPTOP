@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
-import ProductCard from '../components/ProductCard.jsx';
-import { getAllProducts } from '../services/productService.js';
+import ProductCard from '../../components/ProductCard.jsx';
+import { getAllProducts } from '../../services/productService.js';
 
 function Home() {
   const [products, setProducts] = useState([]);
@@ -64,3 +64,4 @@ function Home() {
 }
 
 export default Home;
+

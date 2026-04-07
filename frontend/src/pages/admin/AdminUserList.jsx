@@ -2,14 +2,14 @@ import { useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import * as XLSX from 'xlsx';
 
-import AdminLayout from '../layouts/AdminLayout.jsx';
+import AdminLayout from '../../layouts/AdminLayout.jsx';
 import {
   getUserById,
   getUserMasterData,
   getUsers,
   updateUser,
   updateUserStatus,
-} from '../services/userService.js';
+} from '../../services/userService.js';
 
 const LIMIT = 10;
 
@@ -622,3 +622,4 @@ function AdminUserList() {
 }
 
 export default AdminUserList;
+

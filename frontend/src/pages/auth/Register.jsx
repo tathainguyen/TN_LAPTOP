@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
-import { registerUser } from '../services/authService.js';
+import { registerUser } from '../../services/authService.js';
 
 function Register() {
   const navigate = useNavigate();
@@ -164,3 +164,4 @@ function Register() {
 }
 
 export default Register;
+
