@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 
 import {
   createUser,
+  findRoleById,
   findRoleByName,
   findUserByEmail,
 } from '../models/userModel.js';
@@ -110,6 +111,7 @@ export async function register(req, res) {
     });
 
     const createdUser = await findUserByEmail(normalizedEmail);
+    const customerRoleName = customerRole?.role_name || 'CUSTOMER';
     const token = buildAuthToken({
       ...createdUser,
       id: userId,
@@ -119,7 +121,10 @@ export async function register(req, res) {
       status: 'success',
       message: 'Đăng ký tài khoản thành công.',
       data: {
-        user: sanitizeUser(createdUser),
+        user: {
+          ...sanitizeUser(createdUser),
+          role_name: customerRoleName,
+        },
         token,
       },
     });
@@ -184,12 +189,16 @@ export async function login(req, res) {
     }
 
     const token = buildAuthToken(user);
+    const role = await findRoleById(user.role_id);
 
     return res.status(200).json({
       status: 'success',
       message: 'Đăng nhập thành công.',
       data: {
-        user: sanitizeUser(user),
+        user: {
+          ...sanitizeUser(user),
+          role_name: role?.role_name || null,
+        },
         token,
       },
     });

@@ -40,7 +40,10 @@ function Login() {
 
       window.dispatchEvent(new Event('tn-laptop-auth-change'));
       toast.success('Đăng nhập thành công.');
-      navigate('/', { replace: true });
+
+      const roleName = String(user?.role_name || '').toUpperCase();
+      const isAdmin = roleName === 'ADMIN' || Number(user?.role_id) === 1;
+      navigate(isAdmin ? '/admin' : '/', { replace: true });
     } catch (error) {
       const message =
         error?.response?.data?.message || 'Đăng nhập thất bại. Vui lòng thử lại.';
