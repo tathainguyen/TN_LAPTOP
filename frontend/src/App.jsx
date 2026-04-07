@@ -20,6 +20,7 @@ import CustomerPassword from './pages/customer/CustomerPassword.jsx';
 import CustomerProfile from './pages/customer/CustomerProfile.jsx';
 import CustomerVouchers from './pages/customer/CustomerVouchers.jsx';
 import Home from './pages/store/Home.jsx';
+import EmailVerifyResult from './pages/auth/EmailVerifyResult.jsx';
 import Login from './pages/auth/Login.jsx';
 import Product from './pages/store/Product.jsx';
 import ProductDetail from './pages/store/ProductDetail.jsx';
@@ -124,6 +125,7 @@ function App() {
           <Route path="/admin/product-links/create" element={adminOnly(<AdminProductLinkCreate />)} />
           <Route path="/product" element={storefrontOnly(<Product />)} />
           <Route path="/product/:slug" element={storefrontOnly(<ProductDetail />)} />
+          <Route path="/email-verified" element={storefrontOnly(<EmailVerifyResult />)} />
           <Route path="/account" element={customerOnly(<CustomerAccountLayout />)}>
             <Route path="profile" element={<CustomerProfile />} />
             <Route path="addresses" element={<CustomerAddresses />} />

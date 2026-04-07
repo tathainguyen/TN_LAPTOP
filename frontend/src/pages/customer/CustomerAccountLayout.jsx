@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { sendVerificationEmail } from '../../services/auth/authService.js';
 
 function getUserFromStorage() {
   try {
@@ -27,6 +28,7 @@ function getInitials(fullName, email) {
 
 function CustomerAccountLayout() {
   const [user, setUser] = useState(() => getUserFromStorage());
+  const [sendingVerifyEmail, setSendingVerifyEmail] = useState(false);
 
   useEffect(() => {
     function syncAuthState() {
@@ -57,8 +59,25 @@ function CustomerAccountLayout() {
     };
   }, [user]);
 
-  function handleSendVerificationMail() {
-    toast.success('Demo giao diện: Email xác thực đã được gửi (chức năng thật sẽ hoàn thiện sau).');
+  async function handleSendVerificationMail() {
+    if (!user?.id || !user?.email) {
+      toast.error('Không tìm thấy thông tin tài khoản để gửi xác thực email.');
+      return;
+    }
+
+    try {
+      setSendingVerifyEmail(true);
+      await sendVerificationEmail({
+        user_id: user.id,
+        email: user.email,
+      });
+      toast.success('Đã gửi email xác thực. Vui lòng kiểm tra hộp thư của bạn.');
+    } catch (error) {
+      const message = error?.response?.data?.message || 'Không thể gửi email xác thực lúc này.';
+      toast.error(message);
+    } finally {
+      setSendingVerifyEmail(false);
+    }
   }
 
   return (
@@ -90,10 +109,14 @@ function CustomerAccountLayout() {
           <button
             type="button"
             className="customer-verify-btn"
-            disabled={profile.emailVerified}
+            disabled={profile.emailVerified || sendingVerifyEmail}
             onClick={handleSendVerificationMail}
           >
-            {profile.emailVerified ? 'Đã xác thực' : 'Xác thực email'}
+            {profile.emailVerified
+              ? 'Đã xác thực'
+              : sendingVerifyEmail
+                ? 'Đang gửi email...'
+                : 'Xác thực email'}
           </button>
         </aside>
 

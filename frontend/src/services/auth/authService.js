@@ -16,3 +16,8 @@ export async function loginUser(payload) {
   const response = await authApi.post('/login', payload);
   return response.data;
 }
+
+export async function sendVerificationEmail(payload) {
+  const response = await authApi.post('/send-verification-email', payload);
+  return response.data;
+}
