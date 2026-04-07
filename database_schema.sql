@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th4 06, 2026 lúc 06:49 PM
+-- Thời gian đã tạo: Th4 07, 2026 lúc 08:37 PM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.2.12
 
@@ -124,7 +124,7 @@ INSERT INTO `brands` (`id`, `brand_name`, `slug`, `logo_url`, `is_active`, `crea
 (1, 'Lenovo', 'lenovo', NULL, 1, '2026-04-04 13:38:51', '2026-04-04 13:38:51'),
 (6, 'Hp', 'hp', NULL, 1, '2026-04-04 18:44:16', '2026-04-04 18:48:39'),
 (7, 'Dell', 'dell', NULL, 1, '2026-04-05 15:24:03', '2026-04-05 15:24:03'),
-(8, 'Asus', 'asus', NULL, 1, '2026-04-06 15:22:20', '2026-04-06 15:22:20');
+(8, 'Asus', 'asus', NULL, 1, '2026-04-06 15:22:20', '2026-04-06 17:46:11');
 
 -- --------------------------------------------------------
 
@@ -383,7 +383,7 @@ INSERT INTO `products` (`id`, `group_id`, `product_name`, `slug`, `sku`, `cpu_op
 (1, 1, 'Lenovo LOQ 15IAX9 (i5-12450HX)', 'lenovo-loq-15iax9-i5', 'LOQ-I5-2050', 'Core i5-12450HX', '12GB', NULL, 'RTX 2050 4GB', NULL, 255222250000.00, NULL, 15, 0, 1, '2026-04-04 13:38:51', '2026-04-06 15:04:15'),
 (2, 1, 'Lenovo LOQ 15IAX9 (i7-13650HX)', 'lenovo-loq-15iax9-i7', 'LOQ-I7-4050', 'Core i7-13650HX', '16GB', '256gb', 'RTX 4050 6GB', 'xám', 2299000000.00, NULL, 5, 0, 1, '2026-04-04 13:38:51', '2026-04-06 16:04:37'),
 (134, 19, 'Dell Precision 7560 | Xeon 11855M, 32GB, 512GB, RTX A3000 6GB, 15.6\'\' FHD IPS', 'dell-precision-7560-xeon-11855m-32gb-512gb-rtx-a3000-6gb-156-fhd-ips-dell-precision-7560', 'Dell-Precision-7560', 'Xeon 11855M', '32GB', '512GB', 'RTX A3000 6GB', 'Đen', 2093600000.00, NULL, 3, 0, 1, '2026-04-05 16:39:41', '2026-04-06 15:53:19'),
-(139, 21, 'Asus TUF Gaming F16 FX607VJB-RL151W | Core 5 210H, 16GB, 512GB, RTX 3050 6GB, 16 inch FHD+ 144Hz', 'asus-tuf-gaming-f16-fx607vjb-rl151w-core-5-210h-16gb-512gb-rtx-3050-6gb-16-inch-fhd-144hz-asus-tuf-gaming-f16', 'Asus-TUF-Gaming-F16', 'Core 5 210H', '16GB', '512GB', NULL, 'Đen', 2000.00, NULL, 20, 0, 1, '2026-04-06 15:25:36', '2026-04-06 16:05:17');
+(139, 21, 'Asus TUF Gaming F16 FX607VJB-RL151W | Core 5 210H, 16GB, 512GB, RTX 3050 6GB, 16 inch FHD+ 144Hz', 'asus-tuf-gaming-f16-fx607vjb-rl151w-core-5-210h-16gb-512gb-rtx-3050-6gb-16-inch-fhd-144hz-asus-tuf-gaming-f16', 'Asus-TUF-Gaming-F16', 'Core 5 210H', '16GB', '512GB', NULL, 'Đen', 10000.00, NULL, 20, 0, 1, '2026-04-06 15:25:36', '2026-04-07 16:12:34');
 
 -- --------------------------------------------------------
 
@@ -413,13 +413,14 @@ CREATE TABLE `product_groups` (
 --
 
 INSERT INTO `product_groups` (`id`, `category_id`, `brand_id`, `group_name`, `slug`, `short_description`, `description`, `warranty_months`, `is_active`, `is_featured`, `view_count`, `created_at`, `updated_at`) VALUES
-(1, 1, 1, 'LOQ 2028', 'loq-2028', 'LOQ 2028', NULL, 24, 1, 0, 0, '2026-04-04 13:38:51', '2026-04-05 16:16:39'),
+(1, 1, 1, 'LOQ 2028', 'loq-2028', 'LOQ 2028', NULL, 24, 1, 0, 9, '2026-04-04 13:38:51', '2026-04-07 16:50:20'),
 (16, 1, 1, 'LOQ 2024', 'loq-2024', 'LOQ 2024', '123', 24, 1, 0, 0, '2026-04-05 15:22:34', '2026-04-06 16:03:11'),
 (17, 7, 7, 'Dell 2025', 'dell-2025', 'Dell 2025', NULL, 24, 1, 0, 0, '2026-04-05 15:34:00', '2026-04-05 16:00:37'),
-(19, 7, 7, 'Dell Precision', 'dell-precision', 'Dell Precision 7560 | Xeon 11855M, 32GB, 512GB, RTX A3000 6GB, 15.6\'\' FHD IPS', 'Precision', 24, 1, 0, 0, '2026-04-05 16:39:41', '2026-04-06 16:47:14'),
+(19, 7, 7, 'Dell Precision', 'dell-precision', 'Dell Precision 7560 | Xeon 11855M, 32GB, 512GB, RTX A3000 6GB, 15.6\'\' FHD IPS', 'Precision', 24, 1, 0, 3, '2026-04-05 16:39:41', '2026-04-07 18:14:37'),
 (20, 8, 7, '123', '123', '123', '123', 24, 1, 0, 0, '2026-04-05 16:41:47', '2026-04-05 16:41:47'),
-(21, 1, 8, 'Asus 2028', 'asus-2028', 'Asus TUF Gaming F16 FX607VJB-RL151W | Core 5 210H, 16GB, 512GB, RTX 3050 6GB, 16 inch FHD+ 144Hz', '123', 24, 1, 0, 0, '2026-04-06 15:25:34', '2026-04-06 15:25:34'),
-(22, 8, 8, '123', '123-2', '123', '123', 24, 1, 1, 0, '2026-04-06 15:36:36', '2026-04-06 16:33:45');
+(21, 1, 8, 'Asus 2028', 'asus-2028', 'Asus TUF Gaming F16 FX607VJB-RL151W | Core 5 210H, 16GB, 512GB, RTX 3050 6GB, 16 inch FHD+ 144Hz', NULL, 24, 1, 0, 57, '2026-04-06 15:25:34', '2026-04-07 18:26:50'),
+(22, 8, 8, '123', '123-2', '123', '123', 24, 1, 1, 0, '2026-04-06 15:36:36', '2026-04-06 16:33:45'),
+(23, 1, 7, 'Asus 2028', 'asus-2028-2', 'Asus TUF Gaming F16 FX607VJB-RL151W | Core 5 210H, 16GB, 512GB, RTX 3050 6GB, 16 inch FHD+ 144Hz', NULL, 24, 1, 0, 0, '2026-04-07 15:53:07', '2026-04-07 15:53:07');
 
 -- --------------------------------------------------------
 
@@ -446,13 +447,15 @@ INSERT INTO `product_images` (`id`, `group_id`, `product_id`, `image_url`, `is_p
 (2, 1, 1, 'https://res.cloudinary.com/dc4ebrhks/image/upload/v1775487872/tn-laptop/products/product-1775487855190-252589271.jpg', 1, 0, '2026-04-06 15:04:17'),
 (23, 19, 134, 'https://res.cloudinary.com/dc4ebrhks/image/upload/v1775490814/tn-laptop/products/product-1775490796946-842767715.jpg', 1, 0, '2026-04-06 15:53:19'),
 (26, 1, 2, 'https://res.cloudinary.com/dc4ebrhks/image/upload/v1775491492/tn-laptop/products/product-1775491475164-242503586.jpg', 1, 0, '2026-04-06 16:04:37'),
-(27, 21, 139, 'https://res.cloudinary.com/dc4ebrhks/image/upload/v1775489752/tn-laptop/products/product-1775489734748-51356781.jpg', 1, 0, '2026-04-06 16:05:17'),
-(28, 21, 139, 'https://res.cloudinary.com/dc4ebrhks/image/upload/v1775489768/tn-laptop/products/product-1775489750640-54713265.jpg', 0, 1, '2026-04-06 16:05:17'),
-(29, 21, 139, 'https://res.cloudinary.com/dc4ebrhks/image/upload/v1775491532/tn-laptop/products/product-1775491515418-952877891.jpg', 0, 2, '2026-04-06 16:05:17'),
-(30, 21, 139, 'https://res.cloudinary.com/dc4ebrhks/image/upload/v1775491532/tn-laptop/products/product-1775491515418-214775322.jpg', 0, 3, '2026-04-06 16:05:17'),
-(31, 21, 139, 'https://res.cloudinary.com/dc4ebrhks/image/upload/v1775491532/tn-laptop/products/product-1775491515425-959682487.jpg', 0, 4, '2026-04-06 16:05:17'),
-(32, 21, 139, 'https://res.cloudinary.com/dc4ebrhks/image/upload/v1775491533/tn-laptop/products/product-1775491515426-448401057.jpg', 0, 5, '2026-04-06 16:05:17'),
-(33, 21, 139, 'https://res.cloudinary.com/dc4ebrhks/image/upload/v1775491532/tn-laptop/products/product-1775491515432-771299870.jpg', 0, 6, '2026-04-06 16:05:17');
+(77, 21, 139, 'https://res.cloudinary.com/dc4ebrhks/image/upload/v1775489752/tn-laptop/products/product-1775489734748-51356781.jpg', 1, 0, '2026-04-07 16:20:52'),
+(78, 21, 139, 'https://res.cloudinary.com/dc4ebrhks/image/upload/v1775489768/tn-laptop/products/product-1775489750640-54713265.jpg', 0, 1, '2026-04-07 16:20:52'),
+(79, 21, 139, 'https://res.cloudinary.com/dc4ebrhks/image/upload/v1775491532/tn-laptop/products/product-1775491515418-952877891.jpg', 0, 2, '2026-04-07 16:20:52'),
+(80, 21, 139, 'https://res.cloudinary.com/dc4ebrhks/image/upload/v1775491532/tn-laptop/products/product-1775491515418-214775322.jpg', 0, 3, '2026-04-07 16:20:52'),
+(81, 21, 139, 'https://res.cloudinary.com/dc4ebrhks/image/upload/v1775491532/tn-laptop/products/product-1775491515425-959682487.jpg', 0, 4, '2026-04-07 16:20:52'),
+(82, 21, 139, 'https://res.cloudinary.com/dc4ebrhks/image/upload/v1775491533/tn-laptop/products/product-1775491515426-448401057.jpg', 0, 5, '2026-04-07 16:20:52'),
+(83, 21, 139, 'https://res.cloudinary.com/dc4ebrhks/image/upload/v1775491532/tn-laptop/products/product-1775491515432-771299870.jpg', 0, 6, '2026-04-07 16:20:52');
+
+-- --------------------------------------------------------
 
 --
 -- Cấu trúc bảng cho bảng `product_specs`
@@ -658,9 +661,8 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `role_id`, `email`, `password_hash`, `full_name`, `phone`, `gender`, `date_of_birth`, `avatar_url`, `email_verified`, `user_status`, `google_id`, `facebook_id`, `last_login_at`, `created_at`, `updated_at`) VALUES
-(1, 1, 'tathainguyen686@gmail.com', '$2b$10$H1.36wc.9anmUKG4Ac.PvuFsmP/YJfGIGNPGAoBEG852slNCMUO0e', 'admin', '0913778899', NULL, NULL, NULL, 1, 'ACTIVE', NULL, NULL, NULL, '2026-04-04 13:28:21', '2026-04-05 17:11:41'),
-(2, 2, 'user1@gmail.com', '$2b$10$194FzDL49O90asXoYrD1g.Q7wleQkbaIzTV7Tav1WkGtGqO8A4gNW', 'John Doe Updated', '0987654321', 'MALE', '2004-12-24', NULL, 0, 'ACTIVE', NULL, NULL, NULL, '2026-04-05 17:09:25', '2026-04-06 13:59:28'),
-(3, 2, 'user2@gmail.com', '$2b$10$aQZ1g2Oi9pJYs7A/3q4BWeqtCOyQyDhM4UY84fNiqllIpH/ShVcKW', 'user2', '0913445566', 'MALE', '2026-03-31', NULL, 1, 'ACTIVE', NULL, NULL, NULL, '2026-04-05 17:35:44', '2026-04-06 14:07:04');
+(1, 1, 'tathainguyen686@gmail.com', '$2b$10$H1.36wc.9anmUKG4Ac.PvuFsmP/YJfGIGNPGAoBEG852slNCMUO0e', 'thainguyenAdmin', '0913778899', 'MALE', NULL, NULL, 1, 'ACTIVE', NULL, NULL, NULL, '2026-04-04 13:28:21', '2026-04-07 16:58:39'),
+(6, 2, 'tathainguyen24@gmail.com', '$2b$10$zoRVj9PdgghkXWDPuq72AeYjLCx70YFPcfWam8WKkR70Ob0bavJ/O', 'Nguyễn Thái', '0913772244', 'MALE', NULL, NULL, 1, 'ACTIVE', NULL, NULL, NULL, '2026-04-07 17:19:17', '2026-04-07 18:01:51');
 
 -- --------------------------------------------------------
 
@@ -683,14 +685,6 @@ CREATE TABLE `user_addresses` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Đang đổ dữ liệu cho bảng `user_addresses`
---
-
-INSERT INTO `user_addresses` (`id`, `user_id`, `recipient_name`, `recipient_phone`, `province`, `district`, `ward`, `address_line`, `address_note`, `is_default`, `created_at`, `updated_at`) VALUES
-(1, 2, 'John Doe', '0987654321', 'TP. H? Ch� Minh', 'Qu?n 1', 'Phu?ng B?n Ngh�', '123 Nguy?n Hu?', 'Nh� g?n tru?ng', 1, '2026-04-06 13:59:32', '2026-04-06 13:59:32'),
-(3, 3, 'ta thai nguyen', '0987654321', 'Cần Thơ', 'Quận Cái Răng', 'Phường Lê Bình', '19abc', 'gọi trướcc', 1, '2026-04-06 14:37:36', '2026-04-06 14:37:43');
 
 -- --------------------------------------------------------
 
@@ -1026,7 +1020,7 @@ ALTER TABLE `blog_posts`
 -- AUTO_INCREMENT cho bảng `brands`
 --
 ALTER TABLE `brands`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT cho bảng `carts`
@@ -1044,7 +1038,7 @@ ALTER TABLE `cart_items`
 -- AUTO_INCREMENT cho bảng `categories`
 --
 ALTER TABLE `categories`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT cho bảng `chat_messages`
@@ -1098,13 +1092,13 @@ ALTER TABLE `products`
 -- AUTO_INCREMENT cho bảng `product_groups`
 --
 ALTER TABLE `product_groups`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT cho bảng `product_images`
 --
 ALTER TABLE `product_images`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=84;
 
 --
 -- AUTO_INCREMENT cho bảng `product_specs`
@@ -1164,7 +1158,7 @@ ALTER TABLE `suppliers`
 -- AUTO_INCREMENT cho bảng `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT cho bảng `user_addresses`
