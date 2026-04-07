@@ -29,6 +29,19 @@ function getInitials(fullName, email) {
 function CustomerAccountLayout() {
   const [user, setUser] = useState(() => getUserFromStorage());
   const [sendingVerifyEmail, setSendingVerifyEmail] = useState(false);
+  const [verificationCooldown, setVerificationCooldown] = useState(0);
+
+  useEffect(() => {
+    if (verificationCooldown <= 0) {
+      return undefined;
+    }
+
+    const timerId = window.setInterval(() => {
+      setVerificationCooldown((prev) => Math.max(0, prev - 1));
+    }, 1000);
+
+    return () => window.clearInterval(timerId);
+  }, [verificationCooldown]);
 
   useEffect(() => {
     function syncAuthState() {
@@ -72,9 +85,19 @@ function CustomerAccountLayout() {
         email: user.email,
       });
       toast.success('Đã gửi email xác thực. Vui lòng kiểm tra hộp thư của bạn.');
+      setVerificationCooldown(30);
     } catch (error) {
+      const retryAfterSeconds = Number(
+        error?.response?.data?.data?.retry_after_seconds ||
+          error?.response?.data?.retry_after_seconds ||
+          0
+      );
       const message = error?.response?.data?.message || 'Không thể gửi email xác thực lúc này.';
       toast.error(message);
+
+      if (error?.response?.status === 429 && retryAfterSeconds > 0) {
+        setVerificationCooldown(retryAfterSeconds);
+      }
     } finally {
       setSendingVerifyEmail(false);
     }
@@ -109,11 +132,13 @@ function CustomerAccountLayout() {
           <button
             type="button"
             className="customer-verify-btn"
-            disabled={profile.emailVerified || sendingVerifyEmail}
+            disabled={profile.emailVerified || sendingVerifyEmail || verificationCooldown > 0}
             onClick={handleSendVerificationMail}
           >
             {profile.emailVerified
               ? 'Đã xác thực'
+              : verificationCooldown > 0
+                ? `Gửi lại sau ${verificationCooldown}s`
               : sendingVerifyEmail
                 ? 'Đang gửi email...'
                 : 'Xác thực email'}

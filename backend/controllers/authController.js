@@ -10,6 +10,9 @@ import {
   updateUserById,
 } from '../models/userModel.js';
 
+const EMAIL_VERIFICATION_COOLDOWN_MS = 30_000;
+const verificationCooldownByUserId = new Map();
+
 function getFrontendBaseUrl() {
   return process.env.FRONTEND_URL || 'http://localhost:5173';
 }
@@ -79,6 +82,22 @@ async function sendVerificationMail({ toEmail, fullName, verificationLink }) {
     subject: 'Xác thực email tài khoản TN Laptop',
     html,
   });
+}
+
+function getVerificationCooldownState(userId) {
+  const lastSentAt = verificationCooldownByUserId.get(Number(userId)) || 0;
+  const elapsed = Date.now() - lastSentAt;
+  const remainingMs = Math.max(0, EMAIL_VERIFICATION_COOLDOWN_MS - elapsed);
+
+  return {
+    lastSentAt,
+    remainingMs,
+    retryAfterSeconds: Math.max(0, Math.ceil(remainingMs / 1000)),
+  };
+}
+
+function markVerificationEmailSent(userId) {
+  verificationCooldownByUserId.set(Number(userId), Date.now());
 }
 
 function buildAuthToken(user) {
@@ -317,6 +336,17 @@ export async function sendEmailVerification(req, res) {
       });
     }
 
+    const cooldownState = getVerificationCooldownState(user.id);
+    if (cooldownState.remainingMs > 0) {
+      return res.status(429).json({
+        status: 'error',
+        message: `Bạn vui lòng chờ ${cooldownState.retryAfterSeconds} giây trước khi gửi lại email xác thực.`,
+        data: {
+          retry_after_seconds: cooldownState.retryAfterSeconds,
+        },
+      });
+    }
+
     const token = buildEmailVerificationToken(user);
     const verificationLink = `${getBackendBaseUrl(req)}/api/auth/verify-email?token=${encodeURIComponent(token)}`;
 
@@ -326,11 +356,14 @@ export async function sendEmailVerification(req, res) {
       verificationLink,
     });
 
+    markVerificationEmailSent(user.id);
+
     return res.status(200).json({
       status: 'success',
       message: 'Đã gửi email xác thực. Vui lòng kiểm tra hộp thư của bạn.',
       data: {
         preview_link: verificationLink,
+        retry_after_seconds: Math.ceil(EMAIL_VERIFICATION_COOLDOWN_MS / 1000),
       },
     });
   } catch (error) {
