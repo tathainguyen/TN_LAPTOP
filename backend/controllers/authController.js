@@ -338,6 +338,7 @@ export async function sendEmailVerification(req, res) {
 
     const cooldownState = getVerificationCooldownState(user.id);
     if (cooldownState.remainingMs > 0) {
+      res.set('Retry-After', String(cooldownState.retryAfterSeconds));
       return res.status(429).json({
         status: 'error',
         message: `Bạn vui lòng chờ ${cooldownState.retryAfterSeconds} giây trước khi gửi lại email xác thực.`,

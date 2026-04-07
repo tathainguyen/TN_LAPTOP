@@ -87,9 +87,11 @@ function CustomerAccountLayout() {
       toast.success('Đã gửi email xác thực. Vui lòng kiểm tra hộp thư của bạn.');
       setVerificationCooldown(30);
     } catch (error) {
+      const retryAfterHeader = Number(error?.response?.headers?.['retry-after'] || 0);
       const retryAfterSeconds = Number(
         error?.response?.data?.data?.retry_after_seconds ||
           error?.response?.data?.retry_after_seconds ||
+          retryAfterHeader ||
           0
       );
       const message = error?.response?.data?.message || 'Không thể gửi email xác thực lúc này.';
