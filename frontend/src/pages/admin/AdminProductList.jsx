@@ -32,6 +32,31 @@ function parseCurrencyInputToNumber(value) {
   return digits ? Number(digits) : 0;
 }
 
+function normalizePriceValue(value) {
+  if (value === null || value === undefined) {
+    return '';
+  }
+
+  if (typeof value === 'number') {
+    return value;
+  }
+
+  const text = String(value).trim();
+  if (!text) {
+    return '';
+  }
+
+  // MySQL DECIMAL fields can come as strings like "12500000.00".
+  if (/^\d+([.,]\d{1,2})?$/.test(text)) {
+    const normalized = Number(text.replace(',', '.'));
+    if (Number.isFinite(normalized)) {
+      return Math.round(normalized);
+    }
+  }
+
+  return text;
+}
+
 function formatVnd(value) {
   return new Intl.NumberFormat('vi-VN', {
     style: 'currency',
@@ -382,7 +407,7 @@ function AdminProductList() {
         storage_option: detail.storage_option || '',
         vga_option: detail.vga_option || '',
         color_option: detail.color_option || '',
-        price_sale: formatCurrencyInput(detail.price_sale || ''),
+        price_sale: formatCurrencyInput(normalizePriceValue(detail.price_sale)),
         stock_quantity: String(detail.stock_quantity || 0),
         is_active: Number(detail.is_active) ? 1 : 0,
       });

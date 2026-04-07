@@ -13,7 +13,6 @@ const initialForm = {
   phone: '',
   gender: '',
   date_of_birth: '',
-  avatar_url: '',
   email_verified: 0,
   user_status: 'ACTIVE',
 };
@@ -77,7 +76,6 @@ function AdminUserCreate() {
         phone: form.phone.trim(),
         gender: form.gender || null,
         date_of_birth: form.date_of_birth || null,
-        avatar_url: form.avatar_url.trim() || null,
         email_verified: Number(form.email_verified) ? 1 : 0,
         user_status: form.user_status,
       });
@@ -216,16 +214,6 @@ function AdminUserCreate() {
                 <option value="ACTIVE">Đang hoạt động</option>
                 <option value="BLOCKED">Đã khóa</option>
               </select>
-            </label>
-
-            <label className="admin-form-grid__full">
-              Avatar URL
-              <input
-                type="text"
-                value={form.avatar_url}
-                onChange={(event) => updateField('avatar_url', event.target.value)}
-                placeholder="https://..."
-              />
             </label>
 
             <div className="admin-form-actions admin-form-grid__full">
