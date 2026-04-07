@@ -39,6 +39,11 @@ export async function updateUserStatus(id, userStatus) {
   return response.data;
 }
 
+export async function deleteUser(id) {
+  const response = await userApi.delete(`/admin/${id}`);
+  return response.data;
+}
+
 // Customer profile and password functions
 export async function updateUserProfile(userId, payload) {
   const response = await userApi.put(`/customer/${userId}/profile`, payload);

@@ -196,6 +196,15 @@ export async function updateUserStatusById(id, userStatus) {
   return result.affectedRows > 0;
 }
 
+export async function deleteUserById(id) {
+  const [result] = await pool.query(
+    'DELETE FROM users WHERE id = ?',
+    [Number(id)]
+  );
+
+  return result.affectedRows > 0;
+}
+
 export async function createUser(userData) {
   const {
     roleId,

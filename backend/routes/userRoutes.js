@@ -2,6 +2,7 @@ import { Router } from 'express';
 
 import {
   createUserItem,
+  deleteUserItem,
   getUserByIdDetail,
   getUserList,
   getUserMasterData,
@@ -26,6 +27,7 @@ router.post('/admin', createUserItem);
 router.get('/admin/:id', getUserByIdDetail);
 router.put('/admin/:id', updateUserItem);
 router.patch('/admin/:id/status', toggleUserStatus);
+router.delete('/admin/:id', deleteUserItem);
 
 // Customer profile routes
 router.put('/customer/:userId/profile', updateUserProfileItem);

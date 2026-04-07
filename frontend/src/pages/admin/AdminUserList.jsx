@@ -4,6 +4,7 @@ import * as XLSX from 'xlsx';
 
 import AdminLayout from '../../layouts/AdminLayout.jsx';
 import {
+  deleteUser,
   getUserById,
   getUserMasterData,
   getUsers,
@@ -73,6 +74,7 @@ function AdminUserList() {
   });
   const [editItem, setEditItem] = useState(null);
   const [viewItem, setViewItem] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const [exporting, setExporting] = useState(false);
   const [form, setForm] = useState({
     full_name: '',
@@ -236,6 +238,34 @@ function AdminUserList() {
       toast.success('Đã cập nhật trạng thái người dùng.');
     } catch (error) {
       const message = error?.response?.data?.message || 'Không thể đổi trạng thái người dùng.';
+      toast.error(message);
+    } finally {
+      setActioningId(null);
+    }
+  }
+
+  async function handleConfirmDeleteUser() {
+    if (!deleteTarget) {
+      return;
+    }
+
+    try {
+      setActioningId(deleteTarget.id);
+      await deleteUser(deleteTarget.id);
+      toast.success('Đã xóa người dùng.');
+      setDeleteTarget(null);
+
+      if (users.length === 1 && pagination.page > 1) {
+        setPagination((prev) => ({ ...prev, page: prev.page - 1 }));
+      } else {
+        setUsers((prev) => prev.filter((user) => user.id !== deleteTarget.id));
+        setPagination((prev) => ({
+          ...prev,
+          total: Math.max(0, prev.total - 1),
+        }));
+      }
+    } catch (error) {
+      const message = error?.response?.data?.message || 'Không thể xóa người dùng.';
       toast.error(message);
     } finally {
       setActioningId(null);
@@ -450,6 +480,20 @@ function AdminUserList() {
                           >
                             {Number(user.user_status) === 1 || user.user_status === 'ACTIVE' ? 'Khóa' : 'Mở khóa'}
                           </button>
+                          <button
+                            type="button"
+                            className="admin-btn admin-btn--delete"
+                            disabled={actioningId === user.id}
+                            onClick={() =>
+                              setDeleteTarget({
+                                id: user.id,
+                                full_name: user.full_name,
+                                email: user.email,
+                              })
+                            }
+                          >
+                            Xóa
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -613,6 +657,34 @@ function AdminUserList() {
               <p><strong>Đăng nhập cuối:</strong> {formatDateTime(viewItem.last_login_at)}</p>
               <p><strong>Tạo lúc:</strong> {formatDateTime(viewItem.created_at)}</p>
               <p><strong>Cập nhật lúc:</strong> {formatDateTime(viewItem.updated_at)}</p>
+            </div>
+          </article>
+        </div>
+      ) : null}
+
+      {deleteTarget ? (
+        <div className="admin-modal-overlay" role="presentation">
+          <article className="admin-modal admin-confirm-modal">
+            <header>
+              <h3>Xác nhận xóa người dùng</h3>
+            </header>
+
+            <div className="admin-confirm-body">
+              <p>
+                Bạn có chắc muốn xóa
+                {' '}
+                <strong>{deleteTarget.full_name || deleteTarget.email}</strong>
+                {' '}?
+              </p>
+
+              <div className="admin-form-actions">
+                <button type="button" onClick={() => setDeleteTarget(null)} disabled={actioningId === deleteTarget.id}>
+                  Hủy
+                </button>
+                <button type="button" onClick={handleConfirmDeleteUser} disabled={actioningId === deleteTarget.id}>
+                  {actioningId === deleteTarget.id ? 'Đang xóa...' : 'Xác nhận xóa'}
+                </button>
+              </div>
             </div>
           </article>
         </div>

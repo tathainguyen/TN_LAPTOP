@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import {
   changePassword,
   createUser,
+  deleteUserById,
   findRoleById,
   findUserByEmail,
   getRoles,
@@ -23,6 +24,10 @@ function normalizeDbErrorMessage(error, fallbackMessage) {
 
   if (code === 'ER_NO_REFERENCED_ROW_2') {
     return 'Dữ liệu liên kết không hợp lệ.';
+  }
+
+  if (code === 'ER_ROW_IS_REFERENCED_2') {
+    return 'Không thể xóa vì người dùng đang có dữ liệu liên quan.';
   }
 
   return fallbackMessage;
@@ -354,6 +359,44 @@ export async function toggleUserStatus(req, res) {
     return res.status(500).json({
       status: 'error',
       message: 'Không thể đổi trạng thái người dùng.',
+      data: null,
+    });
+  }
+}
+
+export async function deleteUserItem(req, res) {
+  try {
+    const id = Number(req.params.id);
+
+    if (!Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'ID người dùng không hợp lệ.',
+        data: null,
+      });
+    }
+
+    const deleted = await deleteUserById(id);
+
+    if (!deleted) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Không tìm thấy người dùng để xóa.',
+        data: null,
+      });
+    }
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Xóa người dùng thành công.',
+      data: { id },
+    });
+  } catch (error) {
+    console.error('❌ Lỗi deleteUserItem:', error);
+
+    return res.status(500).json({
+      status: 'error',
+      message: normalizeDbErrorMessage(error, 'Không thể xóa người dùng.'),
       data: null,
     });
   }
