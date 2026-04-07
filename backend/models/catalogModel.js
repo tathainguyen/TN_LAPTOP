@@ -55,7 +55,7 @@ export async function getBrands({ keyword = '', status = 'all' } = {}) {
   const params = [];
 
   if (keyword && String(keyword).trim()) {
-    whereParts.push('(brand_name LIKE ? OR slug LIKE ?)');
+    whereParts.push('(b.brand_name LIKE ? OR b.slug LIKE ?)');
     const like = `%${String(keyword).trim()}%`;
     params.push(like, like);
   }
@@ -150,7 +150,7 @@ export async function getCategories({ keyword = '', status = 'all' } = {}) {
   const params = [];
 
   if (keyword && String(keyword).trim()) {
-    whereParts.push('(category_name LIKE ? OR slug LIKE ?)');
+    whereParts.push('(c.category_name LIKE ? OR c.slug LIKE ?)');
     const like = `%${String(keyword).trim()}%`;
     params.push(like, like);
   }

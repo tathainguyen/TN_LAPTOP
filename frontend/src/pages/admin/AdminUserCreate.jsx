@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import AdminLayout from '../../layouts/AdminLayout.jsx';
-import { createAdminUser, getUserMasterData } from '../../services/userService.js';
+import { createAdminUser, getUserMasterData } from '../../services/user/userService.js';
 
 const initialForm = {
   full_name: '',

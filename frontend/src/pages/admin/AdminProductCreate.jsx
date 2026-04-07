@@ -10,7 +10,7 @@ import {
   getProductGroups,
   getProductMasterData,
   uploadProductImages,
-} from '../../services/productService.js';
+} from '../../services/product/productService.js';
 
 function formatCurrencyInput(value) {
   const digits = String(value || '').replace(/\D/g, '');

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { changeUserPassword } from '../../services/userService.js';
+import { changeUserPassword } from '../../services/user/userService.js';
 
 function CustomerPassword() {
   const { user } = useOutletContext();

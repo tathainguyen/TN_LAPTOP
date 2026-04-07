@@ -41,7 +41,7 @@ export async function getBrandList(req, res) {
       data: brands,
     });
   } catch (error) {
-    console.error('❌ Lỗi getBrandList:', error);
+    console.error('❌ Lỗi getBrandList:', error?.code, error?.message, error?.sqlMessage);
 
     return res.status(500).json({
       status: 'error',
@@ -185,7 +185,7 @@ export async function getCategoryList(req, res) {
       data: categories,
     });
   } catch (error) {
-    console.error('❌ Lỗi getCategoryList:', error);
+    console.error('❌ Lỗi getCategoryList:', error?.code, error?.message, error?.sqlMessage);
 
     return res.status(500).json({
       status: 'error',

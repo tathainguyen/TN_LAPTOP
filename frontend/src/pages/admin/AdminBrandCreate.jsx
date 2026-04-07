@@ -7,7 +7,7 @@ import {
   createBrand,
   getBrands,
   updateBrand,
-} from '../../services/catalogService.js';
+} from '../../services/catalog/catalogService.js';
 
 function AdminBrandCreate() {
   const navigate = useNavigate();

@@ -3,7 +3,7 @@ import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import './App.css';
 import AdminBrandList from './pages/admin/AdminBrandList.jsx';
 import AdminCategoryList from './pages/admin/AdminCategoryList.jsx';
-import Header from './components/Header.jsx';
+import Header from './components/layout/Header.jsx';
 import AdminDashboard from './pages/admin/AdminDashboard.jsx';
 import AdminProductCreate from './pages/admin/AdminProductCreate.jsx';
 import AdminProductLinkCreate from './pages/admin/AdminProductLinkCreate.jsx';

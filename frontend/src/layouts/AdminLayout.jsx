@@ -1,6 +1,6 @@
 import { Search, ShieldUser } from 'lucide-react';
 
-import Sidebar from '../components/Sidebar.jsx';
+import Sidebar from '../components/admin/Sidebar.jsx';
 
 function AdminLayout({ children, title = 'Dashboard quản trị' }) {
   return (

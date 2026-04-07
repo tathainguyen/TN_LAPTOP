@@ -9,7 +9,7 @@ import {
   getUsers,
   updateUser,
   updateUserStatus,
-} from '../../services/userService.js';
+} from '../../services/user/userService.js';
 
 const LIMIT = 10;
 

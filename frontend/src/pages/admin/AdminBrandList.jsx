@@ -8,7 +8,7 @@ import {
   getBrands,
   toggleBrandStatus,
   updateBrand,
-} from '../../services/catalogService.js';
+} from '../../services/catalog/catalogService.js';
 
 function AdminBrandList() {
   const [loading, setLoading] = useState(true);

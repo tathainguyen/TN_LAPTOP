@@ -8,7 +8,7 @@ import {
   getProductMasterData,
   getProductGroups,
   updateProductGroup,
-} from '../../services/productService.js';
+} from '../../services/product/productService.js';
 
 function normalizeText(value) {
   return String(value || '').trim().toLowerCase();

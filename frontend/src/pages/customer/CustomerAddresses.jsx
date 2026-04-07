@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { X } from 'lucide-react';
-import { getAddresses, createAddress, updateAddress, deleteAddress } from '../../services/addressService.js';
+import { getAddresses, createAddress, updateAddress, deleteAddress } from '../../services/address/addressService.js';
 
 const ADDRESS_DATA = {
   'TP. Hồ Chí Minh': {

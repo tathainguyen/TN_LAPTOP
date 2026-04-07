@@ -8,7 +8,7 @@ import {
   getCategories,
   toggleCategoryStatus,
   updateCategory,
-} from '../../services/catalogService.js';
+} from '../../services/catalog/catalogService.js';
 
 function AdminCategoryList() {
   const [loading, setLoading] = useState(true);

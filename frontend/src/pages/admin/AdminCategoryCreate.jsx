@@ -7,7 +7,7 @@ import {
   createCategory,
   getCategories,
   updateCategory,
-} from '../../services/catalogService.js';
+} from '../../services/catalog/catalogService.js';
 
 function AdminCategoryCreate() {
   const navigate = useNavigate();

@@ -14,7 +14,7 @@ import {
   updateProductGroup,
   updateProduct,
   updateProductStatus,
-} from '../../services/productService.js';
+} from '../../services/product/productService.js';
 
 const LIMIT = 10;
 
