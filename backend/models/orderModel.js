@@ -304,3 +304,190 @@ export async function getOrdersByUserId(userId) {
 
   return rows;
 }
+
+export async function getAdminOrders({
+  page = 1,
+  limit = 10,
+  keyword = '',
+  orderStatus = '',
+  paymentStatus = '',
+}) {
+  const normalizedPage = Number(page) > 0 ? Number(page) : 1;
+  const normalizedLimit = Number(limit) > 0 ? Number(limit) : 10;
+  const offset = (normalizedPage - 1) * normalizedLimit;
+
+  const conditions = [];
+  const params = [];
+
+  const keywordText = String(keyword || '').trim();
+  if (keywordText) {
+    conditions.push('(o.order_code LIKE ? OR o.recipient_name LIKE ? OR o.recipient_phone LIKE ?)');
+    const token = `%${keywordText}%`;
+    params.push(token, token, token);
+  }
+
+  const normalizedOrderStatus = String(orderStatus || '').trim().toUpperCase();
+  if (normalizedOrderStatus) {
+    conditions.push('o.order_status = ?');
+    params.push(normalizedOrderStatus);
+  }
+
+  const normalizedPaymentStatus = String(paymentStatus || '').trim().toUpperCase();
+  if (normalizedPaymentStatus) {
+    conditions.push('o.payment_status = ?');
+    params.push(normalizedPaymentStatus);
+  }
+
+  const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+
+  const [rows] = await pool.query(
+    `SELECT
+      o.id,
+      o.order_code,
+      o.user_id,
+      u.full_name AS customer_name,
+      u.email AS customer_email,
+      o.recipient_name,
+      o.recipient_phone,
+      o.payment_method,
+      o.payment_status,
+      o.order_status,
+      o.total_items_amount,
+      o.shipping_fee,
+      o.grand_total,
+      o.created_at,
+      o.updated_at,
+      (
+        SELECT COUNT(*)
+        FROM order_items oi
+        WHERE oi.order_id = o.id
+      ) AS item_count
+    FROM orders o
+    LEFT JOIN users u ON u.id = o.user_id
+    ${whereClause}
+    ORDER BY o.created_at DESC, o.id DESC
+    LIMIT ? OFFSET ?`,
+    [...params, normalizedLimit, offset]
+  );
+
+  const [countRows] = await pool.query(
+    `SELECT COUNT(*) AS total
+    FROM orders o
+    ${whereClause}`,
+    params
+  );
+
+  const total = Number(countRows?.[0]?.total || 0);
+
+  return {
+    items: rows,
+    pagination: {
+      page: normalizedPage,
+      limit: normalizedLimit,
+      total,
+      totalPages: Math.max(1, Math.ceil(total / normalizedLimit)),
+    },
+  };
+}
+
+export async function updateOrderStatusById({
+  orderId,
+  orderStatus,
+  changedBy = null,
+  note = null,
+}) {
+  const normalizedOrderId = Number(orderId);
+  const normalizedOrderStatus = String(orderStatus || '').trim().toUpperCase();
+
+  const connection = await pool.getConnection();
+
+  try {
+    await connection.beginTransaction();
+
+    const [orderRows] = await connection.query(
+      'SELECT id, order_status FROM orders WHERE id = ? LIMIT 1',
+      [normalizedOrderId]
+    );
+
+    if (orderRows.length === 0) {
+      throw new Error('ORDER_NOT_FOUND');
+    }
+
+    const oldStatus = String(orderRows[0].order_status || '').toUpperCase();
+
+    if (oldStatus === normalizedOrderStatus) {
+      await connection.commit();
+      return {
+        id: normalizedOrderId,
+        old_status: oldStatus,
+        new_status: normalizedOrderStatus,
+      };
+    }
+
+    const now = new Date();
+    const updates = ['order_status = ?'];
+    const updateParams = [normalizedOrderStatus];
+
+    if (normalizedOrderStatus === 'CONFIRMED') {
+      updates.push('confirmed_at = ?');
+      updateParams.push(now);
+    }
+
+    if (normalizedOrderStatus === 'SHIPPING') {
+      updates.push('shipping_at = ?');
+      updateParams.push(now);
+    }
+
+    if (normalizedOrderStatus === 'SUCCESS') {
+      updates.push('completed_at = ?');
+      updateParams.push(now);
+      updates.push("payment_status = CASE WHEN payment_method = 'COD' THEN 'PAID' ELSE payment_status END");
+    }
+
+    if (normalizedOrderStatus === 'CANCELLED') {
+      updates.push('cancelled_at = ?');
+      updateParams.push(now);
+      updates.push('cancelled_by = ?');
+      updateParams.push(changedBy || null);
+      updates.push('cancel_reason = ?');
+      updateParams.push(note ? String(note).trim() : null);
+    }
+
+    await connection.query(
+      `UPDATE orders
+      SET ${updates.join(', ')}
+      WHERE id = ?`,
+      [...updateParams, normalizedOrderId]
+    );
+
+    await connection.query(
+      `INSERT INTO order_status_histories (
+        order_id,
+        old_status,
+        new_status,
+        changed_by,
+        note
+      ) VALUES (?, ?, ?, ?, ?)`,
+      [
+        normalizedOrderId,
+        oldStatus,
+        normalizedOrderStatus,
+        changedBy || null,
+        note ? String(note).trim() : null,
+      ]
+    );
+
+    await connection.commit();
+
+    return {
+      id: normalizedOrderId,
+      old_status: oldStatus,
+      new_status: normalizedOrderStatus,
+    };
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
+}

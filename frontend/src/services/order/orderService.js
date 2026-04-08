@@ -23,6 +23,16 @@ export async function getCustomerOrders(userId) {
   return response.data;
 }
 
+export async function getAdminOrders(params = {}) {
+  const response = await orderApi.get('/admin', { params });
+  return response.data;
+}
+
+export async function updateAdminOrderStatus(id, payload) {
+  const response = await orderApi.patch(`/admin/${id}/status`, payload);
+  return response.data;
+}
+
 export async function placeCodOrder(payload) {
   const response = await orderApi.post('/cod', payload);
   return response.data;

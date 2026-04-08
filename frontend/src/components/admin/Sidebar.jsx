@@ -77,7 +77,7 @@ const menuGroups = [
     items: [
       { label: 'Voucher', icon: BadgePercent },
       { label: 'Vận chuyển', icon: Truck },
-      { label: 'Đơn hàng', icon: ShoppingCart },
+      { label: 'Đơn hàng', icon: ShoppingCart, to: '/admin/orders' },
       { label: 'Tin nhắn', icon: Newspaper },
       { label: 'Báo cáo', icon: BarChart3 },
     ],
