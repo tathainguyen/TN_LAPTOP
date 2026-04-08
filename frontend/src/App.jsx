@@ -21,10 +21,12 @@ import CustomerProfile from './pages/customer/CustomerProfile.jsx';
 import CustomerVouchers from './pages/customer/CustomerVouchers.jsx';
 import Home from './pages/store/Home.jsx';
 import EmailVerifyResult from './pages/auth/EmailVerifyResult.jsx';
+import ForgotPassword from './pages/auth/ForgotPassword.jsx';
 import Login from './pages/auth/Login.jsx';
 import Product from './pages/store/Product.jsx';
 import ProductDetail from './pages/store/ProductDetail.jsx';
 import Register from './pages/auth/Register.jsx';
+import ResetPassword from './pages/auth/ResetPassword.jsx';
 
 function getStoredUser() {
   try {
@@ -126,6 +128,8 @@ function App() {
           <Route path="/product" element={storefrontOnly(<Product />)} />
           <Route path="/product/:slug" element={storefrontOnly(<ProductDetail />)} />
           <Route path="/email-verified" element={storefrontOnly(<EmailVerifyResult />)} />
+          <Route path="/forgot-password" element={storefrontOnly(<ForgotPassword />)} />
+          <Route path="/reset-password" element={storefrontOnly(<ResetPassword />)} />
           <Route path="/account" element={customerOnly(<CustomerAccountLayout />)}>
             <Route path="profile" element={<CustomerProfile />} />
             <Route path="addresses" element={<CustomerAddresses />} />

@@ -21,3 +21,13 @@ export async function sendVerificationEmail(payload) {
   const response = await authApi.post('/send-verification-email', payload);
   return response.data;
 }
+
+export async function requestPasswordReset(payload) {
+  const response = await authApi.post('/forgot-password', payload);
+  return response.data;
+}
+
+export async function resetPassword(payload) {
+  const response = await authApi.post('/reset-password', payload);
+  return response.data;
+}

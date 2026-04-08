@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
 
 import {
+  changePassword,
   createUser,
   findRoleById,
   findRoleByName,
@@ -11,6 +12,7 @@ import {
 } from '../models/userModel.js';
 
 const EMAIL_VERIFICATION_COOLDOWN_MS = 30_000;
+const PASSWORD_RESET_TOKEN_EXPIRES_IN = '15m';
 const verificationCooldownByUserId = new Map();
 
 function getFrontendBaseUrl() {
@@ -34,6 +36,19 @@ function buildEmailVerificationToken(user) {
   );
 }
 
+function buildPasswordResetToken(user) {
+  const secret = process.env.EMAIL_SECRET || process.env.JWT_SECRET;
+  return jwt.sign(
+    {
+      purpose: 'reset-password',
+      id: user.id,
+      email: user.email,
+    },
+    secret,
+    { expiresIn: PASSWORD_RESET_TOKEN_EXPIRES_IN }
+  );
+}
+
 function buildVerificationResultUrl(status, message = '') {
   const base = getFrontendBaseUrl();
   const params = new URLSearchParams({ status });
@@ -41,6 +56,11 @@ function buildVerificationResultUrl(status, message = '') {
     params.set('message', message);
   }
   return `${base}/email-verified?${params.toString()}`;
+}
+
+function buildResetPasswordUrl(token) {
+  const base = getFrontendBaseUrl();
+  return `${base}/reset-password?token=${encodeURIComponent(token)}`;
 }
 
 async function sendVerificationMail({ toEmail, fullName, verificationLink }) {
@@ -80,6 +100,47 @@ async function sendVerificationMail({ toEmail, fullName, verificationLink }) {
     from: `"TN Laptop" <${process.env.EMAIL_USER}>`,
     to: toEmail,
     subject: 'Xác thực email tài khoản TN Laptop',
+    html,
+  });
+}
+
+async function sendResetPasswordMail({ toEmail, fullName, resetLink }) {
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    throw new Error('Thiếu cấu hình EMAIL_USER/EMAIL_PASS trong .env');
+  }
+
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
+
+  const customerName = String(fullName || '').trim() || 'Quý khách';
+
+  const html = `
+  <div style="font-family: Arial, sans-serif; color:#1f2937; line-height:1.6; max-width:680px; margin:0 auto; border:1px solid #e5e7eb; border-radius:12px; overflow:hidden;">
+    <div style="padding:20px 24px; background:linear-gradient(135deg,#1d4ed8,#0ea5e9); color:#ffffff;">
+      <h2 style="margin:0; font-size:22px;">TN Laptop</h2>
+      <p style="margin:6px 0 0; opacity:0.95;">Khôi phục mật khẩu tài khoản</p>
+    </div>
+    <div style="padding:24px;">
+      <p>Xin chào <strong>${customerName}</strong>,</p>
+      <p>Chúng tôi đã nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn. Vui lòng bấm vào nút bên dưới để tạo mật khẩu mới:</p>
+      <p style="margin:24px 0;">
+        <a href="${resetLink}" style="display:inline-block; background:#1d4ed8; color:#fff; text-decoration:none; padding:12px 18px; border-radius:8px; font-weight:700;">Đặt lại mật khẩu</a>
+      </p>
+      <p>Nếu nút không hoạt động, hãy sao chép đường link này vào trình duyệt:</p>
+      <p style="word-break:break-all; color:#1d4ed8;">${resetLink}</p>
+      <p style="margin-top:20px; color:#6b7280; font-size:13px;">Liên kết chỉ có hiệu lực trong 15 phút. Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email.</p>
+    </div>
+  </div>`;
+
+  await transporter.sendMail({
+    from: `"TN Laptop" <${process.env.EMAIL_USER}>`,
+    to: toEmail,
+    subject: 'Đặt lại mật khẩu tài khoản TN Laptop',
     html,
   });
 }
@@ -409,5 +470,145 @@ export async function verifyEmail(req, res) {
   } catch (error) {
     console.error('❌ Lỗi verifyEmail:', error);
     return res.redirect(buildVerificationResultUrl('error', 'Liên kết xác thực đã hết hạn hoặc không hợp lệ.'));
+  }
+}
+
+export async function forgotPassword(req, res) {
+  try {
+    const email = String(req.body?.email || '').trim().toLowerCase();
+
+    if (!email) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Vui lòng nhập email.',
+        data: null,
+      });
+    }
+
+    const user = await findUserByEmail(email);
+
+    // Always return the same message to avoid account enumeration.
+    const genericMessage = 'Nếu email hợp lệ, chúng tôi đã gửi link hướng dẫn đặt lại mật khẩu.';
+
+    if (!user) {
+      return res.status(200).json({
+        status: 'success',
+        message: genericMessage,
+        data: null,
+      });
+    }
+
+    const token = buildPasswordResetToken(user);
+    const resetLink = buildResetPasswordUrl(token);
+
+    await sendResetPasswordMail({
+      toEmail: user.email,
+      fullName: user.full_name,
+      resetLink,
+    });
+
+    return res.status(200).json({
+      status: 'success',
+      message: genericMessage,
+      data: {
+        preview_link: resetLink,
+      },
+    });
+  } catch (error) {
+    console.error('❌ Lỗi forgotPassword:', error);
+
+    return res.status(500).json({
+      status: 'error',
+      message: 'Không thể xử lý yêu cầu quên mật khẩu lúc này. Vui lòng thử lại sau.',
+      data: null,
+    });
+  }
+}
+
+export async function resetPassword(req, res) {
+  try {
+    const token = String(req.body?.token || '').trim();
+    const newPassword = String(req.body?.new_password || '');
+    const confirmPassword = String(req.body?.confirm_password || '');
+
+    if (!token || !newPassword || !confirmPassword) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Thiếu token hoặc mật khẩu mới.',
+        data: null,
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Mật khẩu mới phải có ít nhất 6 ký tự.',
+        data: null,
+      });
+    }
+
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Mật khẩu mới và xác nhận mật khẩu không khớp.',
+        data: null,
+      });
+    }
+
+    const secret = process.env.EMAIL_SECRET || process.env.JWT_SECRET;
+    const payload = jwt.verify(token, secret);
+
+    if (payload?.purpose !== 'reset-password') {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Token đặt lại mật khẩu không hợp lệ.',
+        data: null,
+      });
+    }
+
+    const email = String(payload?.email || '').trim().toLowerCase();
+    const userId = Number(payload?.id || 0);
+    const user = await findUserByEmail(email);
+
+    if (!user || Number(user.id) !== userId) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Liên kết đặt lại mật khẩu không còn hợp lệ.',
+        data: null,
+      });
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+    await changePassword(userId, passwordHash);
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Đặt lại mật khẩu thành công. Vui lòng đăng nhập lại.',
+      data: null,
+    });
+  } catch (error) {
+    if (error?.name === 'TokenExpiredError') {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Liên kết đặt lại mật khẩu đã hết hạn.',
+        data: null,
+      });
+    }
+
+    if (error?.name === 'JsonWebTokenError') {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Token đặt lại mật khẩu không hợp lệ.',
+        data: null,
+      });
+    }
+
+    console.error('❌ Lỗi resetPassword:', error);
+
+    return res.status(500).json({
+      status: 'error',
+      message: 'Không thể đặt lại mật khẩu lúc này. Vui lòng thử lại sau.',
+      data: null,
+    });
   }
 }

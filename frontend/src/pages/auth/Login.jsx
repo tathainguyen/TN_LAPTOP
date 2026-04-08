@@ -111,6 +111,10 @@ function Login() {
             </button>
 
             <p className="switch-text">
+              <Link to="/forgot-password">Quên mật khẩu?</Link>
+            </p>
+
+            <p className="switch-text">
               Chưa có tài khoản? <Link to="/register">Tạo tài khoản mới</Link>
             </p>
           </form>
