@@ -162,6 +162,7 @@ function AdminProductList() {
     vga_option: '',
     color_option: '',
     price_sale: '',
+    price_compare: '',
     stock_quantity: '',
     is_active: 1,
   });
@@ -408,6 +409,7 @@ function AdminProductList() {
         vga_option: detail.vga_option || '',
         color_option: detail.color_option || '',
         price_sale: formatCurrencyInput(normalizePriceValue(detail.price_sale)),
+        price_compare: formatCurrencyInput(normalizePriceValue(detail.price_compare)),
         stock_quantity: String(detail.stock_quantity || 0),
         is_active: Number(detail.is_active) ? 1 : 0,
       });
@@ -544,7 +546,9 @@ function AdminProductList() {
       vga_option: editForm.vga_option.trim(),
       color_option: editForm.color_option.trim(),
       price_sale: parseCurrencyInputToNumber(editForm.price_sale),
-      price_compare: null,
+      price_compare: editForm.price_compare
+        ? parseCurrencyInputToNumber(editForm.price_compare)
+        : null,
       stock_quantity: Number(editForm.stock_quantity || 0),
       is_active: Number(editForm.is_active) ? 1 : 0,
       image_urls: imageUrls,
@@ -576,6 +580,7 @@ function AdminProductList() {
                 vga_option: payload.vga_option,
                 color_option: payload.color_option,
                 price_sale: payload.price_sale,
+                price_compare: payload.price_compare,
                 stock_quantity: payload.stock_quantity,
                 is_active: payload.is_active,
                 primary_image: imageUrls[0] || item.primary_image || null,
@@ -956,6 +961,19 @@ function AdminProductList() {
                 </div>
               </label>
               <label>
+                Giá giảm (tùy chọn)
+                <div className="admin-input-with-unit">
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={editForm.price_compare}
+                    onChange={(event) => updateEditPriceField('price_compare', event.target.value)}
+                    placeholder="Để trống nếu không giảm giá"
+                  />
+                  <span>VND</span>
+                </div>
+              </label>
+              <label>
                 Tồn kho
                 <input
                   type="number"
@@ -1054,6 +1072,11 @@ function AdminProductList() {
               <p><strong>Lưu trữ:</strong> {viewItem.storage_option || '-'}</p>
               <p><strong>Màu sắc:</strong> {viewItem.color_option || '-'}</p>
               <p><strong>Giá:</strong> {formatVnd(viewItem.price_sale)}</p>
+              <p>
+                <strong>Giá giảm:</strong>
+                {' '}
+                {viewItem.price_compare ? formatVnd(viewItem.price_compare) : '-'}
+              </p>
               <p><strong>Tồn kho:</strong> {viewItem.stock_quantity ?? 0}</p>
               <p><strong>Trạng thái:</strong> {Number(viewItem.is_active) ? 'Đang kích hoạt' : 'Khóa'}</p>
             </div>
