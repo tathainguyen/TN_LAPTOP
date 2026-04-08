@@ -15,7 +15,8 @@
 - Axios gọi API.
 - React Hot Toast hiển thị thông báo.
 - Lucide React cho icon.
-- CSS thuần (không dùng UI framework).
+- Tailwind CSS làm framework UI chính, kết hợp với các component tự build.
+- Quy ước UI mới: ưu tiên utility class của Tailwind; CSS file chỉ dùng cho phần legacy trong giai đoạn chuyển đổi.
 - Cấu trúc thư mục đã tách theo domain:
   - pages: admin, auth, customer, store.
   - components: admin, layout, store.
