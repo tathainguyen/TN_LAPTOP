@@ -67,7 +67,7 @@ export async function getCartItemsByUserId(userId) {
     FROM cart_items ci
     INNER JOIN products p ON p.id = ci.product_id
     WHERE ci.cart_id = ?
-    ORDER BY ci.updated_at DESC, ci.id DESC`,
+    ORDER BY ci.created_at ASC, ci.id ASC`,
     [cartId]
   );
 
