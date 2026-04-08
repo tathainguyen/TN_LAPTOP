@@ -1336,6 +1336,60 @@
   font-size: 16px;
 }
 
+.admin-product-create-shell {
+  width: 100%;
+  max-width: none;
+}
+
+.admin-product-create-card {
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.05);
+}
+
+.admin-product-create-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.admin-product-create-grid .admin-form-grid__full {
+  grid-column: 1 / -1;
+}
+
+.admin-file-input-hidden {
+  display: none;
+}
+
+.admin-file-trigger {
+  margin-top: 2px;
+  border: 1px dashed #93b4de;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #f8fbff 0%, #edf4ff 100%);
+  color: #1e3a5f;
+  min-height: 44px;
+  padding: 10px 12px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.admin-file-trigger:hover {
+  border-color: #5b8fd4;
+  background: linear-gradient(180deg, #f2f7ff 0%, #e6f0ff 100%);
+}
+
+@media (max-width: 1320px) {
+  .admin-product-create-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 780px) {
+  .admin-product-create-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .admin-stepper {
   margin-bottom: 12px;
   display: flex;

@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { Upload } from 'lucide-react';
 
 import AdminLayout from '../../layouts/AdminLayout.jsx';
 import {
@@ -41,6 +42,7 @@ function readFileAsDataUrl(file) {
 
 function AdminProductCreate() {
   const navigate = useNavigate();
+  const fileInputRef = useRef(null);
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -333,7 +335,7 @@ function AdminProductCreate() {
 
   return (
     <AdminLayout title="Thêm Sản phẩm mới">
-      <section className="admin-panel">
+      <section className="admin-panel admin-product-create-shell">
         <div className="admin-panel__head">
           <div>
             <h2>Thêm sản phẩm mới</h2>
@@ -341,10 +343,10 @@ function AdminProductCreate() {
           </div>
         </div>
 
-        <article className="admin-sub-panel">
+        <article className="admin-sub-panel admin-product-create-card">
           <h3>Thông tin sản phẩm và SKU</h3>
 
-          <div className="admin-form-grid">
+          <div className="admin-form-grid admin-product-create-grid">
             <label>
               Hãng
               <select
@@ -531,11 +533,21 @@ function AdminProductCreate() {
             <label className="admin-form-grid__full">
               Upload ảnh từ máy (Cloudinary)
               <input
+                ref={fileInputRef}
                 type="file"
                 accept="image/*"
                 multiple
                 onChange={handleImageFilesChange}
+                className="admin-file-input-hidden"
               />
+              <button
+                type="button"
+                className="admin-file-trigger"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <Upload size={16} />
+                <span>Chọn tệp ảnh</span>
+              </button>
             </label>
 
             <p className="admin-helper-text admin-form-grid__full" style={{ marginTop: -4 }}>
