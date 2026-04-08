@@ -64,6 +64,27 @@ function getVerificationLabel(value) {
   return Number(value) === 1 ? 'Đã xác thực' : 'Chưa xác thực';
 }
 
+function getOrderStatusLabel(value) {
+  const key = String(value || '').toUpperCase();
+
+  if (key === 'PENDING_CONFIRM') return 'Chờ xác nhận';
+  if (key === 'CONFIRMED') return 'Đã xác nhận';
+  if (key === 'SHIPPING') return 'Đang giao';
+  if (key === 'SUCCESS') return 'Thành công';
+  if (key === 'CANCELLED') return 'Đã hủy';
+  return key || '-';
+}
+
+function getPaymentStatusLabel(value) {
+  const key = String(value || '').toUpperCase();
+
+  if (key === 'UNPAID') return 'Chưa thanh toán';
+  if (key === 'PAID') return 'Đã thanh toán';
+  if (key === 'FAILED') return 'Thất bại';
+  if (key === 'REFUNDED') return 'Đã hoàn tiền';
+  return key || '-';
+}
+
 function AdminUserList() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -662,7 +683,7 @@ function AdminUserList() {
         <div className="admin-modal-overlay" onClick={() => setViewItem(null)} role="presentation">
           <article className="admin-modal" onClick={(event) => event.stopPropagation()}>
             <header>
-              <h3>Chi tiết người dùng</h3>
+              <h3>Thông tin người dùng</h3>
               <button type="button" onClick={() => setViewItem(null)}>
                 Đóng
               </button>
@@ -746,8 +767,8 @@ function AdminUserList() {
                           <td>{formatDateTime(order.created_at)}</td>
                           <td>{Number(order.item_count || 0)}</td>
                           <td>{formatVnd(order.grand_total)}</td>
-                          <td>{order.order_status}</td>
-                          <td>{order.payment_status}</td>
+                          <td>{getOrderStatusLabel(order.order_status)}</td>
+                          <td>{getPaymentStatusLabel(order.payment_status)}</td>
                         </tr>
                       ))}
                     </tbody>
