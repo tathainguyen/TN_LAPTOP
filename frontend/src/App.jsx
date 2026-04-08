@@ -5,6 +5,7 @@ import './App.css';
 import AdminBrandList from './pages/admin/AdminBrandList.jsx';
 import AdminCategoryList from './pages/admin/AdminCategoryList.jsx';
 import Header from './components/layout/Header.jsx';
+import { syncGuestCartToUser } from './services/cart/cartService.js';
 import AdminDashboard from './pages/admin/AdminDashboard.jsx';
 import AdminProductCreate from './pages/admin/AdminProductCreate.jsx';
 import AdminProductLinkCreate from './pages/admin/AdminProductLinkCreate.jsx';
@@ -20,6 +21,7 @@ import CustomerPassword from './pages/customer/CustomerPassword.jsx';
 import CustomerProfile from './pages/customer/CustomerProfile.jsx';
 import CustomerVouchers from './pages/customer/CustomerVouchers.jsx';
 import Home from './pages/store/Home.jsx';
+import Cart from './pages/store/Cart.jsx';
 import EmailVerifyResult from './pages/auth/EmailVerifyResult.jsx';
 import ForgotPassword from './pages/auth/ForgotPassword.jsx';
 import Login from './pages/auth/Login.jsx';
@@ -59,6 +61,22 @@ function App() {
       window.removeEventListener('tn-laptop-auth-change', syncAuthUser);
     };
   }, []);
+
+  useEffect(() => {
+    async function syncGuestCartAfterLogin() {
+      if (!authUser?.id || isAdminUser(authUser)) {
+        return;
+      }
+
+      try {
+        await syncGuestCartToUser(authUser.id);
+      } catch {
+        // Keep login flow non-blocking when cart sync fails.
+      }
+    }
+
+    syncGuestCartAfterLogin();
+  }, [authUser]);
 
   const isLoggedIn = Boolean(authUser?.id);
   const isAdmin = isAdminUser(authUser);
@@ -127,6 +145,7 @@ function App() {
           <Route path="/admin/product-links/create" element={adminOnly(<AdminProductLinkCreate />)} />
           <Route path="/product" element={storefrontOnly(<Product />)} />
           <Route path="/product/:slug" element={storefrontOnly(<ProductDetail />)} />
+          <Route path="/cart" element={storefrontOnly(<Cart />)} />
           <Route path="/email-verified" element={storefrontOnly(<EmailVerifyResult />)} />
           <Route path="/forgot-password" element={storefrontOnly(<ForgotPassword />)} />
           <Route path="/reset-password" element={storefrontOnly(<ResetPassword />)} />

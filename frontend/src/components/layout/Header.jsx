@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
+import { getCartCountForHeader } from '../../services/cart/cartService.js';
+
 function CartIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -30,6 +32,26 @@ function Header() {
       return null;
     }
   });
+  const [cartCount, setCartCount] = useState(0);
+
+  useEffect(() => {
+    async function loadCartCount() {
+      const nextCount = await getCartCountForHeader(user);
+      setCartCount(nextCount);
+    }
+
+    loadCartCount();
+
+    window.addEventListener('tn-laptop-cart-change', loadCartCount);
+    window.addEventListener('storage', loadCartCount);
+    window.addEventListener('tn-laptop-auth-change', loadCartCount);
+
+    return () => {
+      window.removeEventListener('tn-laptop-cart-change', loadCartCount);
+      window.removeEventListener('storage', loadCartCount);
+      window.removeEventListener('tn-laptop-auth-change', loadCartCount);
+    };
+  }, [user]);
 
   useEffect(() => {
     function syncAuthState() {
@@ -101,9 +123,14 @@ function Header() {
           </nav>
 
           <div className="navbar-icons">
-            <button type="button" className="icon-btn" aria-label="Giỏ hàng">
+            <button
+              type="button"
+              className="icon-btn"
+              aria-label="Giỏ hàng"
+              onClick={() => navigate('/cart')}
+            >
               <CartIcon />
-              <span className="cart-badge">0</span>
+              <span className="cart-badge">{cartCount}</span>
             </button>
 
             <Link to={user ? '/account/profile' : '/login'} className="icon-btn" aria-label="Tài khoản">

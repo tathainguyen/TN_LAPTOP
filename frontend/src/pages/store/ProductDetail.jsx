@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
+import { addItemToUserCart } from '../../services/cart/cartService.js';
+import { addGuestCartItem } from '../../services/cart/cartStorage.js';
 import { getAllProducts, getProductBySlug } from '../../services/product/productService.js';
 
 const FALLBACK_IMAGE = 'https://via.placeholder.com/1200x750?text=No+Image';
@@ -29,6 +31,7 @@ function ProductDetail() {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [product, setProduct] = useState(null);
   const [groupProducts, setGroupProducts] = useState([]);
+  const [addingToCart, setAddingToCart] = useState(false);
 
   useEffect(() => {
     async function loadData() {
@@ -109,6 +112,46 @@ function ProductDetail() {
   const displayPrice = hasDiscount ? discountPrice : basePrice;
   const savingsAmount = hasDiscount ? basePrice - discountPrice : 0;
   const savingsPercent = hasDiscount ? Math.round((savingsAmount / basePrice) * 100) : 0;
+
+  async function handleAddToCart() {
+    if (!product?.id) {
+      toast.error('Không thể thêm vào giỏ hàng lúc này.');
+      return;
+    }
+
+    const effectivePrice = hasDiscount ? discountPrice : basePrice;
+
+    try {
+      setAddingToCart(true);
+
+      const rawUser = localStorage.getItem('tn_laptop_user');
+      const user = rawUser ? JSON.parse(rawUser) : null;
+
+      if (user?.id) {
+        await addItemToUserCart({
+          userId: user.id,
+          productId: product.id,
+          quantity: 1,
+        });
+      } else {
+        addGuestCartItem({
+          product_id: product.id,
+          quantity: 1,
+          product_name: product.product_name,
+          slug: product.slug,
+          primary_image: currentImage,
+          unit_price: effectivePrice,
+        });
+      }
+
+      toast.success('Đã thêm sản phẩm vào giỏ hàng.');
+    } catch (error) {
+      const message = error?.response?.data?.message || 'Không thể thêm vào giỏ hàng.';
+      toast.error(message);
+    } finally {
+      setAddingToCart(false);
+    }
+  }
 
   if (loading) {
     return (
@@ -203,8 +246,13 @@ function ProductDetail() {
             </div>
           </section>
 
-          <button type="button" className="detail-add-cart">
-            Thêm vào giỏ hàng
+          <button
+            type="button"
+            className="detail-add-cart"
+            onClick={handleAddToCart}
+            disabled={addingToCart}
+          >
+            {addingToCart ? 'Đang thêm...' : 'Thêm vào giỏ hàng'}
           </button>
         </div>
       </section>
