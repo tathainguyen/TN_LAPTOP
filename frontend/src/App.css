@@ -1806,6 +1806,19 @@
   font-weight: 800;
 }
 
+.product-price-wrap {
+  display: grid;
+  gap: 4px;
+}
+
+.product-price-original {
+  margin: 0;
+  color: #6f86a7;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: line-through;
+}
+
 .product-badges {
   display: flex;
   flex-wrap: wrap;
@@ -1951,9 +1964,8 @@
 }
 
 .detail-price-wrap {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
+  display: grid;
+  gap: 4px;
 }
 
 .detail-price {
@@ -1961,12 +1973,23 @@
   color: #87ff9e;
   font-size: clamp(28px, 4vw, 40px);
   font-weight: 800;
+  font-style: italic;
 }
 
 .detail-price-compare {
   margin: 0;
   color: #9baccc;
+  font-size: 15px;
+  font-weight: 600;
+  font-style: normal;
   text-decoration: line-through;
+}
+
+.detail-price-saving {
+  margin: 0;
+  color: #ffd684;
+  font-size: 15px;
+  font-weight: 700;
 }
 
 .detail-spec-grid {

@@ -11,7 +11,17 @@ function formatVnd(value) {
   }).format(Number(value || 0));
 }
 
+function toNumber(value) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
 function ProductCard({ product }) {
+  const basePrice = toNumber(product.price_sale);
+  const discountPrice = toNumber(product.price_compare);
+  const hasDiscount = discountPrice > 0 && basePrice > 0 && discountPrice < basePrice;
+  const displayPrice = hasDiscount ? discountPrice : basePrice;
+
   return (
     <article className="product-card group overflow-hidden">
       <div className="product-thumb-wrap">
@@ -27,7 +37,13 @@ function ProductCard({ product }) {
         <h3 className="product-title transition-colors duration-300 group-hover:text-blue-500">
           {product.product_name}
         </h3>
-        <p className="product-price">{formatVnd(product.price_sale)}</p>
+
+        <div className="product-price-wrap">
+          <p className="product-price">{formatVnd(displayPrice)}</p>
+          {hasDiscount ? (
+            <p className="product-price-original">{formatVnd(basePrice)}</p>
+          ) : null}
+        </div>
 
         <div className="product-badges">
           {product.cpu_option ? <span className="badge">CPU: {product.cpu_option}</span> : null}

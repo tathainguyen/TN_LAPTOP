@@ -16,6 +16,11 @@ function formatVnd(value) {
   }).format(Number(value || 0));
 }
 
+function toNumber(value) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
 function ProductDetail() {
   const { slug } = useParams();
   const navigate = useNavigate();
@@ -98,6 +103,12 @@ function ProductDetail() {
 
   const safeIndex = activeImageIndex >= imageSlides.length ? 0 : activeImageIndex;
   const currentImage = imageSlides[safeIndex] || FALLBACK_IMAGE;
+  const basePrice = toNumber(product?.price_sale);
+  const discountPrice = toNumber(product?.price_compare);
+  const hasDiscount = discountPrice > 0 && basePrice > 0 && discountPrice < basePrice;
+  const displayPrice = hasDiscount ? discountPrice : basePrice;
+  const savingsAmount = hasDiscount ? basePrice - discountPrice : 0;
+  const savingsPercent = hasDiscount ? Math.round((savingsAmount / basePrice) * 100) : 0;
 
   if (loading) {
     return (
@@ -141,9 +152,14 @@ function ProductDetail() {
           <p className="detail-views">Lượt xem: {Number(product.view_count || 0).toLocaleString('vi-VN')}</p>
 
           <div className="detail-price-wrap">
-            <p className="detail-price">{formatVnd(product.price_sale)}</p>
-            {Number(product.price_compare || 0) > Number(product.price_sale || 0) ? (
-              <p className="detail-price-compare">{formatVnd(product.price_compare)}</p>
+            <p className="detail-price">{formatVnd(displayPrice)}</p>
+            {hasDiscount ? (
+              <p className="detail-price-compare">{formatVnd(basePrice)}</p>
+            ) : null}
+            {hasDiscount ? (
+              <p className="detail-price-saving">
+                Tiết kiệm: {formatVnd(savingsAmount)} ({savingsPercent}%)
+              </p>
             ) : null}
           </div>
 
@@ -172,7 +188,15 @@ function ProductDetail() {
                   >
                     <strong>{item.product_name}</strong>
                     <span>{item.cpu_option} | {item.ram_option} | {item.vga_option}</span>
-                    <em>{formatVnd(item.price_sale)}</em>
+                    <em>
+                      {(() => {
+                        const groupBase = toNumber(item.price_sale);
+                        const groupDiscount = toNumber(item.price_compare);
+                        const groupHasDiscount =
+                          groupDiscount > 0 && groupBase > 0 && groupDiscount < groupBase;
+                        return formatVnd(groupHasDiscount ? groupDiscount : groupBase);
+                      })()}
+                    </em>
                   </button>
                 );
               })}
