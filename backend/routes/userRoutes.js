@@ -3,6 +3,7 @@ import { Router } from 'express';
 import {
   createUserItem,
   deleteUserItem,
+  getUserActivityDetail,
   getUserByIdDetail,
   getUserList,
   getUserMasterData,
@@ -24,6 +25,7 @@ const router = Router();
 router.get('/admin/master-data', getUserMasterData);
 router.get('/admin', getUserList);
 router.post('/admin', createUserItem);
+router.get('/admin/:id/activity', getUserActivityDetail);
 router.get('/admin/:id', getUserByIdDetail);
 router.put('/admin/:id', updateUserItem);
 router.patch('/admin/:id/status', toggleUserStatus);

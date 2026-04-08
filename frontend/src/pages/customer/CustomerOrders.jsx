@@ -39,6 +39,16 @@ function getOrderStatusLabel(status) {
   return key || '-';
 }
 
+function getOrderStatusClass(status) {
+  const key = String(status || '').toUpperCase();
+
+  if (key === 'SUCCESS') return 'customer-status-chip customer-status-chip--success';
+  if (key === 'CANCELLED') return 'customer-status-chip customer-status-chip--danger';
+  if (key === 'SHIPPING') return 'customer-status-chip customer-status-chip--info';
+  if (key === 'CONFIRMED') return 'customer-status-chip customer-status-chip--primary';
+  return 'customer-status-chip customer-status-chip--warning';
+}
+
 function CustomerOrders() {
   const { user } = useOutletContext();
   const [loading, setLoading] = useState(true);
@@ -99,7 +109,7 @@ function CustomerOrders() {
                   <td>{order.item_count || 0}</td>
                   <td>{formatVnd(order.grand_total)}</td>
                   <td>
-                    <span className="customer-status-chip">{getOrderStatusLabel(order.order_status)}</span>
+                    <span className={getOrderStatusClass(order.order_status)}>{getOrderStatusLabel(order.order_status)}</span>
                   </td>
                 </tr>
               ))

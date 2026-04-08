@@ -27,6 +27,11 @@ export async function getUserById(id) {
   return response.data;
 }
 
+export async function getUserActivityById(id) {
+  const response = await userApi.get(`/admin/${id}/activity`);
+  return response.data;
+}
+
 export async function updateUser(id, payload) {
   const response = await userApi.put(`/admin/${id}`, payload);
   return response.data;

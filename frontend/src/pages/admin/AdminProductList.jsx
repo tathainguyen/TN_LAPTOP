@@ -17,6 +17,7 @@ import {
 } from '../../services/product/productService.js';
 
 const LIMIT = 10;
+const SEARCH_BUTTON_TW = 'inline-flex items-center justify-center rounded-xl bg-sky-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-300';
 
 function formatCurrencyInput(value) {
   const digits = String(value || '').replace(/\D/g, '');
@@ -675,7 +676,7 @@ function AdminProductList() {
                   }
                 }}
               />
-              <button type="button" onClick={applyKeywordSearch}>
+              <button type="button" onClick={applyKeywordSearch} className={SEARCH_BUTTON_TW}>
                 Tìm
               </button>
             </div>

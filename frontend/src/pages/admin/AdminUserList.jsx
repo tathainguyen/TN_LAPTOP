@@ -5,6 +5,7 @@ import * as XLSX from 'xlsx';
 import AdminLayout from '../../layouts/AdminLayout.jsx';
 import {
   deleteUser,
+  getUserActivityById,
   getUserById,
   getUserMasterData,
   getUsers,
@@ -13,6 +14,7 @@ import {
 } from '../../services/user/userService.js';
 
 const LIMIT = 10;
+const SEARCH_BUTTON_TW = 'inline-flex items-center justify-center rounded-xl bg-sky-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-300';
 
 function formatDateTime(value) {
   if (!value) {
@@ -28,6 +30,14 @@ function formatDateTime(value) {
     dateStyle: 'short',
     timeStyle: 'short',
   }).format(date);
+}
+
+function formatVnd(value) {
+  return new Intl.NumberFormat('vi-VN', {
+    style: 'currency',
+    currency: 'VND',
+    maximumFractionDigits: 0,
+  }).format(Number(value || 0));
 }
 
 function getGenderLabel(value) {
@@ -74,6 +84,7 @@ function AdminUserList() {
   });
   const [editItem, setEditItem] = useState(null);
   const [viewItem, setViewItem] = useState(null);
+  const [activityItem, setActivityItem] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [exporting, setExporting] = useState(false);
   const [form, setForm] = useState({
@@ -186,6 +197,16 @@ function AdminUserList() {
       setViewItem(response?.data || item);
     } catch (error) {
       const message = error?.response?.data?.message || 'Không thể tải chi tiết người dùng.';
+      toast.error(message);
+    }
+  }
+
+  async function openActivity(item) {
+    try {
+      const response = await getUserActivityById(item.id);
+      setActivityItem(response?.data || null);
+    } catch (error) {
+      const message = error?.response?.data?.message || 'Không thể tải hoạt động người dùng.';
       toast.error(message);
     }
   }
@@ -379,7 +400,7 @@ function AdminUserList() {
                 onChange={(event) => setKeywordInput(event.target.value)}
                 placeholder="Tìm theo tên, email hoặc số điện thoại"
               />
-              <button type="submit">Lọc</button>
+              <button type="submit" className={SEARCH_BUTTON_TW}>Lọc</button>
             </div>
           </label>
 
@@ -468,6 +489,9 @@ function AdminUserList() {
                         <div className="admin-actions">
                           <button type="button" className="admin-btn admin-btn--view" onClick={() => openView(user)}>
                             View
+                          </button>
+                          <button type="button" className="admin-btn admin-btn--view" onClick={() => openActivity(user)}>
+                            Chi tiết
                           </button>
                           <button type="button" className="admin-btn admin-btn--edit" onClick={() => openEdit(user)}>
                             Edit
@@ -685,6 +709,77 @@ function AdminUserList() {
                   {actioningId === deleteTarget.id ? 'Đang xóa...' : 'Xác nhận xóa'}
                 </button>
               </div>
+            </div>
+          </article>
+        </div>
+      ) : null}
+
+      {activityItem ? (
+        <div className="admin-modal-overlay" onClick={() => setActivityItem(null)} role="presentation">
+          <article className="admin-modal admin-modal--large" onClick={(event) => event.stopPropagation()}>
+            <header>
+              <h3>Chi tiết hoạt động khách hàng</h3>
+              <button type="button" onClick={() => setActivityItem(null)}>
+                Đóng
+              </button>
+            </header>
+
+            <div className="admin-activity-block">
+              <h4>Đơn hàng đã mua</h4>
+              {activityItem.orders?.length ? (
+                <div className="admin-table-wrap">
+                  <table className="admin-table">
+                    <thead>
+                      <tr>
+                        <th>Mã đơn</th>
+                        <th>Ngày tạo</th>
+                        <th>Số SP</th>
+                        <th>Tổng tiền</th>
+                        <th>Trạng thái đơn</th>
+                        <th>Thanh toán</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {activityItem.orders.map((order) => (
+                        <tr key={order.id}>
+                          <td>{order.order_code}</td>
+                          <td>{formatDateTime(order.created_at)}</td>
+                          <td>{Number(order.item_count || 0)}</td>
+                          <td>{formatVnd(order.grand_total)}</td>
+                          <td>{order.order_status}</td>
+                          <td>{order.payment_status}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <p className="admin-activity-empty">Khách hàng chưa có đơn hàng nào.</p>
+              )}
+            </div>
+
+            <div className="admin-activity-block">
+              <h4>Đã bình luận sản phẩm nào (mở rộng sau)</h4>
+              {activityItem.product_comments?.length ? (
+                <ul className="admin-activity-list">
+                  {activityItem.product_comments.map((item) => (
+                    <li key={item.id}>
+                      <strong>{item.product_name || 'Sản phẩm'}</strong>
+                      <span>Đánh giá: {item.rating}/5</span>
+                      <p>{item.review_title || item.review_content || 'Không có nội dung'}</p>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="admin-activity-empty">Chưa có bình luận sản phẩm.</p>
+              )}
+            </div>
+
+            <div className="admin-activity-block">
+              <h4>Đã bình luận tin tức nào (mở rộng sau)</h4>
+              <p className="admin-activity-empty">
+                Chức năng bình luận tin tức sẽ được phát triển ở bước tiếp theo.
+              </p>
             </div>
           </article>
         </div>

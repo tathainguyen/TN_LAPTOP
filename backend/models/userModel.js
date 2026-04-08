@@ -149,6 +149,54 @@ export async function getUserById(id) {
   return rows[0] || null;
 }
 
+export async function getUserActivityById(userId, { orderLimit = 10, reviewLimit = 10 } = {}) {
+  const normalizedUserId = Number(userId);
+
+  const [orderRows, reviewRows] = await Promise.all([
+    pool.query(
+      `SELECT
+        o.id,
+        o.order_code,
+        o.order_status,
+        o.payment_status,
+        o.grand_total,
+        o.created_at,
+        (
+          SELECT COUNT(*)
+          FROM order_items oi
+          WHERE oi.order_id = o.id
+        ) AS item_count
+      FROM orders o
+      WHERE o.user_id = ?
+      ORDER BY o.created_at DESC, o.id DESC
+      LIMIT ?`,
+      [normalizedUserId, Number(orderLimit)]
+    ),
+    pool.query(
+      `SELECT
+        r.id,
+        r.rating,
+        r.review_title,
+        r.review_content,
+        r.created_at,
+        p.product_name,
+        p.slug AS product_slug
+      FROM reviews r
+      LEFT JOIN products p ON p.id = r.product_id
+      WHERE r.user_id = ?
+      ORDER BY r.created_at DESC, r.id DESC
+      LIMIT ?`,
+      [normalizedUserId, Number(reviewLimit)]
+    ),
+  ]);
+
+  return {
+    orders: orderRows[0] || [],
+    product_comments: reviewRows[0] || [],
+    news_comments: [],
+  };
+}
+
 export async function updateUserById(id, userData) {
   const allowedFields = {
     roleId: 'role_id',

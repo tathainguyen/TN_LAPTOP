@@ -5,6 +5,7 @@ import AdminLayout from '../../layouts/AdminLayout.jsx';
 import { getAdminOrders, updateAdminOrderStatus } from '../../services/order/orderService.js';
 
 const LIMIT = 10;
+const SEARCH_BUTTON_TW = 'inline-flex items-center justify-center rounded-xl bg-sky-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-300';
 
 const ORDER_STATUS_OPTIONS = [
   { value: 'PENDING_CONFIRM', label: 'Chờ xác nhận' },
@@ -235,7 +236,7 @@ function AdminOrderList() {
             </select>
           </label>
 
-          <button type="submit">Tìm kiếm</button>
+          <button type="submit" className={SEARCH_BUTTON_TW}>Tìm kiếm</button>
         </form>
 
         {loading ? (

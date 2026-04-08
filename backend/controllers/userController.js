@@ -8,6 +8,7 @@ import {
   findUserByEmail,
   getRoles,
   getUserById,
+  getUserActivityById,
   getUserPasswordHash,
   getUsers,
   updateUserById,
@@ -228,6 +229,52 @@ export async function getUserByIdDetail(req, res) {
     return res.status(500).json({
       status: 'error',
       message: 'Không thể lấy chi tiết người dùng.',
+      data: null,
+    });
+  }
+}
+
+export async function getUserActivityDetail(req, res) {
+  try {
+    const id = Number(req.params.id);
+
+    if (!Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'ID người dùng không hợp lệ.',
+        data: null,
+      });
+    }
+
+    const user = await getUserById(id);
+    if (!user) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Không tìm thấy người dùng.',
+        data: null,
+      });
+    }
+
+    const activity = await getUserActivityById(id);
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Lấy hoạt động người dùng thành công.',
+      data: {
+        user: {
+          id: user.id,
+          full_name: user.full_name,
+          email: user.email,
+        },
+        ...activity,
+      },
+    });
+  } catch (error) {
+    console.error('❌ Lỗi getUserActivityDetail:', error);
+
+    return res.status(500).json({
+      status: 'error',
+      message: 'Không thể lấy hoạt động người dùng.',
       data: null,
     });
   }
