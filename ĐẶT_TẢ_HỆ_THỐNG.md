@@ -14,13 +14,13 @@
 - React 19, React Router 7, Vite 8.
 - Axios gọi API.
 - React Hot Toast hiển thị thông báo.
-- Lucide React cho icon.
-- Tailwind CSS làm framework UI chính, kết hợp với các component tự build.
-- Quy ước UI mới: ưu tiên utility class của Tailwind; CSS file chỉ dùng cho phần legacy trong giai đoạn chuyển đổi.
+- Lucide React icon (v1.7.0).
+- Tailwind CSS v4.2.2 via @tailwindcss/vite plugin làm framework UI chính, kết hợp với các component tự build.
+- Quy ước UI: ưu tiên utility class của Tailwind; CSS file chỉ dùng cho phần legacy và component-specific style (modal, table, form layout).
 - Cấu trúc thư mục đã tách theo domain:
   - pages: admin, auth, customer, store.
   - components: admin, layout, store.
-  - services: auth, user, address, product, catalog.
+  - services: auth, user, address, product, catalog, order.
 
 ### 2.2. Backend
 - Node.js + Express 5.
@@ -68,11 +68,12 @@
   - Hiển thị giá và thông số theo SKU hiện tại.
 
 ### 3.1.2. Đang ở mức giao diện/demo
-- Đơn mua hiện đang dùng dữ liệu mẫu.
+- Danh sách đơn mua hiện đang lấy từ API, nút "Xem chi tiết" có sẵn nhưng chỉ khi có dữ liệu thực từ checkout.
 - Kho voucher hiện đang dùng dữ liệu mẫu.
 - Nút Thêm vào giỏ hàng ở Product Detail chưa nối nghiệp vụ giỏ hàng thật.
 
 ### 3.1.3. Chưa triển khai
+- Trang chi tiết đơn mua (hiển thị sản phẩm, giá, địa chỉ, trạng thái chi tiết).
 - Đăng nhập Google/Facebook.
 - Quên mật khẩu bằng OTP hoặc link reset.
 - Đồng bộ giỏ hàng khách vãng lai sang tài khoản sau đăng nhập.
@@ -87,7 +88,7 @@
 - Trang hồ sơ admin riêng.
 - Quản lý người dùng:
   - Danh sách, tìm kiếm, lọc, phân trang.
-  - Xem chi tiết.
+  - Nút "Chi tiết" xem hoạt động của khách hàng (danh sách đơn + bình luận sản phẩm).
   - Sửa thông tin.
   - Khóa/mở trạng thái.
   - Xóa người dùng.
@@ -101,6 +102,16 @@
   - CRUD SKU.
   - Bật/tắt trạng thái Group/SKU.
   - Upload nhiều ảnh SKU lên Cloudinary.
+  - Form tạo sản phẩm thiết kế responsive, gọn gọn với grid layout (3 cột → 2 → 1).
+  - Icon button (Upload icon) cho chọn file ảnh thay vì text label.
+- Quản lý đơn hàng:
+  - Danh sách đơn, tìm kiếm, lọc theo trạng thái đơn/trạng thái thanh toán, phân trang.
+  - Cập nhật trạng thái đơn (PENDING_CONFIRM → CONFIRMED → SHIPPING → SUCCESS/CANCELLED).
+  - Hiển thị status chip color-coded theo trạng thái.
+- UI Styling:
+  - Tích hợp Tailwind CSS 4.2 vào Vite + React.
+  - Search button styled consistent với Tailwind utility class (SEARCH_BUTTON_TW) trên các trang list.
+  - Status chip color mapping semantik (Success/Danger/Warning/Info/Primary).
 
 ### 3.2.2. Đang ở mức cơ bản
 - Dashboard tổng quan mới hiển thị số tĩnh, chưa lấy dữ liệu thống kê thật.
@@ -115,7 +126,17 @@
 
 ## 3.3. GIỎ HÀNG, ĐƠN HÀNG, THANH TOÁN, VẬN CHUYỂN
 
-### 3.3.1. Chưa triển khai nghiệp vụ chạy thật
+### 3.3.1. Backend API được xây dựng sẵn
+- API lấy danh sách đơn của khách (GET /orders/customer).
+- API lấy chi tiết đơn hàng (GET /orders/customer/:id).
+- API tạo đơn COD từ cart (POST /orders/cod).
+- API quản lý đơn (lọc, cập nhật trạng thái).
+
+### 3.3.2. Frontend UI được xây dựng sẵn
+- Trang danh sách đơn mua của khách với nút "Xem chi tiết" (chỉ hiển thị khi có dữ liệu thực).
+- Trang chi tiết đơn mua (bổ sung trong giai đoạn tiếp theo).
+
+### 3.3.3. Chưa triển khai nghiệp vụ chạy thật
 - Giỏ hàng đầy đủ.
 - Checkout và tạo đơn.
 - Áp voucher thật trong đơn.
@@ -149,7 +170,16 @@
 - Brand: danh sách, tạo, cập nhật, đổi trạng thái, xóa.
 - Category: danh sách, tạo, cập nhật, đổi trạng thái, xóa.
 
-### 4.4. Products
+### 4.4. Orders
+- Customer:
+  - Danh sách đơn hàng (GET /orders/customer).
+  - Chi tiết đơn hàng (GET /orders/customer/:id).
+  - Tạo đơn COD (POST /orders/cod).
+- Admin:
+  - Danh sách đơn, lọc, phân trang (GET /orders/admin).
+  - Cập nhật trạng thái đơn (PATCH /orders/admin/:id/status).
+
+### 4.5. Products
 - Admin:
   - Master data.
   - CRUD Product Group.
@@ -166,18 +196,20 @@
 - Nhóm chức năng đã usable:
   - Auth + phân quyền.
   - Tài khoản khách hàng (profile/password/address/email verification).
-  - Quản trị user/catalog/product.
+  - Quản trị user/catalog/product/order.
+  - Tailwind CSS styling infrastructure.
 - Nhóm chức năng chưa hoàn tất end-to-end:
-  - Cart -> Checkout -> Payment -> Order -> Shipping.
-- Mức hoàn thành ước tính theo phạm vi SRS ban đầu: khoảng 45% - 55%.
+  - Cart → Checkout → Payment → Order → Shipping.
+- Mức hoàn thành ước tính theo phạm vi SRS ban đầu: khoảng 50% - 60%.
 
 ---
 
 ## 6. ƯU TIÊN TRIỂN KHAI GIAI ĐOẠN TIẾP THEO
-1. Hoàn thiện giỏ hàng và đồng bộ giỏ hàng guest.
-2. Hoàn thiện checkout và tạo đơn hàng.
-3. Tích hợp thanh toán VNPAY sandbox.
-4. Triển khai trạng thái đơn hàng và hoàn kho khi hủy.
-5. Tích hợp GHN để lấy tracking_code.
-6. Chuyển Đơn mua và Voucher từ mock sang API thật.
-7. Hoàn thiện dashboard thống kê thật cho admin.
+1. Hoàn thiện trang chi tiết đơn mua (xem sản phẩm, giá, địa chỉ, trạng thái chi tiết).
+2. Hoàn thiện giỏ hàng và đồng bộ giỏ hàng guest.
+3. Hoàn thiện checkout và tạo đơn hàng.
+4. Tích hợp thanh toán VNPAY sandbox.
+5. Triển khai trạng thái đơn hàng và hoàn kho khi hủy.
+6. Tích hợp GHN để lấy tracking_code.
+7. Chuyển Kho voucher từ mock sang API thật.
+8. Hoàn thiện dashboard thống kê thật cho admin.
