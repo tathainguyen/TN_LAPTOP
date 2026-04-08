@@ -15,6 +15,14 @@ export async function getCheckoutData(userId) {
   return response.data;
 }
 
+export async function getCustomerOrders(userId) {
+  const response = await orderApi.get('/customer', {
+    params: { user_id: Number(userId) },
+  });
+
+  return response.data;
+}
+
 export async function placeCodOrder(payload) {
   const response = await orderApi.post('/cod', payload);
   return response.data;

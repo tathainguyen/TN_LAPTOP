@@ -92,7 +92,6 @@ function CustomerAddresses() {
     district: '',
     ward: '',
     address_line: '',
-    address_note: '',
     is_default: false,
   });
 
@@ -138,7 +137,6 @@ function CustomerAddresses() {
       district: '',
       ward: '',
       address_line: '',
-      address_note: '',
       is_default: false,
     });
     setEditingId(null);
@@ -165,7 +163,6 @@ function CustomerAddresses() {
       district: address.district,
       ward: address.ward,
       address_line: address.address_line,
-      address_note: address.address_note || '',
       is_default: address.is_default === 1,
     });
     setEditingId(address.id);
@@ -243,7 +240,6 @@ function CustomerAddresses() {
         district: form.district.trim(),
         ward: form.ward.trim(),
         address_line: form.address_line.trim(),
-        address_note: form.address_note.trim() || null,
         is_default: form.is_default ? 1 : 0,
       };
 
@@ -388,17 +384,6 @@ function CustomerAddresses() {
               />
             </label>
 
-            <label className="customer-address-span-2">
-              Ghi chú
-              <input
-                type="text"
-                value={form.address_note}
-                onChange={(e) => updateField('address_note', e.target.value)}
-                placeholder="Ví dụ: Giao giờ hành chính, gọi trước khi đến"
-                disabled={isLoading}
-              />
-            </label>
-
             <label className="customer-checkbox-row customer-address-span-2">
               <input
                 type="checkbox"
@@ -430,7 +415,6 @@ function CustomerAddresses() {
               <p>
                 {address.address_line}, {address.ward}, {address.district}, {address.province}
               </p>
-              {address.address_note && <p style={{ fontSize: '0.9em', color: '#666' }}>Ghi chú: {address.address_note}</p>}
               <div>
                 <button type="button" onClick={() => handleEditClick(address)} disabled={isLoading}>
                   Sửa

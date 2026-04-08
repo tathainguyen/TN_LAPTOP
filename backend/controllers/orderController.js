@@ -1,6 +1,7 @@
 import {
   createCodOrderFromCart,
   getCheckoutDataByUserId,
+  getOrdersByUserId,
 } from '../models/orderModel.js';
 
 function parseUserId(value) {
@@ -119,6 +120,36 @@ export async function placeCodOrder(req, res) {
     return res.status(500).json({
       status: 'error',
       message: 'Không thể đặt hàng COD lúc này. Vui lòng thử lại sau.',
+      data: null,
+    });
+  }
+}
+
+export async function getCustomerOrders(req, res) {
+  try {
+    const userId = parseUserId(req.query.user_id);
+
+    if (!userId) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Thiếu user_id hợp lệ.',
+        data: null,
+      });
+    }
+
+    const orders = await getOrdersByUserId(userId);
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Lấy danh sách đơn mua thành công.',
+      data: orders,
+    });
+  } catch (error) {
+    console.error('❌ Lỗi getCustomerOrders:', error);
+
+    return res.status(500).json({
+      status: 'error',
+      message: 'Không thể tải danh sách đơn mua.',
       data: null,
     });
   }

@@ -275,3 +275,32 @@ export async function createCodOrderFromCart({
     connection.release();
   }
 }
+
+export async function getOrdersByUserId(userId) {
+  const normalizedUserId = Number(userId);
+
+  const [rows] = await pool.query(
+    `SELECT
+      o.id,
+      o.order_code,
+      o.created_at,
+      o.payment_method,
+      o.payment_status,
+      o.order_status,
+      o.total_items_amount,
+      o.shipping_fee,
+      o.grand_total,
+      o.tracking_code,
+      (
+        SELECT COUNT(*)
+        FROM order_items oi
+        WHERE oi.order_id = o.id
+      ) AS item_count
+    FROM orders o
+    WHERE o.user_id = ?
+    ORDER BY o.created_at DESC, o.id DESC`,
+    [normalizedUserId]
+  );
+
+  return rows;
+}

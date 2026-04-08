@@ -236,10 +236,15 @@ function Checkout() {
 
             <div className="checkout-items">
               {cartItems.map((item) => (
-                <p key={`${item.product_id}-${item.sku}`}>
-                  <span>{item.product_name} x {item.quantity}</span>
-                  <strong>{formatVnd(Number(item.quantity) * Number(item.unit_price || 0))}</strong>
-                </p>
+                <div className="checkout-item-row" key={`${item.product_id}-${item.sku}`}>
+                  <div className="checkout-item-main">
+                    <strong>{item.product_name}</strong>
+                    <span>
+                      SL: {item.quantity} x {formatVnd(item.unit_price || 0)}
+                    </span>
+                  </div>
+                  <b>{formatVnd(Number(item.quantity) * Number(item.unit_price || 0))}</b>
+                </div>
               ))}
             </div>
 
