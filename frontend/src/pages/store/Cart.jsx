@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
 import {
@@ -32,10 +32,20 @@ function getStoredUser() {
 }
 
 function Cart() {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [submittingProductId, setSubmittingProductId] = useState(null);
   const [user, setUser] = useState(() => getStoredUser());
   const [items, setItems] = useState([]);
+
+  function handleCheckout() {
+    if (user?.id) {
+      navigate('/checkout');
+      return;
+    }
+
+    navigate('/login');
+  }
 
   useEffect(() => {
     function syncUser() {
@@ -224,8 +234,8 @@ function Cart() {
                 <strong>{totalQuantity}</strong>
               </p>
 
-              <button type="button" disabled>
-                Thanh toán (sẽ triển khai tiếp)
+              <button type="button" onClick={handleCheckout}>
+                {user?.id ? 'Thanh toán COD' : 'Đăng nhập để thanh toán'}
               </button>
             </aside>
           </div>

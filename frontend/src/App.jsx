@@ -22,6 +22,7 @@ import CustomerProfile from './pages/customer/CustomerProfile.jsx';
 import CustomerVouchers from './pages/customer/CustomerVouchers.jsx';
 import Home from './pages/store/Home.jsx';
 import Cart from './pages/store/Cart.jsx';
+import Checkout from './pages/store/Checkout.jsx';
 import EmailVerifyResult from './pages/auth/EmailVerifyResult.jsx';
 import ForgotPassword from './pages/auth/ForgotPassword.jsx';
 import Login from './pages/auth/Login.jsx';
@@ -146,6 +147,7 @@ function App() {
           <Route path="/product" element={storefrontOnly(<Product />)} />
           <Route path="/product/:slug" element={storefrontOnly(<ProductDetail />)} />
           <Route path="/cart" element={storefrontOnly(<Cart />)} />
+          <Route path="/checkout" element={storefrontOnly(<Checkout />)} />
           <Route path="/email-verified" element={storefrontOnly(<EmailVerifyResult />)} />
           <Route path="/forgot-password" element={storefrontOnly(<ForgotPassword />)} />
           <Route path="/reset-password" element={storefrontOnly(<ResetPassword />)} />
