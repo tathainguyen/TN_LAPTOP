@@ -53,7 +53,14 @@ const menuGroups = [
     title: 'Quản lý Kho & Sản phẩm',
     items: [
       { label: 'Nhập hàng', icon: PackagePlus },
-      { label: 'Quản lý Sản phẩm', icon: Boxes, to: '/admin/products' },
+      {
+        label: 'Quản lý Sản phẩm',
+        icon: Boxes,
+        children: [
+          { label: 'Danh sách sản phẩm', to: '/admin/products' },
+          { label: 'Thêm sản phẩm mới', to: '/admin/products/create' },
+        ],
+      },
       {
         label: 'Quản lý Mã liên kết',
         icon: Receipt,
@@ -97,6 +104,10 @@ function Sidebar() {
     if (location.pathname.startsWith('/admin/product-links')) {
       setOpenKeys((prev) => ({ ...prev, productLink: true }));
     }
+
+    if (location.pathname.startsWith('/admin/products')) {
+      setOpenKeys((prev) => ({ ...prev, product: true }));
+    }
   }, [location.pathname]);
 
   function toggleGroup(key) {
@@ -125,6 +136,8 @@ function Sidebar() {
                       ? 'user'
                       : item.label === 'Danh mục & Nhãn hàng'
                         ? 'catalog'
+                      : item.label === 'Quản lý Sản phẩm'
+                        ? 'product'
                       : item.label === 'Quản lý Mã liên kết'
                         ? 'productLink'
                         : item.label;
