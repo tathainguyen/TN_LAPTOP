@@ -14,6 +14,7 @@ import orderRoutes from './routes/orderRoutes.js';
 import productRoutes from './routes/productRoutes.js';
 import shippingRoutes from './routes/shippingRoutes.js';
 import userRoutes from './routes/userRoutes.js';
+import voucherRoutes from './routes/voucherRoutes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -43,6 +44,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/shipping', shippingRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/vouchers', voucherRoutes);
 
 app.use((err, req, res, next) => {
   console.error('❌ Lỗi hệ thống:', err);

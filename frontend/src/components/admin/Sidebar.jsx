@@ -75,7 +75,14 @@ const menuGroups = [
   {
     title: 'Quản lý Kinh doanh & Vận hành',
     items: [
-      { label: 'Voucher', icon: BadgePercent },
+      {
+        label: 'Voucher',
+        icon: BadgePercent,
+        children: [
+          { label: 'Loại voucher', to: '/admin/voucher-types' },
+          { label: 'Mã voucher', to: '/admin/voucher-codes' },
+        ],
+      },
       {
         label: 'Vận chuyển',
         icon: Truck,
@@ -119,6 +126,10 @@ function Sidebar() {
     if (location.pathname.startsWith('/admin/shipping')) {
       setOpenKeys((prev) => ({ ...prev, shipping: true }));
     }
+
+    if (location.pathname.startsWith('/admin/voucher')) {
+      setOpenKeys((prev) => ({ ...prev, voucher: true }));
+    }
   }, [location.pathname]);
 
   function toggleGroup(key) {
@@ -151,6 +162,8 @@ function Sidebar() {
                         ? 'product'
                       : item.label === 'Quản lý Mã liên kết'
                         ? 'productLink'
+                      : item.label === 'Voucher'
+                        ? 'voucher'
                       : item.label === 'Vận chuyển'
                         ? 'shipping'
                         : item.label;

@@ -822,6 +822,25 @@ CREATE TABLE `user_vouchers` (
 -- --------------------------------------------------------
 
 --
+-- Cấu trúc bảng cho bảng `voucher_types`
+--
+
+DROP TABLE IF EXISTS `voucher_types`;
+CREATE TABLE `voucher_types` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `type_name` varchar(150) NOT NULL,
+  `discount_type` enum('PERCENT','FIXED') NOT NULL,
+  `discount_value` decimal(15,2) NOT NULL,
+  `min_order_value` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `max_discount_value` decimal(15,2) DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Cấu trúc bảng cho bảng `vouchers`
 --
 
@@ -841,6 +860,7 @@ CREATE TABLE `vouchers` (
   `end_at` datetime NOT NULL,
   `is_active` tinyint(1) NOT NULL DEFAULT 1,
   `created_by` bigint(20) UNSIGNED DEFAULT NULL,
+  `voucher_type_id` bigint(20) UNSIGNED DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -1104,12 +1124,20 @@ ALTER TABLE `user_vouchers`
   ADD KEY `idx_user_vouchers_order_id` (`order_id`);
 
 --
+-- Chỉ mục cho bảng `voucher_types`
+--
+ALTER TABLE `voucher_types`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uk_voucher_types_type_name` (`type_name`);
+
+--
 -- Chỉ mục cho bảng `vouchers`
 --
 ALTER TABLE `vouchers`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `uk_vouchers_code` (`code`),
-  ADD KEY `idx_vouchers_created_by` (`created_by`);
+  ADD KEY `idx_vouchers_created_by` (`created_by`),
+  ADD KEY `idx_vouchers_voucher_type_id` (`voucher_type_id`);
 
 --
 -- AUTO_INCREMENT cho các bảng đã đổ
@@ -1299,6 +1327,12 @@ ALTER TABLE `user_addresses`
 -- AUTO_INCREMENT cho bảng `user_vouchers`
 --
 ALTER TABLE `user_vouchers`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT cho bảng `voucher_types`
+--
+ALTER TABLE `voucher_types`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
@@ -1493,7 +1527,8 @@ ALTER TABLE `user_vouchers`
 -- Các ràng buộc cho bảng `vouchers`
 --
 ALTER TABLE `vouchers`
-  ADD CONSTRAINT `fk_vouchers_created_by` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+  ADD CONSTRAINT `fk_vouchers_created_by` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_vouchers_voucher_type_id` FOREIGN KEY (`voucher_type_id`) REFERENCES `voucher_types` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

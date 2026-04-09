@@ -218,14 +218,6 @@ export async function createShippingCarrierController(req, res) {
   } catch (error) {
     console.error('❌ Loi createShippingCarrierController:', error);
 
-    if (String(error?.message || '') === 'CARRIER_TABLE_NOT_AVAILABLE') {
-      return res.status(400).json({
-        status: 'error',
-        message: 'Bang shipping_carriers chua duoc tao trong CSDL.',
-        data: null,
-      });
-    }
-
     const isDuplicateCode = String(error?.message || '').includes('uk_shipping_carriers_code');
     if (isDuplicateCode) {
       return res.status(409).json({
@@ -278,14 +270,6 @@ export async function updateShippingCarrierController(req, res) {
   } catch (error) {
     console.error('❌ Loi updateShippingCarrierController:', error);
 
-    if (String(error?.message || '') === 'CARRIER_TABLE_NOT_AVAILABLE') {
-      return res.status(400).json({
-        status: 'error',
-        message: 'Bang shipping_carriers chua duoc tao trong CSDL.',
-        data: null,
-      });
-    }
-
     const isDuplicateCode = String(error?.message || '').includes('uk_shipping_carriers_code');
     if (isDuplicateCode) {
       return res.status(409).json({
@@ -332,14 +316,6 @@ export async function deleteShippingCarrierController(req, res) {
     });
   } catch (error) {
     console.error('❌ Loi deleteShippingCarrierController:', error);
-
-    if (String(error?.message || '') === 'CARRIER_TABLE_NOT_AVAILABLE') {
-      return res.status(400).json({
-        status: 'error',
-        message: 'Bang shipping_carriers chua duoc tao trong CSDL.',
-        data: null,
-      });
-    }
 
     return res.status(500).json({
       status: 'error',

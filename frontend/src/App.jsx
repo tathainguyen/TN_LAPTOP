@@ -16,6 +16,8 @@ import AdminOrderDetail from './pages/admin/AdminOrderDetail.jsx';
 import AdminProfile from './pages/admin/AdminProfile.jsx';
 import AdminShippingCarriers from './pages/admin/AdminShippingCarriers.jsx';
 import AdminShippingMethods from './pages/admin/AdminShippingMethods.jsx';
+import AdminVoucherCodes from './pages/admin/AdminVoucherCodes.jsx';
+import AdminVoucherTypes from './pages/admin/AdminVoucherTypes.jsx';
 import AdminUserCreate from './pages/admin/AdminUserCreate.jsx';
 import AdminUserList from './pages/admin/AdminUserList.jsx';
 import CustomerAccountLayout from './pages/customer/CustomerAccountLayout.jsx';
@@ -164,6 +166,9 @@ function App() {
           <Route path="/admin/shipping" element={adminOnly(<Navigate to="/admin/shipping-methods" replace />)} />
           <Route path="/admin/shipping-methods" element={adminOnly(<AdminShippingMethods />)} />
           <Route path="/admin/shipping-carriers" element={adminOnly(<AdminShippingCarriers />)} />
+          <Route path="/admin/vouchers" element={adminOnly(<Navigate to="/admin/voucher-types" replace />)} />
+          <Route path="/admin/voucher-types" element={adminOnly(<AdminVoucherTypes />)} />
+          <Route path="/admin/voucher-codes" element={adminOnly(<AdminVoucherCodes />)} />
           <Route path="/product" element={storefrontOnly(<Product />)} />
           <Route path="/product/:slug" element={storefrontOnly(<ProductDetail />)} />
           <Route path="/cart" element={storefrontOnly(<Cart />)} />
