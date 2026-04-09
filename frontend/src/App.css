@@ -750,8 +750,69 @@
   font-size: 13px;
 }
 @media (max-width: 1080px) {
+  .customer-account-shell {
+    width: 100%;
+    padding-inline: 12px;
+  }
+
   .customer-account-layout {
     grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .customer-account-layout.is-profile-page,
+  .customer-account-layout.is-section-page {
+    grid-template-columns: 1fr;
+  }
+
+  .customer-account-left,
+  .customer-account-center,
+  .customer-account-right {
+    padding: 14px;
+    border-radius: 14px;
+  }
+
+  .customer-account-right {
+    order: -1;
+  }
+
+  .customer-account-right h3 {
+    font-size: 24px;
+  }
+
+  .customer-avatar-wrap {
+    width: 124px;
+    height: 124px;
+  }
+
+  .customer-account-left h3 {
+    font-size: 20px;
+  }
+
+  .customer-card {
+    padding: 14px;
+  }
+
+  .customer-card h2 {
+    margin-bottom: 10px;
+  }
+
+  .customer-card-head {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .customer-address-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .customer-address-actions {
+    justify-content: stretch;
+  }
+
+  .customer-address-actions button {
+    width: 100%;
   }
 
   .customer-order-detail-grid {
@@ -796,17 +857,63 @@
     width: 2px;
     height: calc(100% - 12px);
   }
-  .customer-account-right h3 {
-    font-size: 26px;
-  }
 }
 @media (max-width: 720px) {
   .customer-profile-form {
     grid-template-columns: 1fr;
   }
+
+  .customer-account-shell {
+    padding-inline: 8px;
+  }
+
+  .customer-account-left,
+  .customer-account-center,
+  .customer-account-right {
+    padding: 12px;
+  }
+
+  .customer-account-right h3 {
+    font-size: 22px;
+  }
+
+  .customer-menu-group a {
+    padding: 10px;
+  }
+
   .customer-profile-form .span-2 {
     grid-column: auto;
   }
+
+  .customer-upload-row {
+    width: 100%;
+  }
+
+  .customer-upload-row .customer-upload-btn {
+    width: 100%;
+  }
+
+  .customer-password-form {
+    width: 100%;
+  }
+
+  .customer-form-actions button,
+  .customer-card-head button,
+  .customer-address-item button,
+  .customer-voucher-form button,
+  .customer-upload-btn {
+    width: 100%;
+  }
+
+  .customer-address-item div {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .customer-address-item div button {
+    width: 100%;
+  }
+
   .customer-voucher-form {
     grid-template-columns: 1fr;
   }

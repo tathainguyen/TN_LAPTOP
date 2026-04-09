@@ -114,6 +114,22 @@ function filterSuggestions(options, keyword) {
     .slice(0, 8);
 }
 
+const SHIPPING_METHOD_LABELS = {
+  EXPRESS: { name: 'Hỏa tốc', description: 'Trong ngày' },
+  FAST: { name: 'Nhanh', description: '2 - 4 ngày' },
+  SAVING: { name: 'Tiết kiệm', description: '4 - 7 ngày' },
+};
+
+function getShippingMethodView(method) {
+  const key = String(method?.method_code || '').toUpperCase();
+  const fallback = SHIPPING_METHOD_LABELS[key] || null;
+
+  return {
+    name: fallback?.name || String(method?.method_name || '').trim() || 'Phương thức vận chuyển',
+    description: fallback?.description || String(method?.description || '').trim() || '-',
+  };
+}
+
 function Checkout() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -666,8 +682,8 @@ function Checkout() {
                       }
                     />
                     <div>
-                      <strong>{method.method_name}</strong>
-                      <p>{method.description || '-'}</p>
+                      <strong>{getShippingMethodView(method).name}</strong>
+                      <p>{getShippingMethodView(method).description}</p>
                     </div>
                     <b>{formatVnd(method.fee)}</b>
                   </label>

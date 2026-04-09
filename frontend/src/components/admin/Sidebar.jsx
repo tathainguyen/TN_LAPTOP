@@ -76,7 +76,14 @@ const menuGroups = [
     title: 'Quản lý Kinh doanh & Vận hành',
     items: [
       { label: 'Voucher', icon: BadgePercent },
-      { label: 'Vận chuyển', icon: Truck },
+      {
+        label: 'Vận chuyển',
+        icon: Truck,
+        children: [
+          { label: 'Phương thức vận chuyển', to: '/admin/shipping-methods' },
+          { label: 'Đơn vị vận chuyển', to: '/admin/shipping-carriers' },
+        ],
+      },
       { label: 'Đơn hàng', icon: ShoppingCart, to: '/admin/orders' },
       { label: 'Tin nhắn', icon: Newspaper },
       { label: 'Báo cáo', icon: BarChart3 },
@@ -107,6 +114,10 @@ function Sidebar() {
 
     if (location.pathname.startsWith('/admin/products')) {
       setOpenKeys((prev) => ({ ...prev, product: true }));
+    }
+
+    if (location.pathname.startsWith('/admin/shipping')) {
+      setOpenKeys((prev) => ({ ...prev, shipping: true }));
     }
   }, [location.pathname]);
 
@@ -140,6 +151,8 @@ function Sidebar() {
                         ? 'product'
                       : item.label === 'Quản lý Mã liên kết'
                         ? 'productLink'
+                      : item.label === 'Vận chuyển'
+                        ? 'shipping'
                         : item.label;
                   const isOpen = Boolean(openKeys[subMenuKey]);
                   const isParentActive = item.children.some((child) =>
