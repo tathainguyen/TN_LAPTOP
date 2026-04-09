@@ -31,6 +31,19 @@ function parseCurrencyInputToNumber(value) {
   return digits ? Number(digits) : 0;
 }
 
+function formatCurrencyFromStoredValue(value) {
+  if (value === null || value === undefined || value === '') {
+    return '';
+  }
+
+  const parsed = Number(value);
+  if (Number.isFinite(parsed)) {
+    return Math.round(parsed).toLocaleString('vi-VN');
+  }
+
+  return formatCurrencyInput(value);
+}
+
 const EMPTY_FORM = {
   type_name: '',
   discount_type: 'PERCENT',
@@ -84,7 +97,7 @@ function AdminVoucherTypes() {
       discount_value: Number(item.discount_value || 0),
       min_order_value: Number(item.min_order_value || 0),
       max_discount_value:
-        item.max_discount_value === null ? '' : formatCurrencyInput(item.max_discount_value),
+        item.max_discount_value === null ? '' : formatCurrencyFromStoredValue(item.max_discount_value),
       is_active: Number(item.is_active || 0),
     });
     setModalOpen(true);
