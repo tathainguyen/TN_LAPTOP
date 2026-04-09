@@ -3,8 +3,8 @@
 ## 1. TỔNG QUAN DỰ ÁN
 - Mục tiêu: Xây dựng website thương mại điện tử bán laptop và thiết bị công nghệ theo mô hình B2C.
 - Trọng tâm nghiệp vụ: Quản lý sản phẩm theo mô hình Dòng sản phẩm (Group) + SKU cấu hình chi tiết.
-- Trạng thái hiện tại: Đã hoàn thành nền tảng xác thực, phân quyền, quản trị danh mục, quản trị người dùng, quản trị sản phẩm và phần lớn trang tài khoản khách hàng.
-- Hạng mục còn lại lớn: Giỏ hàng, checkout, đơn hàng thực tế, VNPAY, GHN, blog, chat realtime, review.
+- Trạng thái hiện tại: Đã hoàn thành xác thực, phân quyền, quản trị danh mục/người dùng/sản phẩm, giỏ hàng, checkout COD, đơn hàng và voucher checkout chạy dữ liệu thật.
+- Hạng mục còn lại lớn: VNPAY, GHN vận chuyển thực tế, hoàn kho tự động khi hủy đơn, blog, chat realtime, review.
 
 ---
 
@@ -38,6 +38,9 @@
   - Auth/User/Address.
   - Catalog (Brand/Category).
   - Product (Group/SKU/Image).
+  - Cart/Order/Order items/Order status histories.
+  - Shipping methods/carriers.
+  - Voucher types/vouchers (áp dụng tại checkout).
 
 ---
 
@@ -66,17 +69,26 @@
   - Hiển thị đa ảnh theo SKU.
   - Chuyển SKU cùng group theo danh sách cấu hình.
   - Hiển thị giá và thông số theo SKU hiện tại.
+- Giỏ hàng:
+  - Thêm vào giỏ từ trang sản phẩm.
+  - Cập nhật số lượng/xóa sản phẩm.
+  - Hỗ trợ giỏ khách (localStorage) và đồng bộ sang user khi đăng nhập.
+- Checkout COD:
+  - Lấy dữ liệu checkout (địa chỉ + phương thức vận chuyển) từ API thật.
+  - Tạo đơn COD từ giỏ hàng.
+  - Danh sách đơn mua và trang chi tiết đơn mua chạy dữ liệu thật.
+  - Khách hàng hủy đơn ở trạng thái PENDING_CONFIRM.
+- Voucher tại checkout:
+  - Lấy danh sách voucher khả dụng theo giá trị đơn hàng.
+  - Kiểm tra mã voucher theo điều kiện hoạt động/thời gian/giá trị đơn tối thiểu/giới hạn lượt dùng.
+  - Áp dụng giảm giá vào đơn COD và ghi nhận used_count.
 
 ### 3.1.2. Đang ở mức giao diện/demo
-- Danh sách đơn mua hiện đang lấy từ API, nút "Xem chi tiết" có sẵn nhưng chỉ khi có dữ liệu thực từ checkout.
-- Kho voucher hiện đang dùng dữ liệu mẫu.
-- Nút Thêm vào giỏ hàng ở Product Detail chưa nối nghiệp vụ giỏ hàng thật.
+- Kho voucher trong trang tài khoản khách hàng (Customer Vouchers) vẫn đang dùng dữ liệu mẫu, chưa nối API thật.
 
 ### 3.1.3. Chưa triển khai
-- Trang chi tiết đơn mua (hiển thị sản phẩm, giá, địa chỉ, trạng thái chi tiết).
 - Đăng nhập Google/Facebook.
-- Luồng checkout thực tế.
-- Thanh toán COD/VNPAY thực tế.
+- Thanh toán online VNPAY thực tế.
 - Đánh giá sản phẩm theo điều kiện Verified Purchase.
 
 ## 3.2. PHÂN HỆ QUẢN TRỊ VIÊN (ADMIN)
@@ -106,6 +118,12 @@
   - Danh sách đơn, tìm kiếm, lọc theo trạng thái đơn/trạng thái thanh toán, phân trang.
   - Cập nhật trạng thái đơn (PENDING_CONFIRM → CONFIRMED → SHIPPING → SUCCESS/CANCELLED).
   - Hiển thị status chip color-coded theo trạng thái.
+- Quản lý vận chuyển:
+  - CRUD phương thức vận chuyển.
+  - CRUD hãng vận chuyển.
+- Quản lý voucher:
+  - CRUD loại voucher (voucher types).
+  - CRUD mã voucher (voucher codes).
 - UI Styling:
   - Tích hợp Tailwind CSS 4.2 vào Vite + React.
   - Search button styled consistent với Tailwind utility class (SEARCH_BUTTON_TW) trên các trang list.
@@ -124,23 +142,27 @@
 
 ## 3.3. GIỎ HÀNG, ĐƠN HÀNG, THANH TOÁN, VẬN CHUYỂN
 
-### 3.3.1. Backend API được xây dựng sẵn
-- API lấy danh sách đơn của khách (GET /orders/customer).
-- API lấy chi tiết đơn hàng (GET /orders/customer/:id).
-- API tạo đơn COD từ cart (POST /orders/cod).
-- API quản lý đơn (lọc, cập nhật trạng thái).
+### 3.3.1. Đã chạy thật end-to-end
+- Giỏ hàng:
+  - API lấy giỏ, thêm/cập nhật/xóa item, clear cart, sync guest cart.
+- Checkout + đơn COD:
+  - API checkout-data (địa chỉ + phương thức vận chuyển).
+  - API tạo đơn COD từ cart.
+  - API đơn khách hàng (danh sách/chi tiết/hủy đơn).
+  - API đơn admin (danh sách/chi tiết/cập nhật trạng thái).
+- Voucher checkout:
+  - API danh sách voucher khả dụng.
+  - API validate voucher theo giá trị đơn hàng.
 
-### 3.3.2. Frontend UI được xây dựng sẵn
-- Trang danh sách đơn mua của khách với nút "Xem chi tiết" (chỉ hiển thị khi có dữ liệu thực).
-- Trang chi tiết đơn mua (bổ sung trong giai đoạn tiếp theo).
+### 3.3.2. Trạng thái vận hành hiện tại
+- Checkout hiện hỗ trợ thanh toán COD.
+- Có áp voucher thật tại checkout.
+- Trạng thái đơn cập nhật được từ admin.
+- Chưa có hoàn kho tự động khi đơn chuyển CANCELLED.
 
 ### 3.3.3. Chưa triển khai nghiệp vụ chạy thật
-- Giỏ hàng đầy đủ.
-- Checkout và tạo đơn.
-- Áp voucher thật trong đơn.
 - Thanh toán VNPAY sandbox.
-- Quản lý trạng thái đơn hàng thực tế.
-- Hủy đơn và hoàn kho tự động.
+- Hoàn kho tự động khi hủy đơn.
 - Tích hợp GHN lấy tracking_code.
 
 ## 3.4. BLOG VÀ CHAT
@@ -156,6 +178,8 @@
 ### 4.1. Auth
 - POST /api/auth/register
 - POST /api/auth/login
+- POST /api/auth/forgot-password
+- POST /api/auth/reset-password
 - POST /api/auth/send-verification-email
 - GET /api/auth/verify-email
 
@@ -172,10 +196,14 @@
 - Customer:
   - Danh sách đơn hàng (GET /orders/customer).
   - Chi tiết đơn hàng (GET /orders/customer/:id).
+  - Hủy đơn (PATCH /orders/customer/:orderId/cancel).
   - Tạo đơn COD (POST /orders/cod).
 - Admin:
   - Danh sách đơn, lọc, phân trang (GET /orders/admin).
+  - Chi tiết đơn hàng (GET /orders/admin/:id).
   - Cập nhật trạng thái đơn (PATCH /orders/admin/:id/status).
+- Shared:
+  - Dữ liệu checkout (GET /orders/checkout-data).
 
 ### 4.5. Products
 - Admin:
@@ -187,6 +215,36 @@
   - Danh sách sản phẩm.
   - Chi tiết sản phẩm theo slug.
 
+### 4.6. Cart
+- GET /api/cart
+- POST /api/cart/items
+- PUT /api/cart/items/:productId
+- DELETE /api/cart/items/:productId
+- POST /api/cart/sync
+- POST /api/cart/clear
+
+### 4.7. Shipping
+- GET /api/shipping/methods
+- POST /api/shipping/methods
+- PUT /api/shipping/methods/:id
+- DELETE /api/shipping/methods/:id
+- GET /api/shipping/carriers
+- POST /api/shipping/carriers
+- PUT /api/shipping/carriers/:id
+- DELETE /api/shipping/carriers/:id
+
+### 4.8. Vouchers
+- GET /api/vouchers/types
+- POST /api/vouchers/types
+- PUT /api/vouchers/types/:id
+- DELETE /api/vouchers/types/:id
+- GET /api/vouchers/codes
+- POST /api/vouchers/codes
+- PUT /api/vouchers/codes/:id
+- DELETE /api/vouchers/codes/:id
+- GET /api/vouchers/checkout/available
+- POST /api/vouchers/checkout/validate
+
 ---
 
 ## 5. ĐÁNH GIÁ TIẾN ĐỘ TỔNG THỂ
@@ -194,20 +252,22 @@
 - Nhóm chức năng đã usable:
   - Auth + phân quyền.
   - Tài khoản khách hàng (profile/password/address/email verification).
-  - Quản trị user/catalog/product/order.
+  - Quản trị user/catalog/product/order/shipping/voucher.
+  - Cart + checkout COD + áp voucher checkout + đơn hàng khách/admin.
   - Tailwind CSS styling infrastructure.
 - Nhóm chức năng chưa hoàn tất end-to-end:
-  - Cart → Checkout → Payment → Order → Shipping.
-- Mức hoàn thành ước tính theo phạm vi SRS ban đầu: khoảng 50% - 60%.
+  - Thanh toán online (VNPAY).
+  - GHN vận chuyển thực tế.
+  - Hoàn kho tự động khi hủy đơn.
+  - Blog/Chat/Review.
+- Mức hoàn thành ước tính theo phạm vi SRS ban đầu: khoảng 65% - 75%.
 
 ---
 
 ## 6. ƯU TIÊN TRIỂN KHAI GIAI ĐOẠN TIẾP THEO
-1. Hoàn thiện trang chi tiết đơn mua (xem sản phẩm, giá, địa chỉ, trạng thái chi tiết).
-2. Hoàn thiện giỏ hàng và đồng bộ giỏ hàng guest.
-3. Hoàn thiện checkout và tạo đơn hàng.
-4. Tích hợp thanh toán VNPAY sandbox.
-5. Triển khai trạng thái đơn hàng và hoàn kho khi hủy.
-6. Tích hợp GHN để lấy tracking_code.
-7. Chuyển Kho voucher từ mock sang API thật.
-8. Hoàn thiện dashboard thống kê thật cho admin.
+1. Tích hợp thanh toán online VNPAY sandbox cho checkout.
+2. Bổ sung hoàn kho tự động khi đơn chuyển CANCELLED.
+3. Tích hợp GHN lấy tracking_code và đồng bộ trạng thái giao hàng.
+4. Chuyển trang "Kho voucher" phía tài khoản khách hàng từ mock sang API thật.
+5. Hoàn thiện dashboard thống kê thật cho admin.
+6. Triển khai blog, chat realtime và review theo lộ trình.

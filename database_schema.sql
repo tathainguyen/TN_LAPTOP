@@ -968,7 +968,9 @@ ALTER TABLE `orders`
   ADD KEY `idx_orders_user_address_id` (`user_address_id`),
   ADD KEY `idx_orders_shipping_method_id` (`shipping_method_id`),
   ADD KEY `idx_orders_voucher_id` (`voucher_id`),
-  ADD KEY `idx_orders_cancelled_by` (`cancelled_by`);
+  ADD KEY `idx_orders_cancelled_by` (`cancelled_by`),
+  ADD KEY `idx_orders_status_created_at` (`order_status`,`created_at`),
+  ADD KEY `idx_orders_payment_status_created_at` (`payment_status`,`created_at`);
 
 --
 -- Chỉ mục cho bảng `order_items`
@@ -1080,7 +1082,8 @@ ALTER TABLE `shipping_carriers`
 ALTER TABLE `shipping_methods`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `uk_shipping_methods_code` (`method_code`),
-  ADD KEY `idx_shipping_methods_carrier_id` (`carrier_id`);
+  ADD KEY `idx_shipping_methods_carrier_id` (`carrier_id`),
+  ADD KEY `idx_shipping_methods_active_sort` (`is_active`,`sort_order`);
 
 --
 -- Chỉ mục cho bảng `stock_movements`
@@ -1112,7 +1115,8 @@ ALTER TABLE `users`
 --
 ALTER TABLE `user_addresses`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_user_addresses_user_id` (`user_id`);
+  ADD KEY `idx_user_addresses_user_id` (`user_id`),
+  ADD KEY `idx_user_addresses_user_default_created` (`user_id`,`is_default`,`created_at`);
 
 --
 -- Chỉ mục cho bảng `user_vouchers`
@@ -1137,7 +1141,9 @@ ALTER TABLE `vouchers`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `uk_vouchers_code` (`code`),
   ADD KEY `idx_vouchers_created_by` (`created_by`),
-  ADD KEY `idx_vouchers_voucher_type_id` (`voucher_type_id`);
+  ADD KEY `idx_vouchers_voucher_type_id` (`voucher_type_id`),
+  ADD KEY `idx_vouchers_active_time` (`is_active`,`start_at`,`end_at`),
+  ADD KEY `idx_vouchers_limit_usage` (`total_usage_limit`,`used_count`);
 
 --
 -- AUTO_INCREMENT cho các bảng đã đổ
