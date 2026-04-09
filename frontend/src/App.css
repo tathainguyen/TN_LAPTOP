@@ -197,6 +197,11 @@
 .customer-password-form {
   display: grid;
   gap: 12px;
+  width: min(520px, 100%);
+  margin-inline: 0;
+}
+.customer-password-form .customer-form-actions {
+  justify-content: flex-start;
 }
 .customer-card-head {
   display: flex;
