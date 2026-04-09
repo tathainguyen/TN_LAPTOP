@@ -1211,6 +1211,102 @@
   font-size: 13px;
 }
 
+.admin-panel__toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.admin-panel__toolbar h2 {
+  margin: 0;
+  color: #1a3557;
+  font-size: 20px;
+}
+
+.admin-panel__toolbar p {
+  margin: 4px 0 0;
+  color: #557097;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.admin-panel__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.admin-action-button {
+  border: 1px solid transparent;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: transform 160ms ease, box-shadow 160ms ease, background-color 160ms ease, border-color 160ms ease;
+}
+
+.admin-action-button:hover {
+  transform: translateY(-1px);
+}
+
+.admin-action-button--primary {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #fff;
+  border-color: #1d4ed8;
+  box-shadow: 0 10px 20px rgba(37, 99, 235, 0.16);
+}
+
+.admin-action-button--primary:hover {
+  background: linear-gradient(135deg, #1d4ed8, #1e40af);
+}
+
+.admin-action-button--secondary {
+  background: #fff;
+  color: #173457;
+  border-color: #cfd9e6;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
+}
+
+.admin-action-button--secondary:hover {
+  background: #f8fbff;
+}
+
+.admin-table-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.admin-modal header button {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+}
+
+.admin-modal form {
+  padding: 0 14px 14px;
+}
+
+.admin-modal .admin-form-grid {
+  padding: 14px 0 0;
+}
+
+.admin-modal .admin-form-actions {
+  margin-top: 14px;
+}
+
+.admin-modal .admin-form-actions button:first-child {
+  background: #fff;
+}
+
 .admin-primary-link {
   text-decoration: none;
   display: inline-flex;
@@ -1442,6 +1538,12 @@
   background: #fee2e2;
   color: #991b1b;
   border-color: #fecaca;
+}
+
+.admin-btn--create {
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  color: #fff;
+  border-color: #15803d;
 }
 
 .admin-orders-table {
@@ -3552,6 +3654,20 @@
   .admin-search {
     min-width: 0;
     width: 100%;
+  }
+
+  .admin-panel__toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-panel__actions {
+    width: 100%;
+  }
+
+  .admin-action-button {
+    width: 100%;
+    justify-content: center;
   }
 
   .admin-cards {

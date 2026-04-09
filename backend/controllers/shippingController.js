@@ -154,6 +154,14 @@ export async function deleteShippingMethod(req, res) {
   } catch (error) {
     console.error('❌ Loi deleteShippingMethod:', error);
 
+    if (String(error?.message || '') === 'MINIMUM_SHIPPING_METHODS_REQUIRED') {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Khach hang phai luon co it nhat 3 phuong thuc van chuyen.',
+        data: null,
+      });
+    }
+
     return res.status(500).json({
       status: 'error',
       message: 'Khong the xoa phuong thuc van chuyen.',

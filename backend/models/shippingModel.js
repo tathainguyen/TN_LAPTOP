@@ -177,6 +177,14 @@ export async function deleteShippingMethodById(id) {
   await ensureShippingSchema();
 
   const methodId = Number(id);
+  const [countRows] = await pool.query('SELECT COUNT(*) AS total FROM shipping_methods');
+  const total = Number(countRows?.[0]?.total || 0);
+
+  if (total <= 3) {
+    const error = new Error('MINIMUM_SHIPPING_METHODS_REQUIRED');
+    throw error;
+  }
+
   const [result] = await pool.query('DELETE FROM shipping_methods WHERE id = ? LIMIT 1', [methodId]);
   return Number(result?.affectedRows || 0) > 0;
 }
