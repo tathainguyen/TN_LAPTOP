@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th4 07, 2026 lúc 08:37 PM
+-- Thời gian đã tạo: Th4 09, 2026 lúc 09:46 PM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.2.12
 
@@ -140,6 +140,13 @@ CREATE TABLE `carts` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `carts`
+--
+
+INSERT INTO `carts` (`id`, `user_id`, `session_id`, `created_at`, `updated_at`) VALUES
+(1, 6, NULL, '2026-04-08 17:41:51', '2026-04-08 17:41:51');
 
 -- --------------------------------------------------------
 
@@ -287,6 +294,21 @@ CREATE TABLE `orders` (
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Đang đổ dữ liệu cho bảng `orders`
+--
+
+INSERT INTO `orders` (`id`, `order_code`, `user_id`, `user_address_id`, `recipient_name`, `recipient_phone`, `province`, `district`, `ward`, `address_line`, `address_note`, `shipping_method_id`, `shipping_fee`, `voucher_id`, `voucher_discount`, `payment_method`, `payment_status`, `order_status`, `customer_note`, `tracking_code`, `total_items_amount`, `grand_total`, `cancelled_by`, `cancel_reason`, `cancelled_at`, `confirmed_at`, `shipping_at`, `completed_at`, `created_at`, `updated_at`) VALUES
+(1, 'DH2604092466', 6, NULL, 'Nguyễn Thái', '0913556699', 'Cần Thơ', 'Quận Cái Răng', 'Phường Lê Bình', '19abc, vĩnh nguyên', 'gọi trước khi đến', 1, 50000.00, NULL, 0.00, 'COD', 'UNPAID', 'PENDING_CONFIRM', NULL, NULL, 257540255000.00, 257540305000.00, NULL, NULL, NULL, NULL, NULL, NULL, '2026-04-08 18:01:04', '2026-04-08 18:01:04'),
+(2, 'DH2604097175', 6, NULL, 'Nguyễn Thái', '0913556699', 'Cần Thơ', 'Quận Cái Răng', 'Phường Lê Bình', '19abc, vĩnh nguyên', 'gọi trước khi đến', 2, 30000.00, NULL, 0.00, 'COD', 'UNPAID', 'CANCELLED', '123', NULL, 19005000.00, 19035000.00, 1, NULL, '2026-04-09 02:07:20', NULL, NULL, NULL, '2026-04-08 18:13:49', '2026-04-08 19:07:20'),
+(3, 'DH2604094916', 6, 7, 'thai', '0913669955', 'Hà Nội', 'Quận Cầu Giấy', 'Phường Yên Hòa', '123', NULL, 3, 20000.00, NULL, 0.00, 'COD', 'UNPAID', 'SHIPPING', 'aaaaa', NULL, 5000.00, 25000.00, NULL, NULL, NULL, '2026-04-09 01:22:11', '2026-04-09 01:38:23', NULL, '2026-04-08 18:15:29', '2026-04-08 18:38:23'),
+(4, 'DH2604091486', 6, 6, 'nguyen', '0913778899', 'TP. Hồ Chí Minh', 'Quận 1', 'Phường Bến Nghé', '123', NULL, 2, 30000.00, NULL, 0.00, 'COD', 'UNPAID', 'CANCELLED', '123', NULL, 2318005000.00, 2318035000.00, 6, 'Khach hang huy don', '2026-04-10 01:06:45', NULL, NULL, NULL, '2026-04-09 16:14:00', '2026-04-09 18:06:45'),
+(5, 'DH2604094757', 6, 7, 'thai', '0913669955', 'Hà Nội', 'Quận Cầu Giấy', 'Phường Yên Hòa', '123', NULL, 1, 50000.00, NULL, 0.00, 'COD', 'UNPAID', 'PENDING_CONFIRM', NULL, NULL, 19000000.00, 19050000.00, NULL, NULL, NULL, NULL, NULL, NULL, '2026-04-09 16:46:14', '2026-04-09 16:46:14'),
+(6, 'DH2604097532', 6, 7, 'thai', '0913669955', 'Hà Nội', 'Quận Cầu Giấy', 'Phường Yên Hòa', '123', NULL, 1, 50000.00, NULL, 0.00, 'COD', 'UNPAID', 'SHIPPING', NULL, NULL, 5000.00, 55000.00, NULL, NULL, NULL, NULL, '2026-04-10 01:12:24', NULL, '2026-04-09 16:54:19', '2026-04-09 18:12:24'),
+(7, 'DH2604091094', 6, 7, 'thai', '0913669955', 'Hà Nội', 'Quận Cầu Giấy', 'Phường Yên Hòa', '123', NULL, 1, 50000.00, NULL, 0.00, 'COD', 'PAID', 'SUCCESS', NULL, NULL, 5000.00, 55000.00, NULL, NULL, NULL, NULL, NULL, '2026-04-10 01:12:16', '2026-04-09 16:54:45', '2026-04-09 18:12:16'),
+(8, 'DH2604101480', 6, NULL, 'test', '091354848', 'Hải Phòng', 'Quận Lê Chân', 'Phường An Biên', '123123123123', NULL, 1, 50000.00, NULL, 0.00, 'COD', 'UNPAID', 'CANCELLED', NULL, NULL, 19005000.00, 19055000.00, 6, 'Khach hang huy don', '2026-04-10 00:55:54', NULL, NULL, NULL, '2026-04-09 17:34:09', '2026-04-09 17:55:54'),
+(9, 'DH2604105066', 6, 7, 'thai', '0913669955', 'Hà Nội', 'Quận Cầu Giấy', 'Phường Yên Hòa', '123', NULL, 3, 20000.00, NULL, 0.00, 'COD', 'UNPAID', 'PENDING_CONFIRM', NULL, NULL, 255241250000.00, 255241270000.00, NULL, NULL, NULL, NULL, NULL, NULL, '2026-04-09 19:41:00', '2026-04-09 19:41:00');
+
 -- --------------------------------------------------------
 
 --
@@ -307,6 +329,29 @@ CREATE TABLE `order_items` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Đang đổ dữ liệu cho bảng `order_items`
+--
+
+INSERT INTO `order_items` (`id`, `order_id`, `product_id`, `product_name`, `variant_name`, `sku`, `quantity`, `unit_price`, `line_total`, `created_at`) VALUES
+(1, 1, 134, 'Dell Precision 7560 | Xeon 11855M, 32GB, 512GB, RTX A3000 6GB, 15.6\'\' FHD IPS', 'Xeon 11855M | 32GB | 512GB | RTX A3000 6GB', 'Dell-Precision-7560', 1, 19000000.00, 19000000.00, '2026-04-08 18:01:04'),
+(2, 1, 1, 'Lenovo LOQ 15IAX9 (i5-12450HX)', 'Core i5-12450HX | 12GB | RTX 2050 4GB', 'LOQ-I5-2050', 1, 255222250000.00, 255222250000.00, '2026-04-08 18:01:04'),
+(3, 1, 2, 'Lenovo LOQ 15IAX9 (i7-13650HX)', 'Core i7-13650HX | 16GB | 256gb | RTX 4050 6GB', 'LOQ-I7-4050', 1, 2299000000.00, 2299000000.00, '2026-04-08 18:01:04'),
+(4, 1, 139, 'Asus TUF Gaming F16 FX607VJB-RL151W | Core 5 210H, 16GB, 512GB, RTX 3050 6GB, 16 inch FHD+ 144Hz', 'Core 5 210H | 16GB | 512GB', 'Asus-TUF-Gaming-F16', 1, 5000.00, 5000.00, '2026-04-08 18:01:04'),
+(5, 2, 139, 'Asus TUF Gaming F16 FX607VJB-RL151W | Core 5 210H, 16GB, 512GB, RTX 3050 6GB, 16 inch FHD+ 144Hz', 'Core 5 210H | 16GB | 512GB', 'Asus-TUF-Gaming-F16', 1, 5000.00, 5000.00, '2026-04-08 18:13:49'),
+(6, 2, 134, 'Dell Precision 7560 | Xeon 11855M, 32GB, 512GB, RTX A3000 6GB, 15.6\'\' FHD IPS', 'Xeon 11855M | 32GB | 512GB | RTX A3000 6GB', 'Dell-Precision-7560', 1, 19000000.00, 19000000.00, '2026-04-08 18:13:49'),
+(7, 3, 139, 'Asus TUF Gaming F16 FX607VJB-RL151W | Core 5 210H, 16GB, 512GB, RTX 3050 6GB, 16 inch FHD+ 144Hz', 'Core 5 210H | 16GB | 512GB', 'Asus-TUF-Gaming-F16', 1, 5000.00, 5000.00, '2026-04-08 18:15:29'),
+(8, 4, 139, 'Asus TUF Gaming F16 FX607VJB-RL151W | Core 5 210H, 16GB, 512GB, RTX 3050 6GB, 16 inch FHD+ 144Hz', 'Core 5 210H | 16GB | 512GB', 'Asus-TUF-Gaming-F16', 1, 5000.00, 5000.00, '2026-04-09 16:14:00'),
+(9, 4, 134, 'Dell Precision 7560 | Xeon 11855M, 32GB, 512GB, RTX A3000 6GB, 15.6\'\' FHD IPS', 'Xeon 11855M | 32GB | 512GB | RTX A3000 6GB', 'Dell-Precision-7560', 1, 19000000.00, 19000000.00, '2026-04-09 16:14:00'),
+(10, 4, 2, 'Lenovo LOQ 15IAX9 (i7-13650HX)', 'Core i7-13650HX | 16GB | 256gb | RTX 4050 6GB', 'LOQ-I7-4050', 1, 2299000000.00, 2299000000.00, '2026-04-09 16:14:00'),
+(11, 5, 134, 'Dell Precision 7560 | Xeon 11855M, 32GB, 512GB, RTX A3000 6GB, 15.6\'\' FHD IPS', 'Xeon 11855M | 32GB | 512GB | RTX A3000 6GB', 'Dell-Precision-7560', 1, 19000000.00, 19000000.00, '2026-04-09 16:46:14'),
+(12, 6, 139, 'Asus TUF Gaming F16 FX607VJB-RL151W | Core 5 210H, 16GB, 512GB, RTX 3050 6GB, 16 inch FHD+ 144Hz', 'Core 5 210H | 16GB | 512GB', 'Asus-TUF-Gaming-F16', 1, 5000.00, 5000.00, '2026-04-09 16:54:19'),
+(13, 7, 139, 'Asus TUF Gaming F16 FX607VJB-RL151W | Core 5 210H, 16GB, 512GB, RTX 3050 6GB, 16 inch FHD+ 144Hz', 'Core 5 210H | 16GB | 512GB', 'Asus-TUF-Gaming-F16', 1, 5000.00, 5000.00, '2026-04-09 16:54:45'),
+(14, 8, 134, 'Dell Precision 7560 | Xeon 11855M, 32GB, 512GB, RTX A3000 6GB, 15.6\'\' FHD IPS', 'Xeon 11855M | 32GB | 512GB | RTX A3000 6GB', 'Dell-Precision-7560', 1, 19000000.00, 19000000.00, '2026-04-09 17:34:09'),
+(15, 8, 139, 'Asus TUF Gaming F16 FX607VJB-RL151W | Core 5 210H, 16GB, 512GB, RTX 3050 6GB, 16 inch FHD+ 144Hz', 'Core 5 210H | 16GB | 512GB', 'Asus-TUF-Gaming-F16', 1, 5000.00, 5000.00, '2026-04-09 17:34:09'),
+(16, 9, 134, 'Dell Precision 7560 | Xeon 11855M, 32GB, 512GB, RTX A3000 6GB, 15.6\'\' FHD IPS', 'Xeon 11855M | 32GB | 512GB | RTX A3000 6GB', 'Dell-Precision-7560', 1, 19000000.00, 19000000.00, '2026-04-09 19:41:00'),
+(17, 9, 1, 'Lenovo LOQ 15IAX9 (i5-12450HX)', 'Core i5-12450HX | 12GB | RTX 2050 4GB', 'LOQ-I5-2050', 1, 255222250000.00, 255222250000.00, '2026-04-09 19:41:00');
+
 -- --------------------------------------------------------
 
 --
@@ -323,6 +368,19 @@ CREATE TABLE `order_status_histories` (
   `note` varchar(255) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `order_status_histories`
+--
+
+INSERT INTO `order_status_histories` (`id`, `order_id`, `old_status`, `new_status`, `changed_by`, `note`, `created_at`) VALUES
+(1, 3, 'PENDING_CONFIRM', 'CONFIRMED', 1, NULL, '2026-04-08 18:22:11'),
+(2, 3, 'CONFIRMED', 'SHIPPING', 1, NULL, '2026-04-08 18:38:23'),
+(3, 2, 'PENDING_CONFIRM', 'CANCELLED', 1, NULL, '2026-04-08 19:07:20'),
+(4, 8, 'PENDING_CONFIRM', 'CANCELLED', 6, 'Khach hang huy don', '2026-04-09 17:55:54'),
+(5, 4, 'PENDING_CONFIRM', 'CANCELLED', 6, 'Khach hang huy don', '2026-04-09 18:06:45'),
+(6, 7, 'PENDING_CONFIRM', 'SUCCESS', 1, NULL, '2026-04-09 18:12:16'),
+(7, 6, 'PENDING_CONFIRM', 'SHIPPING', 1, NULL, '2026-04-09 18:12:24');
 
 -- --------------------------------------------------------
 
@@ -380,10 +438,10 @@ CREATE TABLE `products` (
 --
 
 INSERT INTO `products` (`id`, `group_id`, `product_name`, `slug`, `sku`, `cpu_option`, `ram_option`, `storage_option`, `vga_option`, `color_option`, `price_sale`, `price_compare`, `stock_quantity`, `sold_quantity`, `is_active`, `created_at`, `updated_at`) VALUES
-(1, 1, 'Lenovo LOQ 15IAX9 (i5-12450HX)', 'lenovo-loq-15iax9-i5', 'LOQ-I5-2050', 'Core i5-12450HX', '12GB', NULL, 'RTX 2050 4GB', NULL, 255222250000.00, NULL, 15, 0, 1, '2026-04-04 13:38:51', '2026-04-06 15:04:15'),
-(2, 1, 'Lenovo LOQ 15IAX9 (i7-13650HX)', 'lenovo-loq-15iax9-i7', 'LOQ-I7-4050', 'Core i7-13650HX', '16GB', '256gb', 'RTX 4050 6GB', 'xám', 2299000000.00, NULL, 5, 0, 1, '2026-04-04 13:38:51', '2026-04-06 16:04:37'),
-(134, 19, 'Dell Precision 7560 | Xeon 11855M, 32GB, 512GB, RTX A3000 6GB, 15.6\'\' FHD IPS', 'dell-precision-7560-xeon-11855m-32gb-512gb-rtx-a3000-6gb-156-fhd-ips-dell-precision-7560', 'Dell-Precision-7560', 'Xeon 11855M', '32GB', '512GB', 'RTX A3000 6GB', 'Đen', 2093600000.00, NULL, 3, 0, 1, '2026-04-05 16:39:41', '2026-04-06 15:53:19'),
-(139, 21, 'Asus TUF Gaming F16 FX607VJB-RL151W | Core 5 210H, 16GB, 512GB, RTX 3050 6GB, 16 inch FHD+ 144Hz', 'asus-tuf-gaming-f16-fx607vjb-rl151w-core-5-210h-16gb-512gb-rtx-3050-6gb-16-inch-fhd-144hz-asus-tuf-gaming-f16', 'Asus-TUF-Gaming-F16', 'Core 5 210H', '16GB', '512GB', NULL, 'Đen', 10000.00, NULL, 20, 0, 1, '2026-04-06 15:25:36', '2026-04-07 16:12:34');
+(1, 1, 'Lenovo LOQ 15IAX9 (i5-12450HX)', 'lenovo-loq-15iax9-i5', 'LOQ-I5-2050', 'Core i5-12450HX', '12GB', NULL, 'RTX 2050 4GB', NULL, 255222250000.00, NULL, 13, 2, 1, '2026-04-04 13:38:51', '2026-04-09 19:41:00'),
+(2, 1, 'Lenovo LOQ 15IAX9 (i7-13650HX)', 'lenovo-loq-15iax9-i7', 'LOQ-I7-4050', 'Core i7-13650HX', '16GB', '256gb', 'RTX 4050 6GB', 'xám', 2299000000.00, NULL, 3, 2, 1, '2026-04-04 13:38:51', '2026-04-09 16:14:00'),
+(134, 19, 'Dell Precision 7560 | Xeon 11855M, 32GB, 512GB, RTX A3000 6GB, 15.6\'\' FHD IPS', 'dell-precision-7560-xeon-11855m-32gb-512gb-rtx-a3000-6gb-156-fhd-ips-dell-precision-7560', 'Dell-Precision-7560', 'Xeon 11855M', '32GB', '512GB', 'RTX A3000 6GB', 'Đen', 20900000.00, 19000000.00, 17, 6, 1, '2026-04-05 16:39:41', '2026-04-09 19:41:00'),
+(139, 21, 'Asus TUF Gaming F16 FX607VJB-RL151W | Core 5 210H, 16GB, 512GB, RTX 3050 6GB, 16 inch FHD+ 144Hz', 'asus-tuf-gaming-f16-fx607vjb-rl151w-core-5-210h-16gb-512gb-rtx-3050-6gb-16-inch-fhd-144hz-asus-tuf-gaming-f16', 'Asus-TUF-Gaming-F16', 'Core 5 210H', '16GB', '512GB', NULL, 'Đen', 10000.00, 5000.00, 13, 7, 1, '2026-04-06 15:25:36', '2026-04-09 17:34:09');
 
 -- --------------------------------------------------------
 
@@ -413,14 +471,13 @@ CREATE TABLE `product_groups` (
 --
 
 INSERT INTO `product_groups` (`id`, `category_id`, `brand_id`, `group_name`, `slug`, `short_description`, `description`, `warranty_months`, `is_active`, `is_featured`, `view_count`, `created_at`, `updated_at`) VALUES
-(1, 1, 1, 'LOQ 2028', 'loq-2028', 'LOQ 2028', NULL, 24, 1, 0, 9, '2026-04-04 13:38:51', '2026-04-07 16:50:20'),
+(1, 1, 1, 'LOQ 2028', 'loq-2028', 'LOQ 2028', NULL, 24, 1, 0, 21, '2026-04-04 13:38:51', '2026-04-09 19:40:36'),
 (16, 1, 1, 'LOQ 2024', 'loq-2024', 'LOQ 2024', '123', 24, 1, 0, 0, '2026-04-05 15:22:34', '2026-04-06 16:03:11'),
 (17, 7, 7, 'Dell 2025', 'dell-2025', 'Dell 2025', NULL, 24, 1, 0, 0, '2026-04-05 15:34:00', '2026-04-05 16:00:37'),
-(19, 7, 7, 'Dell Precision', 'dell-precision', 'Dell Precision 7560 | Xeon 11855M, 32GB, 512GB, RTX A3000 6GB, 15.6\'\' FHD IPS', 'Precision', 24, 1, 0, 3, '2026-04-05 16:39:41', '2026-04-07 18:14:37'),
+(19, 7, 7, 'Dell Precision', 'dell-precision', 'Dell Precision 7560 | Xeon 11855M, 32GB, 512GB, RTX A3000 6GB, 15.6\'\' FHD IPS', NULL, 24, 1, 0, 26, '2026-04-05 16:39:41', '2026-04-09 19:03:41'),
 (20, 8, 7, '123', '123', '123', '123', 24, 1, 0, 0, '2026-04-05 16:41:47', '2026-04-05 16:41:47'),
-(21, 1, 8, 'Asus 2028', 'asus-2028', 'Asus TUF Gaming F16 FX607VJB-RL151W | Core 5 210H, 16GB, 512GB, RTX 3050 6GB, 16 inch FHD+ 144Hz', NULL, 24, 1, 0, 57, '2026-04-06 15:25:34', '2026-04-07 18:26:50'),
-(22, 8, 8, '123', '123-2', '123', '123', 24, 1, 1, 0, '2026-04-06 15:36:36', '2026-04-06 16:33:45'),
-(23, 1, 7, 'Asus 2028', 'asus-2028-2', 'Asus TUF Gaming F16 FX607VJB-RL151W | Core 5 210H, 16GB, 512GB, RTX 3050 6GB, 16 inch FHD+ 144Hz', NULL, 24, 1, 0, 0, '2026-04-07 15:53:07', '2026-04-07 15:53:07');
+(21, 1, 8, 'Asus 2028', 'asus-2028', 'Asus TUF Gaming F16 FX607VJB-RL151W | Core 5 210H, 16GB, 512GB, RTX 3050 6GB, 16 inch FHD+ 144Hz', NULL, 24, 1, 0, 78, '2026-04-06 15:25:34', '2026-04-09 18:58:27'),
+(22, 8, 8, '123', '123-2', '123', '123', 24, 1, 1, 0, '2026-04-06 15:36:36', '2026-04-06 16:33:45');
 
 -- --------------------------------------------------------
 
@@ -445,15 +502,15 @@ CREATE TABLE `product_images` (
 
 INSERT INTO `product_images` (`id`, `group_id`, `product_id`, `image_url`, `is_primary`, `sort_order`, `created_at`) VALUES
 (2, 1, 1, 'https://res.cloudinary.com/dc4ebrhks/image/upload/v1775487872/tn-laptop/products/product-1775487855190-252589271.jpg', 1, 0, '2026-04-06 15:04:17'),
-(23, 19, 134, 'https://res.cloudinary.com/dc4ebrhks/image/upload/v1775490814/tn-laptop/products/product-1775490796946-842767715.jpg', 1, 0, '2026-04-06 15:53:19'),
 (26, 1, 2, 'https://res.cloudinary.com/dc4ebrhks/image/upload/v1775491492/tn-laptop/products/product-1775491475164-242503586.jpg', 1, 0, '2026-04-06 16:04:37'),
-(77, 21, 139, 'https://res.cloudinary.com/dc4ebrhks/image/upload/v1775489752/tn-laptop/products/product-1775489734748-51356781.jpg', 1, 0, '2026-04-07 16:20:52'),
-(78, 21, 139, 'https://res.cloudinary.com/dc4ebrhks/image/upload/v1775489768/tn-laptop/products/product-1775489750640-54713265.jpg', 0, 1, '2026-04-07 16:20:52'),
-(79, 21, 139, 'https://res.cloudinary.com/dc4ebrhks/image/upload/v1775491532/tn-laptop/products/product-1775491515418-952877891.jpg', 0, 2, '2026-04-07 16:20:52'),
-(80, 21, 139, 'https://res.cloudinary.com/dc4ebrhks/image/upload/v1775491532/tn-laptop/products/product-1775491515418-214775322.jpg', 0, 3, '2026-04-07 16:20:52'),
-(81, 21, 139, 'https://res.cloudinary.com/dc4ebrhks/image/upload/v1775491532/tn-laptop/products/product-1775491515425-959682487.jpg', 0, 4, '2026-04-07 16:20:52'),
-(82, 21, 139, 'https://res.cloudinary.com/dc4ebrhks/image/upload/v1775491533/tn-laptop/products/product-1775491515426-448401057.jpg', 0, 5, '2026-04-07 16:20:52'),
-(83, 21, 139, 'https://res.cloudinary.com/dc4ebrhks/image/upload/v1775491532/tn-laptop/products/product-1775491515432-771299870.jpg', 0, 6, '2026-04-07 16:20:52');
+(97, 21, 139, 'https://res.cloudinary.com/dc4ebrhks/image/upload/v1775489752/tn-laptop/products/product-1775489734748-51356781.jpg', 1, 0, '2026-04-08 14:57:14'),
+(98, 21, 139, 'https://res.cloudinary.com/dc4ebrhks/image/upload/v1775489768/tn-laptop/products/product-1775489750640-54713265.jpg', 0, 1, '2026-04-08 14:57:14'),
+(99, 21, 139, 'https://res.cloudinary.com/dc4ebrhks/image/upload/v1775491532/tn-laptop/products/product-1775491515418-952877891.jpg', 0, 2, '2026-04-08 14:57:14'),
+(100, 21, 139, 'https://res.cloudinary.com/dc4ebrhks/image/upload/v1775491532/tn-laptop/products/product-1775491515418-214775322.jpg', 0, 3, '2026-04-08 14:57:14'),
+(101, 21, 139, 'https://res.cloudinary.com/dc4ebrhks/image/upload/v1775491533/tn-laptop/products/product-1775491515426-448401057.jpg', 0, 4, '2026-04-08 14:57:14'),
+(102, 21, 139, 'https://res.cloudinary.com/dc4ebrhks/image/upload/v1775491532/tn-laptop/products/product-1775491515432-771299870.jpg', 0, 5, '2026-04-08 14:57:14'),
+(106, 19, 134, 'https://res.cloudinary.com/dc4ebrhks/image/upload/v1775490814/tn-laptop/products/product-1775490796946-842767715.jpg', 1, 0, '2026-04-09 16:46:10'),
+(107, 19, 134, 'https://res.cloudinary.com/dc4ebrhks/image/upload/v1775661576/tn-laptop/products/product-1775661557679-507891334.jpg', 0, 1, '2026-04-09 16:46:10');
 
 -- --------------------------------------------------------
 
@@ -567,6 +624,32 @@ INSERT INTO `roles` (`id`, `role_name`, `description`, `created_at`, `updated_at
 -- --------------------------------------------------------
 
 --
+-- Cấu trúc bảng cho bảng `shipping_carriers`
+--
+
+DROP TABLE IF EXISTS `shipping_carriers`;
+CREATE TABLE `shipping_carriers` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `carrier_name` varchar(120) NOT NULL,
+  `carrier_code` varchar(50) NOT NULL,
+  `note` varchar(255) DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `shipping_carriers`
+--
+
+INSERT INTO `shipping_carriers` (`id`, `carrier_name`, `carrier_code`, `note`, `is_active`, `created_at`, `updated_at`) VALUES
+(1, 'Nội bộ', 'INTERNAL', 'Đang sử dụng', 1, '2026-04-09 19:16:58', '2026-04-09 19:16:58'),
+(2, 'GHN', 'GHN', 'Sẽ phát triển sau', 0, '2026-04-09 19:16:58', '2026-04-09 19:16:58'),
+(3, 'ViettelPost', 'VIETTEL_POST', 'Sẽ phát triển sau', 0, '2026-04-09 19:16:58', '2026-04-09 19:16:58');
+
+-- --------------------------------------------------------
+
+--
 -- Cấu trúc bảng cho bảng `shipping_methods`
 --
 
@@ -577,6 +660,7 @@ CREATE TABLE `shipping_methods` (
   `method_code` varchar(50) NOT NULL,
   `fee` decimal(15,2) NOT NULL,
   `description` varchar(255) DEFAULT NULL,
+  `carrier_id` bigint(20) UNSIGNED DEFAULT NULL,
   `sort_order` int(11) NOT NULL DEFAULT 0,
   `is_active` tinyint(1) NOT NULL DEFAULT 1,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
@@ -587,10 +671,10 @@ CREATE TABLE `shipping_methods` (
 -- Đang đổ dữ liệu cho bảng `shipping_methods`
 --
 
-INSERT INTO `shipping_methods` (`id`, `method_name`, `method_code`, `fee`, `description`, `sort_order`, `is_active`, `created_at`, `updated_at`) VALUES
-(1, 'Hoa toc', 'EXPRESS', 50000.00, 'Giao nhanh trong ngay', 1, 1, '2026-04-04 13:25:35', '2026-04-04 13:25:35'),
-(2, 'Nhanh', 'FAST', 30000.00, 'Giao nhanh tieu chuan', 2, 1, '2026-04-04 13:25:35', '2026-04-04 13:25:35'),
-(3, 'Tiet kiem', 'SAVING', 20000.00, 'Giao tiet kiem chi phi', 3, 1, '2026-04-04 13:25:35', '2026-04-04 13:25:35');
+INSERT INTO `shipping_methods` (`id`, `method_name`, `method_code`, `fee`, `description`, `carrier_id`, `sort_order`, `is_active`, `created_at`, `updated_at`) VALUES
+(1, 'Hỏa tốc', 'EXPRESS', 50000.00, 'Trong ngày', NULL, 1, 1, '2026-04-04 13:25:35', '2026-04-09 19:05:45'),
+(2, 'Nhanh', 'FAST', 30000.00, '2 - 4 ngày', NULL, 2, 1, '2026-04-04 13:25:35', '2026-04-09 19:05:45'),
+(3, 'Tiết kiệm', 'SAVING', 20000.00, '4 - 7 ngày', NULL, 3, 1, '2026-04-04 13:25:35', '2026-04-09 19:05:45');
 
 -- --------------------------------------------------------
 
@@ -609,6 +693,29 @@ CREATE TABLE `stock_movements` (
   `created_by` bigint(20) UNSIGNED DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `stock_movements`
+--
+
+INSERT INTO `stock_movements` (`id`, `product_id`, `source_type`, `source_id`, `quantity_change`, `note`, `created_by`, `created_at`) VALUES
+(1, 134, 'ORDER', 1, -1, 'Tru kho tu don hang DH2604092466', NULL, '2026-04-08 18:01:04'),
+(2, 1, 'ORDER', 1, -1, 'Tru kho tu don hang DH2604092466', NULL, '2026-04-08 18:01:04'),
+(3, 2, 'ORDER', 1, -1, 'Tru kho tu don hang DH2604092466', NULL, '2026-04-08 18:01:04'),
+(4, 139, 'ORDER', 1, -1, 'Tru kho tu don hang DH2604092466', NULL, '2026-04-08 18:01:04'),
+(5, 139, 'ORDER', 2, -1, 'Tru kho tu don hang DH2604097175', NULL, '2026-04-08 18:13:49'),
+(6, 134, 'ORDER', 2, -1, 'Tru kho tu don hang DH2604097175', NULL, '2026-04-08 18:13:49'),
+(7, 139, 'ORDER', 3, -1, 'Tru kho tu don hang DH2604094916', NULL, '2026-04-08 18:15:29'),
+(8, 139, 'ORDER', 4, -1, 'Tru kho tu don hang DH2604091486', NULL, '2026-04-09 16:14:00'),
+(9, 134, 'ORDER', 4, -1, 'Tru kho tu don hang DH2604091486', NULL, '2026-04-09 16:14:00'),
+(10, 2, 'ORDER', 4, -1, 'Tru kho tu don hang DH2604091486', NULL, '2026-04-09 16:14:00'),
+(11, 134, 'ORDER', 5, -1, 'Tru kho tu don hang DH2604094757', NULL, '2026-04-09 16:46:14'),
+(12, 139, 'ORDER', 6, -1, 'Tru kho tu don hang DH2604097532', NULL, '2026-04-09 16:54:19'),
+(13, 139, 'ORDER', 7, -1, 'Tru kho tu don hang DH2604091094', NULL, '2026-04-09 16:54:45'),
+(14, 134, 'ORDER', 8, -1, 'Tru kho tu don hang DH2604101480', NULL, '2026-04-09 17:34:09'),
+(15, 139, 'ORDER', 8, -1, 'Tru kho tu don hang DH2604101480', NULL, '2026-04-09 17:34:09'),
+(16, 134, 'ORDER', 9, -1, 'Tru kho tu don hang DH2604105066', NULL, '2026-04-09 19:41:00'),
+(17, 1, 'ORDER', 9, -1, 'Tru kho tu don hang DH2604105066', NULL, '2026-04-09 19:41:00');
 
 -- --------------------------------------------------------
 
@@ -662,7 +769,7 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `role_id`, `email`, `password_hash`, `full_name`, `phone`, `gender`, `date_of_birth`, `avatar_url`, `email_verified`, `user_status`, `google_id`, `facebook_id`, `last_login_at`, `created_at`, `updated_at`) VALUES
 (1, 1, 'tathainguyen686@gmail.com', '$2b$10$H1.36wc.9anmUKG4Ac.PvuFsmP/YJfGIGNPGAoBEG852slNCMUO0e', 'thainguyenAdmin', '0913778899', 'MALE', NULL, NULL, 1, 'ACTIVE', NULL, NULL, NULL, '2026-04-04 13:28:21', '2026-04-07 16:58:39'),
-(6, 2, 'tathainguyen24@gmail.com', '$2b$10$zoRVj9PdgghkXWDPuq72AeYjLCx70YFPcfWam8WKkR70Ob0bavJ/O', 'Nguyễn Thái', '0913772244', 'MALE', NULL, NULL, 1, 'ACTIVE', NULL, NULL, NULL, '2026-04-07 17:19:17', '2026-04-07 18:01:51');
+(6, 2, 'tathainguyen24@gmail.com', '$2b$10$1O7T49UGsnwQhXJkG0m8Nudp25NG7DQCl3RLTNLAuPyU57kR1azUm', 'Nguyễn Thái', '0913772244', 'MALE', NULL, NULL, 1, 'ACTIVE', NULL, NULL, NULL, '2026-04-07 17:19:17', '2026-04-08 14:20:34');
 
 -- --------------------------------------------------------
 
@@ -685,6 +792,14 @@ CREATE TABLE `user_addresses` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `user_addresses`
+--
+
+INSERT INTO `user_addresses` (`id`, `user_id`, `recipient_name`, `recipient_phone`, `province`, `district`, `ward`, `address_line`, `address_note`, `is_default`, `created_at`, `updated_at`) VALUES
+(6, 6, 'nguyen', '0913778899', 'TP. Hồ Chí Minh', 'Quận 1', 'Phường Bến Nghé', '123', NULL, 0, '2026-04-08 18:14:40', '2026-04-08 18:14:40'),
+(7, 6, 'thai', '0913669955', 'Hà Nội', 'Quận Cầu Giấy', 'Phường Yên Hòa', '123', NULL, 0, '2026-04-08 18:15:05', '2026-04-08 18:15:05');
 
 -- --------------------------------------------------------
 
@@ -933,11 +1048,19 @@ ALTER TABLE `roles`
   ADD UNIQUE KEY `uk_roles_role_name` (`role_name`);
 
 --
+-- Chỉ mục cho bảng `shipping_carriers`
+--
+ALTER TABLE `shipping_carriers`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uk_shipping_carriers_code` (`carrier_code`);
+
+--
 -- Chỉ mục cho bảng `shipping_methods`
 --
 ALTER TABLE `shipping_methods`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `uk_shipping_methods_code` (`method_code`);
+  ADD UNIQUE KEY `uk_shipping_methods_code` (`method_code`),
+  ADD KEY `idx_shipping_methods_carrier_id` (`carrier_id`);
 
 --
 -- Chỉ mục cho bảng `stock_movements`
@@ -1026,13 +1149,13 @@ ALTER TABLE `brands`
 -- AUTO_INCREMENT cho bảng `carts`
 --
 ALTER TABLE `carts`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT cho bảng `cart_items`
 --
 ALTER TABLE `cart_items`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
 
 --
 -- AUTO_INCREMENT cho bảng `categories`
@@ -1062,19 +1185,19 @@ ALTER TABLE `ghn_shipments`
 -- AUTO_INCREMENT cho bảng `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT cho bảng `order_items`
 --
 ALTER TABLE `order_items`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT cho bảng `order_status_histories`
 --
 ALTER TABLE `order_status_histories`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT cho bảng `payments`
@@ -1098,7 +1221,7 @@ ALTER TABLE `product_groups`
 -- AUTO_INCREMENT cho bảng `product_images`
 --
 ALTER TABLE `product_images`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=84;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=108;
 
 --
 -- AUTO_INCREMENT cho bảng `product_specs`
@@ -1137,16 +1260,22 @@ ALTER TABLE `roles`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
+-- AUTO_INCREMENT cho bảng `shipping_carriers`
+--
+ALTER TABLE `shipping_carriers`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
 -- AUTO_INCREMENT cho bảng `shipping_methods`
 --
 ALTER TABLE `shipping_methods`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT cho bảng `stock_movements`
 --
 ALTER TABLE `stock_movements`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT cho bảng `suppliers`
@@ -1164,7 +1293,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT cho bảng `user_addresses`
 --
 ALTER TABLE `user_addresses`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT cho bảng `user_vouchers`
@@ -1326,6 +1455,12 @@ ALTER TABLE `reviews`
 ALTER TABLE `review_replies`
   ADD CONSTRAINT `fk_review_replies_admin_id` FOREIGN KEY (`admin_id`) REFERENCES `users` (`id`) ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_review_replies_review_id` FOREIGN KEY (`review_id`) REFERENCES `reviews` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Các ràng buộc cho bảng `shipping_methods`
+--
+ALTER TABLE `shipping_methods`
+  ADD CONSTRAINT `fk_shipping_methods_carrier_id` FOREIGN KEY (`carrier_id`) REFERENCES `shipping_carriers` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Các ràng buộc cho bảng `stock_movements`
