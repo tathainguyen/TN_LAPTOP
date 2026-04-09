@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
 import { loginUser } from '../../services/auth/authService.js';
 
 function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
@@ -43,7 +44,19 @@ function Login() {
 
       const roleName = String(user?.role_name || '').toUpperCase();
       const isAdmin = roleName === 'ADMIN' || Number(user?.role_id) === 1;
-      navigate(isAdmin ? '/admin' : '/', { replace: true });
+
+      if (isAdmin) {
+        navigate('/admin', { replace: true });
+        return;
+      }
+
+      const locationStateFrom =
+        typeof location.state?.from === 'string' ? location.state.from : null;
+      const storedReturnUrl = localStorage.getItem('tn_laptop_auth_return_url');
+      const nextPath = locationStateFrom || storedReturnUrl || '/cart';
+
+      localStorage.removeItem('tn_laptop_auth_return_url');
+      navigate(nextPath, { replace: true });
     } catch (error) {
       const message =
         error?.response?.data?.message || 'Đăng nhập thất bại. Vui lòng thử lại.';

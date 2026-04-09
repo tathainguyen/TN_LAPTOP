@@ -121,7 +121,17 @@ function App() {
       return element;
     }
 
-    return <Navigate to={isAdmin ? '/admin' : '/'} replace />;
+    if (isAdmin) {
+      return <Navigate to="/admin" replace />;
+    }
+
+    const locationFrom =
+      typeof location.state?.from === 'string' ? location.state.from : null;
+    const storedReturnUrl = localStorage.getItem('tn_laptop_auth_return_url');
+    const nextPath = locationFrom || storedReturnUrl || '/cart';
+    const safeNextPath = nextPath === '/login' || nextPath === '/register' ? '/cart' : nextPath;
+
+    return <Navigate to={safeNextPath} replace />;
   }
 
   return (

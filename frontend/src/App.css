@@ -2552,6 +2552,108 @@
   border-radius: 10px;
   font-weight: 700;
   font-size: 14px;
+  cursor: pointer;
+}
+
+.checkout-add-address:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.checkout-address-form-panel {
+  margin-bottom: 10px;
+  border: 1px dashed #c9daf2;
+  border-radius: 12px;
+  padding: 12px;
+  background: #f8fbff;
+  display: grid;
+  gap: 10px;
+}
+
+.checkout-address-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.checkout-address-grid label:not(.checkout-address-checkbox) {
+  display: grid;
+  gap: 6px;
+  color: #334155;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.checkout-address-grid input[type='text'],
+.checkout-address-grid input[type='tel'] {
+  border: 1px solid #d5e2f3;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 14px;
+  color: #334155;
+  background: #fff;
+}
+
+.checkout-address-grid input[type='text']:focus,
+.checkout-address-grid input[type='tel']:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.checkout-address-grid input:disabled {
+  background: #eef4fb;
+  cursor: not-allowed;
+}
+
+.checkout-address-full-width {
+  grid-column: 1 / -1;
+}
+
+.checkout-address-checkbox {
+  grid-column: 1 / -1;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  color: #475569;
+}
+
+.checkout-address-checkbox input[type='checkbox'] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: #2563eb;
+}
+
+.checkout-address-checkbox span {
+  font-size: 14px;
+  color: #475569;
+}
+
+.checkout-address-form-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.checkout-address-form-actions button {
+  border: 1px solid #3b82f6;
+  background: #2563eb;
+  color: #fff;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.checkout-address-form-actions button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.checkout-address-form-actions .checkout-address-cancel {
+  background: #fff;
+  color: #3b82f6;
 }
 
 .checkout-warning {

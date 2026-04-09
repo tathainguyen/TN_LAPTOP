@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 
 import { getUserCart } from '../../services/cart/cartService.js';
 import { getCheckoutData, placeCodOrder } from '../../services/order/orderService.js';
+import { createAddress } from '../../services/address/addressService.js';
 
 function formatVnd(value) {
   return new Intl.NumberFormat('vi-VN', {
@@ -39,6 +40,80 @@ const VOUCHER_MAP = {
   },
 };
 
+const ADDRESS_DATA = {
+  'TP. Hồ Chí Minh': {
+    'Quận 1': ['Phường Bến Nghé', 'Phường Bến Thành', 'Phường Cầu Ông Lãnh', 'Phường Nguyễn Thái Bình'],
+    'Quận 3': ['Phường Võ Thị Sáu', 'Phường 4', 'Phường 5', 'Phường 6'],
+    'Quận 7': ['Phường Tân Phú', 'Phường Tân Phong', 'Phường Tân Kiểng', 'Phường Phú Mỹ'],
+    'Quận Bình Thạnh': ['Phường 13', 'Phường 14', 'Phường 15', 'Phường 22'],
+    'Thành phố Thủ Đức': ['Phường An Phú', 'Phường Thảo Điền', 'Phường Hiệp Bình Chánh', 'Phường Linh Đông'],
+  },
+  'Hà Nội': {
+    'Quận Ba Đình': ['Phường Liễu Giai', 'Phường Kim Mã', 'Phường Ngọc Hà', 'Phường Đội Cấn'],
+    'Quận Hoàn Kiếm': ['Phường Hàng Bạc', 'Phường Hàng Bông', 'Phường Tràng Tiền', 'Phường Cửa Đông'],
+    'Quận Cầu Giấy': ['Phường Dịch Vọng', 'Phường Nghĩa Đô', 'Phường Quan Hoa', 'Phường Yên Hòa'],
+    'Quận Đống Đa': ['Phường Láng Thượng', 'Phường Trung Liệt', 'Phường Ô Chợ Dừa', 'Phường Văn Miếu'],
+    'Quận Hà Đông': ['Phường Mộ Lao', 'Phường Nguyễn Trãi', 'Phường Văn Quán', 'Phường Phú La'],
+  },
+  'Đà Nẵng': {
+    'Quận Hải Châu': ['Phường Hải Châu I', 'Phường Hải Châu II', 'Phường Bình Hiên', 'Phường Hòa Thuận Tây'],
+    'Quận Thanh Khê': ['Phường Thanh Khê Đông', 'Phường Thanh Khê Tây', 'Phường Xuân Hà', 'Phường Chính Gián'],
+    'Quận Sơn Trà': ['Phường An Hải Bắc', 'Phường Phước Mỹ', 'Phường Nại Hiên Đông', 'Phường Mân Thái'],
+    'Quận Ngũ Hành Sơn': ['Phường Mỹ An', 'Phường Khuê Mỹ', 'Phường Hòa Hải'],
+  },
+  'Cần Thơ': {
+    'Quận Ninh Kiều': ['Phường Tân An', 'Phường An Cư', 'Phường An Nghiệp', 'Phường Xuân Khánh'],
+    'Quận Bình Thủy': ['Phường Bình Thủy', 'Phường Trà An', 'Phường Long Hòa', 'Phường Bùi Hữu Nghĩa'],
+    'Quận Cái Răng': ['Phường Lê Bình', 'Phường Hưng Phú', 'Phường Hưng Thạnh', 'Phường Ba Láng'],
+  },
+  'Hải Phòng': {
+    'Quận Hồng Bàng': ['Phường Hạ Lý', 'Phường Minh Khai', 'Phường Sở Dầu', 'Phường Quán Toan'],
+    'Quận Ngô Quyền': ['Phường Máy Tơ', 'Phường Lạch Tray', 'Phường Cầu Đất', 'Phường Đằng Giang'],
+    'Quận Lê Chân': ['Phường An Biên', 'Phường Trại Cau', 'Phường Kênh Dương', 'Phường Vĩnh Niệm'],
+  },
+};
+
+const FALLBACK_DISTRICTS = [
+  'Quận 1',
+  'Quận 3',
+  'Quận 7',
+  'Thành phố Thủ Đức',
+  'Quận Cầu Giấy',
+  'Quận Đống Đa',
+  'Quận Hải Châu',
+  'Quận Sơn Trà',
+  'Quận Ninh Kiều',
+  'Quận Hồng Bàng',
+];
+
+const FALLBACK_WARDS = [
+  'Phường Bến Nghé',
+  'Phường Thảo Điền',
+  'Phường Dịch Vọng',
+  'Phường Kim Mã',
+  'Phường Hải Châu I',
+  'Phường An Hải Bắc',
+  'Phường Tân An',
+  'Phường Lạch Tray',
+];
+
+function normalizeText(value) {
+  return String(value || '').trim().toLowerCase();
+}
+
+function filterSuggestions(options, keyword) {
+  const normalizedKeyword = normalizeText(keyword);
+  return options
+    .filter((option) => {
+      if (!normalizedKeyword) {
+        return true;
+      }
+
+      return normalizeText(option).includes(normalizedKeyword);
+    })
+    .slice(0, 8);
+}
+
 function Checkout() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -54,12 +129,24 @@ function Checkout() {
     payment_method: 'COD',
     online_provider: 'VNPAY',
   });
+  const [showAddressForm, setShowAddressForm] = useState(false);
+  const [addingAddress, setAddingAddress] = useState(false);
+  const [addressForm, setAddressForm] = useState({
+    recipient_name: '',
+    recipient_phone: '',
+    province: '',
+    district: '',
+    ward: '',
+    address_line: '',
+    is_default: false,
+  });
   const [voucherInput, setVoucherInput] = useState('');
   const [appliedVoucher, setAppliedVoucher] = useState(null);
   const [voucherModalOpen, setVoucherModalOpen] = useState(false);
 
   useEffect(() => {
     if (!user?.id) {
+      localStorage.setItem('tn_laptop_auth_return_url', '/cart');
       navigate('/login', { replace: true });
       return;
     }
@@ -114,6 +201,38 @@ function Checkout() {
   const discountAmount = Number(appliedVoucher?.discount || 0);
   const grandTotal = Math.max(0, subtotal + shippingFee - discountAmount);
   const savedVouchers = useMemo(() => Object.values(VOUCHER_MAP), []);
+  const provinceOptions = useMemo(
+    () => filterSuggestions(Object.keys(ADDRESS_DATA), addressForm.province),
+    [addressForm.province]
+  );
+  const selectedProvince = useMemo(
+    () => Object.keys(ADDRESS_DATA).find(
+      (province) => normalizeText(province) === normalizeText(addressForm.province)
+    ),
+    [addressForm.province]
+  );
+  const districtSource = selectedProvince
+    ? Object.keys(ADDRESS_DATA[selectedProvince])
+    : FALLBACK_DISTRICTS;
+  const districtOptions = useMemo(
+    () => filterSuggestions(districtSource, addressForm.district),
+    [districtSource, addressForm.district]
+  );
+  const selectedDistrict = useMemo(
+    () => (selectedProvince
+      ? Object.keys(ADDRESS_DATA[selectedProvince]).find(
+        (district) => normalizeText(district) === normalizeText(addressForm.district)
+      )
+      : null),
+    [selectedProvince, addressForm.district]
+  );
+  const wardSource = selectedProvince && selectedDistrict
+    ? ADDRESS_DATA[selectedProvince][selectedDistrict]
+    : FALLBACK_WARDS;
+  const wardOptions = useMemo(
+    () => filterSuggestions(wardSource, addressForm.ward),
+    [wardSource, addressForm.ward]
+  );
 
   function handleApplyVoucher(rawCode = voucherInput) {
     const normalizedCode = String(rawCode || '').trim().toUpperCase();
@@ -149,11 +268,114 @@ function Checkout() {
     setVoucherModalOpen(false);
   }
 
+  function resetAddressForm() {
+    setAddressForm({
+      recipient_name: '',
+      recipient_phone: '',
+      province: '',
+      district: '',
+      ward: '',
+      address_line: '',
+      is_default: false,
+    });
+    setShowAddressForm(false);
+  }
+
+  function updateAddressField(field, value) {
+    setAddressForm((prev) => {
+      if (field === 'province') {
+        return { ...prev, province: value, district: '', ward: '' };
+      }
+
+      if (field === 'district') {
+        return { ...prev, district: value, ward: '' };
+      }
+
+      return { ...prev, [field]: value };
+    });
+  }
+
+  async function handleAddressSubmit() {
+    if (!addressForm.recipient_name.trim()) {
+      toast.error('Vui lòng nhập tên người nhận.');
+      return;
+    }
+
+    if (!addressForm.recipient_phone.trim()) {
+      toast.error('Vui lòng nhập số điện thoại.');
+      return;
+    }
+
+    if (!addressForm.province.trim()) {
+      toast.error('Vui lòng nhập tỉnh/thành phố.');
+      return;
+    }
+
+    if (!addressForm.district.trim()) {
+      toast.error('Vui lòng nhập quận/huyện.');
+      return;
+    }
+
+    if (!addressForm.ward.trim()) {
+      toast.error('Vui lòng nhập phường/xã.');
+      return;
+    }
+
+    if (!addressForm.address_line.trim()) {
+      toast.error('Vui lòng nhập địa chỉ chi tiết.');
+      return;
+    }
+
+    try {
+      setAddingAddress(true);
+
+      const payload = {
+        recipient_name: addressForm.recipient_name.trim(),
+        recipient_phone: addressForm.recipient_phone.trim(),
+        province: addressForm.province.trim(),
+        district: addressForm.district.trim(),
+        ward: addressForm.ward.trim(),
+        address_line: addressForm.address_line.trim(),
+        is_default: addressForm.is_default ? 1 : 0,
+      };
+
+      const response = await createAddress(user.id, payload);
+
+      if (response?.status !== 'success' || !response?.data) {
+        toast.error(response?.message || 'Lưu địa chỉ thất bại.');
+        return;
+      }
+
+      const newAddress = response.data;
+      setAddresses((prev) => {
+        const nextList = addressForm.is_default
+          ? prev.map((item) => ({ ...item, is_default: 0 }))
+          : prev;
+
+        return [...nextList, newAddress];
+      });
+
+      setForm((prev) => ({
+        ...prev,
+        user_address_id: String(newAddress.id),
+      }));
+
+      toast.success('Thêm địa chỉ thành công.');
+      resetAddressForm();
+    } catch (error) {
+      const message = error?.response?.data?.message || 'Không thể lưu địa chỉ.';
+      toast.error(message);
+    } finally {
+      setAddingAddress(false);
+    }
+  }
+
   async function handlePlaceCodOrder(event) {
     event.preventDefault();
 
     if (!user?.id) {
       toast.error('Vui lòng đăng nhập để đặt hàng.');
+      localStorage.setItem('tn_laptop_auth_return_url', '/cart');
       navigate('/login', { replace: true });
       return;
     }
@@ -231,16 +453,140 @@ function Checkout() {
           <article className="checkout-card checkout-card--address">
             <div className="checkout-card-headline">
               <h2>1. Chọn địa chỉ nhận hàng</h2>
-              <Link className="checkout-add-address" to="/account/addresses">
-                + Thêm địa chỉ mới
-              </Link>
+              <button
+                type="button"
+                className="checkout-add-address"
+                onClick={() => {
+                  if (showAddressForm) {
+                    resetAddressForm();
+                    return;
+                  }
+
+                  setShowAddressForm(true);
+                }}
+                disabled={addingAddress}
+              >
+                {showAddressForm ? 'Hủy' : '+ Thêm địa chỉ mới'}
+              </button>
             </div>
+
+            {showAddressForm ? (
+              <div className="checkout-address-form-panel">
+                <div className="checkout-address-grid">
+                  <label>
+                    Tên người nhận
+                    <input
+                      type="text"
+                      value={addressForm.recipient_name}
+                      onChange={(event) => updateAddressField('recipient_name', event.target.value)}
+                      placeholder="Ví dụ: Nguyễn Văn A"
+                      disabled={addingAddress}
+                    />
+                  </label>
+
+                  <label>
+                    Số điện thoại
+                    <input
+                      type="tel"
+                      value={addressForm.recipient_phone}
+                      onChange={(event) => updateAddressField('recipient_phone', event.target.value)}
+                      placeholder="Ví dụ: 0901234567"
+                      disabled={addingAddress}
+                    />
+                  </label>
+
+                  <label>
+                    Tỉnh / Thành phố
+                    <input
+                      type="text"
+                      list="checkout-province-options"
+                      value={addressForm.province}
+                      onChange={(event) => updateAddressField('province', event.target.value)}
+                      placeholder="Ví dụ: TP. Hồ Chí Minh"
+                      disabled={addingAddress}
+                    />
+                    <datalist id="checkout-province-options">
+                      {provinceOptions.map((option) => (
+                        <option key={option} value={option} />
+                      ))}
+                    </datalist>
+                  </label>
+
+                  <label>
+                    Quận / Huyện
+                    <input
+                      type="text"
+                      list="checkout-district-options"
+                      value={addressForm.district}
+                      onChange={(event) => updateAddressField('district', event.target.value)}
+                      placeholder="Ví dụ: Quận 1"
+                      disabled={addingAddress}
+                    />
+                    <datalist id="checkout-district-options">
+                      {districtOptions.map((option) => (
+                        <option key={option} value={option} />
+                      ))}
+                    </datalist>
+                  </label>
+
+                  <label>
+                    Phường / Xã
+                    <input
+                      type="text"
+                      list="checkout-ward-options"
+                      value={addressForm.ward}
+                      onChange={(event) => updateAddressField('ward', event.target.value)}
+                      placeholder="Ví dụ: Phường Bến Nghé"
+                      disabled={addingAddress}
+                    />
+                    <datalist id="checkout-ward-options">
+                      {wardOptions.map((option) => (
+                        <option key={option} value={option} />
+                      ))}
+                    </datalist>
+                  </label>
+
+                  <label className="checkout-address-full-width">
+                    Địa chỉ chi tiết
+                    <input
+                      type="text"
+                      value={addressForm.address_line}
+                      onChange={(event) => updateAddressField('address_line', event.target.value)}
+                      placeholder="Ví dụ: 12 Nguyễn Huệ"
+                      disabled={addingAddress}
+                    />
+                  </label>
+
+                  <label className="checkout-address-checkbox">
+                    <input
+                      type="checkbox"
+                      checked={addressForm.is_default}
+                      onChange={(event) => updateAddressField('is_default', event.target.checked)}
+                      disabled={addingAddress}
+                    />
+                    <span>Đặt làm địa chỉ mặc định</span>
+                  </label>
+                </div>
+
+                <div className="checkout-address-form-actions">
+                  <button type="button" onClick={handleAddressSubmit} disabled={addingAddress}>
+                    {addingAddress ? 'Đang lưu...' : 'Lưu địa chỉ'}
+                  </button>
+                  <button
+                    type="button"
+                    className="checkout-address-cancel"
+                    onClick={resetAddressForm}
+                    disabled={addingAddress}
+                  >
+                    Hủy
+                  </button>
+                </div>
+              </div>
+            ) : null}
 
             {addresses.length === 0 ? (
               <p className="checkout-warning">
-                Bạn chưa có địa chỉ giao hàng. Vui lòng thêm địa chỉ trong
-                {' '}
-                <Link to="/account/addresses">Sổ địa chỉ</Link>.
+                Bạn chưa có địa chỉ giao hàng. Vui lòng thêm địa chỉ mới ngay tại đây.
               </p>
             ) : (
               <div className="checkout-address-list">

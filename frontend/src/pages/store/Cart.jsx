@@ -44,7 +44,8 @@ function Cart() {
       return;
     }
 
-    navigate('/login');
+    localStorage.setItem('tn_laptop_auth_return_url', '/cart');
+    navigate('/login', { state: { from: '/cart' } });
   }
 
   useEffect(() => {
