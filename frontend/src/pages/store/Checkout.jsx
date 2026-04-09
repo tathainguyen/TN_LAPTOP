@@ -22,6 +22,23 @@ function getStoredUser() {
   }
 }
 
+const VOUCHER_MAP = {
+  MAGIAM100: {
+    code: 'MAGIAM100',
+    discount: 100000,
+    label: 'Giảm 100.000đ',
+    subtitle: 'Giảm tối đa 100,000đ',
+    usedPercent: '16.7%',
+  },
+  FREESHIP50: {
+    code: 'FREESHIP50',
+    discount: 50000,
+    label: 'Giảm 50.000đ',
+    subtitle: 'Giảm tối đa 50,000đ',
+    usedPercent: '16%',
+  },
+};
+
 function Checkout() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -34,7 +51,12 @@ function Checkout() {
     user_address_id: '',
     shipping_method_id: '',
     customer_note: '',
+    payment_method: 'COD',
+    online_provider: 'VNPAY',
   });
+  const [voucherInput, setVoucherInput] = useState('');
+  const [appliedVoucher, setAppliedVoucher] = useState(null);
+  const [voucherModalOpen, setVoucherModalOpen] = useState(false);
 
   useEffect(() => {
     if (!user?.id) {
@@ -89,7 +111,43 @@ function Checkout() {
   );
 
   const shippingFee = Number(selectedShippingMethod?.fee || 0);
-  const grandTotal = subtotal + shippingFee;
+  const discountAmount = Number(appliedVoucher?.discount || 0);
+  const grandTotal = Math.max(0, subtotal + shippingFee - discountAmount);
+  const savedVouchers = useMemo(() => Object.values(VOUCHER_MAP), []);
+
+  function handleApplyVoucher(rawCode = voucherInput) {
+    const normalizedCode = String(rawCode || '').trim().toUpperCase();
+
+    if (!normalizedCode) {
+      toast.error('Vui lòng nhập mã voucher.');
+      return;
+    }
+
+    const matchedVoucher = VOUCHER_MAP[normalizedCode] || null;
+
+    if (!matchedVoucher) {
+      toast.error('Mã voucher không hợp lệ hoặc đã hết hạn.');
+      return;
+    }
+
+    setAppliedVoucher(matchedVoucher);
+    setVoucherInput(matchedVoucher.code);
+    setVoucherModalOpen(false);
+    toast.success(`Áp dụng voucher thành công: ${matchedVoucher.label}`);
+  }
+
+  function handleClearVoucher() {
+    setAppliedVoucher(null);
+    setVoucherInput('');
+  }
+
+  function openVoucherModal() {
+    setVoucherModalOpen(true);
+  }
+
+  function closeVoucherModal() {
+    setVoucherModalOpen(false);
+  }
 
   async function handlePlaceCodOrder(event) {
     event.preventDefault();
@@ -107,6 +165,13 @@ function Checkout() {
 
     if (!form.shipping_method_id) {
       toast.error('Vui lòng chọn phương thức vận chuyển.');
+      return;
+    }
+
+    if (form.payment_method === 'ONLINE') {
+      toast('Thanh toán online sẽ được triển khai ở bước tiếp theo. Vui lòng chọn COD để đặt hàng.', {
+        icon: 'ℹ️',
+      });
       return;
     }
 
@@ -158,47 +223,91 @@ function Checkout() {
     <main className="checkout-page">
       <section className="checkout-shell">
         <header className="checkout-head">
-          <h1>Thanh toán COD</h1>
-          <p>Xác nhận địa chỉ và phương thức giao hàng trước khi đặt.</p>
+          <h1>Thanh toán</h1>
+          <p>Kiểm tra thông tin đơn hàng và xác nhận trước khi đặt hàng.</p>
         </header>
 
         <form className="checkout-grid" onSubmit={handlePlaceCodOrder}>
-          <div className="checkout-main">
-            <article className="checkout-card">
-              <h2>Địa chỉ giao hàng</h2>
-              {addresses.length === 0 ? (
-                <p className="checkout-warning">
-                  Bạn chưa có địa chỉ giao hàng. Vui lòng thêm địa chỉ trong
-                  {' '}
-                  <Link to="/account/addresses">Sổ địa chỉ</Link>.
-                </p>
-              ) : (
-                <div className="checkout-address-list">
-                  {addresses.map((address) => (
-                    <label key={address.id} className="checkout-address-item">
-                      <input
-                        type="radio"
-                        name="address"
-                        checked={String(form.user_address_id) === String(address.id)}
-                        onChange={() =>
-                          setForm((prev) => ({ ...prev, user_address_id: String(address.id) }))
-                        }
-                      />
-                      <div>
-                        <strong>{address.recipient_name} - {address.recipient_phone}</strong>
-                        <p>
-                          {address.address_line}, {address.ward}, {address.district}, {address.province}
-                        </p>
-                        {address.address_note ? <span>Ghi chú: {address.address_note}</span> : null}
-                      </div>
-                    </label>
-                  ))}
-                </div>
-              )}
-            </article>
+          <article className="checkout-card checkout-card--address">
+            <div className="checkout-card-headline">
+              <h2>1. Chọn địa chỉ nhận hàng</h2>
+              <Link className="checkout-add-address" to="/account/addresses">
+                + Thêm địa chỉ mới
+              </Link>
+            </div>
 
-            <article className="checkout-card">
-              <h2>Vận chuyển</h2>
+            {addresses.length === 0 ? (
+              <p className="checkout-warning">
+                Bạn chưa có địa chỉ giao hàng. Vui lòng thêm địa chỉ trong
+                {' '}
+                <Link to="/account/addresses">Sổ địa chỉ</Link>.
+              </p>
+            ) : (
+              <div className="checkout-address-list">
+                {addresses.map((address) => (
+                  <label key={address.id} className="checkout-address-item">
+                    <input
+                      type="radio"
+                      name="address"
+                      checked={String(form.user_address_id) === String(address.id)}
+                      onChange={() =>
+                        setForm((prev) => ({ ...prev, user_address_id: String(address.id) }))
+                      }
+                    />
+                    <div>
+                      <strong>{address.recipient_name} - {address.recipient_phone}</strong>
+                      <p>
+                        {address.address_line}, {address.ward}, {address.district}, {address.province}
+                      </p>
+                      {address.address_note ? <span>Ghi chú: {address.address_note}</span> : null}
+                    </div>
+                  </label>
+                ))}
+              </div>
+            )}
+          </article>
+
+          <article className="checkout-card checkout-card--products">
+            <h2>2. Sản phẩm & vận chuyển</h2>
+
+            <div className="checkout-product-table-wrap">
+              <table className="checkout-product-table">
+                <thead>
+                  <tr>
+                    <th>Sản phẩm</th>
+                    <th>Tên sản phẩm</th>
+                    <th>Giá</th>
+                    <th>Số lượng</th>
+                    <th>Tổng tiền</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {cartItems.map((item) => (
+                    <tr key={`${item.product_id}-${item.sku || ''}`}>
+                      <td className="checkout-product-thumb-cell">
+                        <img
+                          src={item.primary_image || 'https://via.placeholder.com/120x80?text=No+Image'}
+                          alt={item.product_name || 'Sản phẩm'}
+                          className="checkout-product-thumb"
+                        />
+                      </td>
+                      <td>
+                        <p className="checkout-product-name">{item.product_name || 'Sản phẩm'}</p>
+                        <p className="checkout-product-sku">{item.sku || '-'}</p>
+                      </td>
+                      <td>{formatVnd(item.unit_price)}</td>
+                      <td>{item.quantity}</td>
+                      <td className="checkout-product-line-total">
+                        {formatVnd(Number(item.quantity || 0) * Number(item.unit_price || 0))}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="checkout-shipping-section">
+              <h3>Phương thức vận chuyển</h3>
               <div className="checkout-ship-list">
                 {shippingMethods.map((method) => (
                   <label key={method.id} className="checkout-ship-item">
@@ -218,58 +327,176 @@ function Checkout() {
                   </label>
                 ))}
               </div>
-            </article>
-
-            <article className="checkout-card">
-              <h2>Lời nhắn cho shop</h2>
-              <textarea
-                rows={3}
-                value={form.customer_note}
-                onChange={(event) => setForm((prev) => ({ ...prev, customer_note: event.target.value }))}
-                placeholder="Ví dụ: Giao trong giờ hành chính, gọi trước khi đến"
-              />
-            </article>
-          </div>
-
-          <aside className="checkout-summary">
-            <h2>Đơn hàng của bạn</h2>
-
-            <div className="checkout-items">
-              {cartItems.map((item) => (
-                <div className="checkout-item-row" key={`${item.product_id}-${item.sku}`}>
-                  <div className="checkout-item-main">
-                    <strong>{item.product_name}</strong>
-                    <span>
-                      SL: {item.quantity} x {formatVnd(item.unit_price || 0)}
-                    </span>
-                  </div>
-                  <b>{formatVnd(Number(item.quantity) * Number(item.unit_price || 0))}</b>
-                </div>
-              ))}
             </div>
 
-            <hr />
-            <p>
-              <span>Tạm tính</span>
-              <strong>{formatVnd(subtotal)}</strong>
-            </p>
-            <p>
-              <span>Phí vận chuyển</span>
-              <strong>{formatVnd(shippingFee)}</strong>
-            </p>
-            <p className="checkout-total">
-              <span>Tổng cộng</span>
-              <strong>{formatVnd(grandTotal)}</strong>
-            </p>
+            <div className="checkout-voucher-row">
+              <div className="checkout-voucher-brand">TN LAPTOP voucher</div>
+              <button type="button" className="checkout-voucher-trigger" onClick={openVoucherModal}>
+                Chọn hoặc nhập mã
+              </button>
+              <div className="checkout-voucher-code">
+                Mã voucher:
+                {' '}
+                <strong>{appliedVoucher?.code || 'Chưa áp dụng'}</strong>
+                {appliedVoucher ? (
+                  <button type="button" className="checkout-voucher-clear-inline" onClick={handleClearVoucher}>
+                    Bỏ mã
+                  </button>
+                ) : null}
+              </div>
+            </div>
 
-            <button
-              type="submit"
-              disabled={placingOrder || !addresses.length || !shippingMethods.length}
-            >
-              {placingOrder ? 'Đang tạo đơn...' : 'Đặt hàng COD'}
-            </button>
-          </aside>
+            <div className="checkout-note-row">
+              <label htmlFor="checkout-customer-note">Lời nhắn:</label>
+              <input
+                id="checkout-customer-note"
+                type="text"
+                value={form.customer_note}
+                onChange={(event) => setForm((prev) => ({ ...prev, customer_note: event.target.value }))}
+                placeholder="Lưu ý cho Người bán..."
+              />
+              <div className="checkout-inline-total">
+                Tổng thanh toán ({cartItems.length} sản phẩm):
+                {' '}
+                <strong>{formatVnd(grandTotal)}</strong>
+              </div>
+            </div>
+          </article>
+
+          <article className="checkout-card checkout-card--payment">
+            <h2>3. Thanh toán</h2>
+
+            <div className="checkout-payment-box">
+              <p className="checkout-payment-title">Phương thức thanh toán</p>
+
+              <label className="checkout-payment-option">
+                <input
+                  type="radio"
+                  name="payment_method"
+                  checked={form.payment_method === 'COD'}
+                  onChange={() =>
+                    setForm((prev) => ({ ...prev, payment_method: 'COD' }))
+                  }
+                />
+                <span>Thanh toán khi nhận hàng (COD)</span>
+              </label>
+
+              <label className="checkout-payment-option">
+                <input
+                  type="radio"
+                  name="payment_method"
+                  checked={form.payment_method === 'ONLINE'}
+                  onChange={() =>
+                    setForm((prev) => ({ ...prev, payment_method: 'ONLINE' }))
+                  }
+                />
+                <span>Thanh toán online</span>
+              </label>
+
+              {form.payment_method === 'ONLINE' ? (
+                <div className="checkout-online-methods">
+                  <label>
+                    <input
+                      type="radio"
+                      name="online_provider"
+                      checked={form.online_provider === 'VNPAY'}
+                      onChange={() =>
+                        setForm((prev) => ({ ...prev, online_provider: 'VNPAY' }))
+                      }
+                    />
+                    <span>VNPAY</span>
+                  </label>
+                  <label>
+                    <input
+                      type="radio"
+                      name="online_provider"
+                      checked={form.online_provider === 'PAYPAL'}
+                      onChange={() =>
+                        setForm((prev) => ({ ...prev, online_provider: 'PAYPAL' }))
+                      }
+                    />
+                    <span>PAYPAL</span>
+                  </label>
+                </div>
+              ) : null}
+            </div>
+
+            <div className="checkout-summary-box">
+              <p>
+                <span>Tổng tiền hàng</span>
+                <strong>{formatVnd(subtotal)}</strong>
+              </p>
+              <p>
+                <span>Tổng giảm giá</span>
+                <strong>- {formatVnd(discountAmount)}</strong>
+              </p>
+              <p>
+                <span>Phí vận chuyển</span>
+                <strong>{formatVnd(shippingFee)}</strong>
+              </p>
+              <p className="checkout-total">
+                <span>Tổng thanh toán</span>
+                <strong>{formatVnd(grandTotal)}</strong>
+              </p>
+
+              <button
+                type="submit"
+                disabled={placingOrder || !addresses.length || !shippingMethods.length}
+              >
+                {placingOrder
+                  ? 'Đang tạo đơn...'
+                  : form.payment_method === 'ONLINE'
+                    ? 'Thanh toán online'
+                    : 'Đặt hàng'}
+              </button>
+            </div>
+          </article>
         </form>
+
+        {voucherModalOpen ? (
+          <div className="checkout-voucher-modal-overlay" onClick={closeVoucherModal}>
+            <section className="checkout-voucher-modal" onClick={(event) => event.stopPropagation()}>
+              <header className="checkout-voucher-modal-head">
+                <h3>Chọn TN LAPTOP Voucher</h3>
+                <button type="button" onClick={closeVoucherModal}>X</button>
+              </header>
+
+              <div className="checkout-voucher-modal-input-row">
+                <label htmlFor="checkout-voucher-input">Mã Voucher</label>
+                <input
+                  id="checkout-voucher-input"
+                  type="text"
+                  value={voucherInput}
+                  onChange={(event) => setVoucherInput(event.target.value)}
+                  placeholder="Nhập mã voucher tại đây"
+                />
+                <button type="button" onClick={() => handleApplyVoucher(voucherInput)}>Áp dụng</button>
+              </div>
+
+              <div className="checkout-voucher-modal-list">
+                {savedVouchers.map((voucher) => (
+                  <article className="checkout-voucher-ticket" key={voucher.code}>
+                    <div className="checkout-voucher-ticket-left">
+                      <strong>{voucher.code}</strong>
+                    </div>
+                    <div className="checkout-voucher-ticket-body">
+                      <p>{voucher.label}</p>
+                      <span>{voucher.subtitle}</span>
+                      <small>Đã dùng {voucher.usedPercent}</small>
+                    </div>
+                    <button type="button" onClick={() => handleApplyVoucher(voucher.code)}>
+                      Dùng ngay
+                    </button>
+                  </article>
+                ))}
+              </div>
+
+              <footer className="checkout-voucher-modal-foot">
+                <button type="button" onClick={closeVoucherModal}>Hủy</button>
+              </footer>
+            </section>
+          </div>
+        ) : null}
       </section>
     </main>
   );

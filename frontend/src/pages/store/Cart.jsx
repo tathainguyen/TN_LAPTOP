@@ -235,7 +235,7 @@ function Cart() {
               </p>
 
               <button type="button" onClick={handleCheckout}>
-                {user?.id ? 'Thanh toán COD' : 'Đăng nhập để thanh toán'}
+                {user?.id ? 'Thanh Toán' : 'Đăng nhập để thanh toán'}
               </button>
             </aside>
           </div>
