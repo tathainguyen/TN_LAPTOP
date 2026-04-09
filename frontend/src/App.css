@@ -3707,6 +3707,17 @@
   cursor: pointer;
 }
 
+.checkout-voucher-modal-input-row button.is-active {
+  border-color: #1d4ed8;
+  background: #2563eb;
+  color: #fff;
+}
+
+.checkout-voucher-modal-input-row button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
 .checkout-voucher-modal-list {
   padding: 12px 16px;
   display: grid;

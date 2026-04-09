@@ -133,14 +133,14 @@ function formatVoucherMeta(voucher) {
 
   const chunks = [];
   if (minOrder > 0) {
-    chunks.push(`Don toi thieu ${formatVnd(minOrder)}`);
+    chunks.push(`Đơn tối thiểu ${formatVnd(minOrder)}`);
   }
 
   if (maxDiscount !== null && maxDiscount > 0) {
-    chunks.push(`Toi da ${formatVnd(maxDiscount)}`);
+    chunks.push(`Tối đa giảm ${formatVnd(maxDiscount)}`);
   }
 
-  return chunks.length > 0 ? chunks.join(' | ') : 'Khong gioi han dieu kien don hang';
+  return chunks.length > 0 ? chunks.join(' | ') : 'Không giới hạn điều kiện đơn hàng';
 }
 
 function Checkout() {
@@ -232,6 +232,12 @@ function Checkout() {
   const shippingFee = Number(selectedShippingMethod?.fee || 0);
   const discountAmount = Number(appliedVoucher?.discount_amount || 0);
   const grandTotal = Math.max(0, subtotal + shippingFee - discountAmount);
+  const normalizedVoucherInput = String(voucherInput || '').trim().toUpperCase();
+  const matchedManualVoucher = useMemo(
+    () => availableVouchers.find((voucher) => String(voucher?.code || '').toUpperCase() === normalizedVoucherInput) || null,
+    [availableVouchers, normalizedVoucherInput]
+  );
+  const canApplyManualVoucher = Boolean(normalizedVoucherInput) && Boolean(matchedManualVoucher?.is_eligible) && !applyingVoucher;
   const provinceOptions = useMemo(
     () => filterSuggestions(Object.keys(ADDRESS_DATA), addressForm.province),
     [addressForm.province]
@@ -872,8 +878,13 @@ function Checkout() {
                   onChange={(event) => setVoucherInput(event.target.value)}
                   placeholder="Nhập mã voucher tại đây"
                 />
-                <button type="button" onClick={() => handleApplyVoucher(voucherInput)} disabled={applyingVoucher}>
-                  {applyingVoucher ? 'Dang ap dung...' : 'Áp dụng'}
+                <button
+                  type="button"
+                  onClick={() => handleApplyVoucher(voucherInput)}
+                  disabled={!canApplyManualVoucher}
+                  className={canApplyManualVoucher ? 'is-active' : ''}
+                >
+                  {applyingVoucher ? 'Đang áp dụng...' : 'Áp dụng'}
                 </button>
               </div>
 
@@ -895,8 +906,8 @@ function Checkout() {
                         <span>{formatVoucherMeta(voucher)}</span>
                         <small>
                           {voucher.is_eligible
-                            ? `Uoc tinh giam ${formatVnd(voucher.estimated_discount)}`
-                            : `Can don toi thieu ${formatVnd(voucher.min_order_value)}`}
+                            ? `Ước tính giảm ${formatVnd(voucher.estimated_discount)}`
+                            : `Cần đơn tối thiểu ${formatVnd(voucher.min_order_value)}`}
                         </small>
                       </div>
                       <button
