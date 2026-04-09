@@ -46,3 +46,22 @@ export async function deleteVoucherCodeAdmin(id) {
   const response = await voucherApi.delete(`/codes/${Number(id)}`);
   return response.data;
 }
+
+export async function getCheckoutVouchers(orderAmount) {
+  const response = await voucherApi.get('/checkout/available', {
+    params: {
+      order_amount: Number(orderAmount || 0),
+    },
+  });
+
+  return response.data;
+}
+
+export async function validateCheckoutVoucher(code, orderAmount) {
+  const response = await voucherApi.post('/checkout/validate', {
+    code: String(code || '').trim().toUpperCase(),
+    order_amount: Number(orderAmount || 0),
+  });
+
+  return response.data;
+}

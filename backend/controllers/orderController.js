@@ -64,6 +64,7 @@ export async function placeCodOrder(req, res) {
     const userId = parseUserId(req.body?.user_id);
     const userAddressId = Number(req.body?.user_address_id || 0);
     const shippingMethodId = Number(req.body?.shipping_method_id || 0);
+    const voucherCode = req.body?.voucher_code || null;
     const customerNote = req.body?.customer_note || null;
 
     if (!userId || !Number.isInteger(userAddressId) || userAddressId <= 0) {
@@ -86,6 +87,7 @@ export async function placeCodOrder(req, res) {
       userId,
       userAddressId,
       shippingMethodId,
+      voucherCode,
       customerNote,
     });
 
@@ -107,6 +109,54 @@ export async function placeCodOrder(req, res) {
       return res.status(400).json({
         status: 'error',
         message: 'Phương thức vận chuyển không hợp lệ.',
+        data: null,
+      });
+    }
+
+    if (error?.message === 'INVALID_VOUCHER') {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Voucher khong hop le.',
+        data: null,
+      });
+    }
+
+    if (error?.message === 'VOUCHER_NOT_ACTIVE') {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Voucher hien khong hoat dong.',
+        data: null,
+      });
+    }
+
+    if (error?.message === 'VOUCHER_NOT_STARTED') {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Voucher chua den thoi gian ap dung.',
+        data: null,
+      });
+    }
+
+    if (error?.message === 'VOUCHER_EXPIRED') {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Voucher da het han.',
+        data: null,
+      });
+    }
+
+    if (error?.message === 'VOUCHER_USAGE_EXCEEDED') {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Voucher da het luot su dung.',
+        data: null,
+      });
+    }
+
+    if (error?.message === 'VOUCHER_MIN_ORDER_NOT_MET') {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Don hang chua dat gia tri toi thieu de ap dung voucher.',
         data: null,
       });
     }

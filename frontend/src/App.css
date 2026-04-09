@@ -3715,6 +3715,14 @@
   overflow: auto;
 }
 
+.checkout-voucher-loading {
+  margin: 0;
+  color: #64748b;
+  font-size: 14px;
+  text-align: center;
+  padding: 10px 0;
+}
+
 .checkout-voucher-ticket {
   border: 1px solid #e2e8f0;
   border-radius: 10px;
@@ -3764,6 +3772,11 @@
   color: #ef4444;
   font-weight: 700;
   cursor: pointer;
+}
+
+.checkout-voucher-ticket button:disabled {
+  color: #94a3b8;
+  cursor: not-allowed;
 }
 
 .checkout-voucher-modal-foot {

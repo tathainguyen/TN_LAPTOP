@@ -1,13 +1,65 @@
 import {
+  calculateVoucherDiscountAmount,
   createVoucherCode,
   createVoucherType,
   deleteVoucherCodeById,
   deleteVoucherTypeById,
+  getAvailableVouchersForCheckout,
+  getVoucherByCodeForCheckout,
   getVouchersAdmin,
   getVoucherTypesAdmin,
   updateVoucherCodeById,
   updateVoucherTypeById,
 } from '../models/voucherModel.js';
+
+function parseOrderAmount(value) {
+  const orderAmount = Number(value || 0);
+  if (!Number.isFinite(orderAmount) || orderAmount < 0) {
+    return null;
+  }
+
+  return orderAmount;
+}
+
+function checkVoucherAvailability(voucher, orderAmount) {
+  if (!voucher) {
+    return { ok: false, message: 'Ma voucher khong ton tai.' };
+  }
+
+  if (Number(voucher.is_active) !== 1) {
+    return { ok: false, message: 'Voucher hien khong hoat dong.' };
+  }
+
+  const now = new Date();
+  const startAt = new Date(voucher.start_at);
+  const endAt = new Date(voucher.end_at);
+
+  if (!Number.isNaN(startAt.getTime()) && now < startAt) {
+    return { ok: false, message: 'Voucher chua den thoi gian ap dung.' };
+  }
+
+  if (!Number.isNaN(endAt.getTime()) && now > endAt) {
+    return { ok: false, message: 'Voucher da het han.' };
+  }
+
+  const usageLimit = voucher.total_usage_limit === null
+    ? null
+    : Number(voucher.total_usage_limit || 0);
+
+  if (usageLimit !== null && Number(voucher.used_count || 0) >= usageLimit) {
+    return { ok: false, message: 'Voucher da het luot su dung.' };
+  }
+
+  const minOrderValue = Math.max(0, Number(voucher.min_order_value || 0));
+  if (orderAmount < minOrderValue) {
+    return {
+      ok: false,
+      message: `Don hang chua dat gia tri toi thieu ${Math.round(minOrderValue).toLocaleString('vi-VN')} VND de ap dung voucher.`,
+    };
+  }
+
+  return { ok: true, message: '' };
+}
 
 export async function getVoucherTypes(req, res) {
   try {
@@ -320,6 +372,96 @@ export async function deleteVoucherCodeController(req, res) {
     return res.status(500).json({
       status: 'error',
       message: 'Khong the xoa ma khuyen mai.',
+      data: null,
+    });
+  }
+}
+
+export async function getCheckoutVouchers(req, res) {
+  try {
+    const orderAmount = parseOrderAmount(req.query?.order_amount);
+
+    if (orderAmount === null) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Gia tri order_amount khong hop le.',
+        data: null,
+      });
+    }
+
+    const vouchers = await getAvailableVouchersForCheckout(orderAmount);
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Lay danh sach voucher checkout thanh cong.',
+      data: vouchers,
+    });
+  } catch (error) {
+    console.error('❌ Loi getCheckoutVouchers:', error);
+
+    return res.status(500).json({
+      status: 'error',
+      message: 'Khong the tai danh sach voucher checkout.',
+      data: null,
+    });
+  }
+}
+
+export async function validateCheckoutVoucher(req, res) {
+  try {
+    const code = String(req.body?.code || '').trim().toUpperCase();
+    const orderAmount = parseOrderAmount(req.body?.order_amount);
+
+    if (!code) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Ma voucher khong duoc de trong.',
+        data: null,
+      });
+    }
+
+    if (orderAmount === null) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Gia tri order_amount khong hop le.',
+        data: null,
+      });
+    }
+
+    const voucher = await getVoucherByCodeForCheckout(code);
+    const check = checkVoucherAvailability(voucher, orderAmount);
+
+    if (!check.ok) {
+      return res.status(400).json({
+        status: 'error',
+        message: check.message,
+        data: null,
+      });
+    }
+
+    const discountAmount = calculateVoucherDiscountAmount(voucher, orderAmount);
+    if (discountAmount <= 0) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Voucher khong tao duoc gia tri giam gia cho don hang nay.',
+        data: null,
+      });
+    }
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Ap dung voucher hop le.',
+      data: {
+        ...voucher,
+        discount_amount: discountAmount,
+      },
+    });
+  } catch (error) {
+    console.error('❌ Loi validateCheckoutVoucher:', error);
+
+    return res.status(500).json({
+      status: 'error',
+      message: 'Khong the kiem tra voucher luc nay.',
       data: null,
     });
   }

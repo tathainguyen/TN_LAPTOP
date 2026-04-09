@@ -5,10 +5,12 @@ import {
   createVoucherTypeController,
   deleteVoucherCodeController,
   deleteVoucherTypeController,
+  getCheckoutVouchers,
   getVoucherCodes,
   getVoucherTypes,
   updateVoucherCodeController,
   updateVoucherTypeController,
+  validateCheckoutVoucher,
 } from '../controllers/voucherController.js';
 
 const router = Router();
@@ -22,5 +24,8 @@ router.get('/codes', getVoucherCodes);
 router.post('/codes', createVoucherCodeController);
 router.put('/codes/:id', updateVoucherCodeController);
 router.delete('/codes/:id', deleteVoucherCodeController);
+
+router.get('/checkout/available', getCheckoutVouchers);
+router.post('/checkout/validate', validateCheckoutVoucher);
 
 export default router;

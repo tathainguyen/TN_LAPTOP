@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import { getUserCart } from '../../services/cart/cartService.js';
 import { getCheckoutData, placeCodOrder } from '../../services/order/orderService.js';
 import { createAddress } from '../../services/address/addressService.js';
+import { getCheckoutVouchers, validateCheckoutVoucher } from '../../services/voucher/voucherService.js';
 
 function formatVnd(value) {
   return new Intl.NumberFormat('vi-VN', {
@@ -22,23 +23,6 @@ function getStoredUser() {
     return null;
   }
 }
-
-const VOUCHER_MAP = {
-  MAGIAM100: {
-    code: 'MAGIAM100',
-    discount: 100000,
-    label: 'Giảm 100.000đ',
-    subtitle: 'Giảm tối đa 100,000đ',
-    usedPercent: '16.7%',
-  },
-  FREESHIP50: {
-    code: 'FREESHIP50',
-    discount: 50000,
-    label: 'Giảm 50.000đ',
-    subtitle: 'Giảm tối đa 50,000đ',
-    usedPercent: '16%',
-  },
-};
 
 const ADDRESS_DATA = {
   'TP. Hồ Chí Minh': {
@@ -130,6 +114,35 @@ function getShippingMethodView(method) {
   };
 }
 
+function formatVoucherBenefit(voucher) {
+  const discountType = String(voucher?.discount_type || '').toUpperCase();
+  const discountValue = Number(voucher?.discount_value || 0);
+
+  if (discountType === 'PERCENT') {
+    return `Giam ${discountValue}%`;
+  }
+
+  return `Giam ${formatVnd(discountValue)}`;
+}
+
+function formatVoucherMeta(voucher) {
+  const minOrder = Number(voucher?.min_order_value || 0);
+  const maxDiscount = voucher?.max_discount_value === null
+    ? null
+    : Number(voucher?.max_discount_value || 0);
+
+  const chunks = [];
+  if (minOrder > 0) {
+    chunks.push(`Don toi thieu ${formatVnd(minOrder)}`);
+  }
+
+  if (maxDiscount !== null && maxDiscount > 0) {
+    chunks.push(`Toi da ${formatVnd(maxDiscount)}`);
+  }
+
+  return chunks.length > 0 ? chunks.join(' | ') : 'Khong gioi han dieu kien don hang';
+}
+
 function Checkout() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -159,6 +172,9 @@ function Checkout() {
   const [voucherInput, setVoucherInput] = useState('');
   const [appliedVoucher, setAppliedVoucher] = useState(null);
   const [voucherModalOpen, setVoucherModalOpen] = useState(false);
+  const [availableVouchers, setAvailableVouchers] = useState([]);
+  const [loadingVouchers, setLoadingVouchers] = useState(false);
+  const [applyingVoucher, setApplyingVoucher] = useState(false);
 
   useEffect(() => {
     if (!user?.id) {
@@ -214,9 +230,8 @@ function Checkout() {
   );
 
   const shippingFee = Number(selectedShippingMethod?.fee || 0);
-  const discountAmount = Number(appliedVoucher?.discount || 0);
+  const discountAmount = Number(appliedVoucher?.discount_amount || 0);
   const grandTotal = Math.max(0, subtotal + shippingFee - discountAmount);
-  const savedVouchers = useMemo(() => Object.values(VOUCHER_MAP), []);
   const provinceOptions = useMemo(
     () => filterSuggestions(Object.keys(ADDRESS_DATA), addressForm.province),
     [addressForm.province]
@@ -250,7 +265,21 @@ function Checkout() {
     [wardSource, addressForm.ward]
   );
 
-  function handleApplyVoucher(rawCode = voucherInput) {
+  async function loadAvailableVouchers() {
+    try {
+      setLoadingVouchers(true);
+      const response = await getCheckoutVouchers(subtotal);
+      setAvailableVouchers(response?.data || []);
+    } catch (error) {
+      const message = error?.response?.data?.message || 'Khong the tai danh sach voucher.';
+      toast.error(message);
+      setAvailableVouchers([]);
+    } finally {
+      setLoadingVouchers(false);
+    }
+  }
+
+  async function handleApplyVoucher(rawCode = voucherInput) {
     const normalizedCode = String(rawCode || '').trim().toUpperCase();
 
     if (!normalizedCode) {
@@ -258,17 +287,26 @@ function Checkout() {
       return;
     }
 
-    const matchedVoucher = VOUCHER_MAP[normalizedCode] || null;
+    try {
+      setApplyingVoucher(true);
+      const response = await validateCheckoutVoucher(normalizedCode, subtotal);
+      const voucher = response?.data;
 
-    if (!matchedVoucher) {
-      toast.error('Mã voucher không hợp lệ hoặc đã hết hạn.');
-      return;
+      if (!voucher) {
+        toast.error('Voucher khong hop le.');
+        return;
+      }
+
+      setAppliedVoucher(voucher);
+      setVoucherInput(voucher.code || normalizedCode);
+      setVoucherModalOpen(false);
+      toast.success(`Da ap dung voucher ${voucher.code} (${formatVnd(voucher.discount_amount)}).`);
+    } catch (error) {
+      const message = error?.response?.data?.message || 'Voucher khong hop le hoac da het han.';
+      toast.error(message);
+    } finally {
+      setApplyingVoucher(false);
     }
-
-    setAppliedVoucher(matchedVoucher);
-    setVoucherInput(matchedVoucher.code);
-    setVoucherModalOpen(false);
-    toast.success(`Áp dụng voucher thành công: ${matchedVoucher.label}`);
   }
 
   function handleClearVoucher() {
@@ -276,8 +314,9 @@ function Checkout() {
     setVoucherInput('');
   }
 
-  function openVoucherModal() {
+  async function openVoucherModal() {
     setVoucherModalOpen(true);
+    await loadAvailableVouchers();
   }
 
   function closeVoucherModal() {
@@ -420,6 +459,7 @@ function Checkout() {
         user_id: user.id,
         user_address_id: Number(form.user_address_id),
         shipping_method_id: Number(form.shipping_method_id),
+        voucher_code: appliedVoucher?.code || null,
         customer_note: form.customer_note?.trim() || null,
       });
 
@@ -832,25 +872,43 @@ function Checkout() {
                   onChange={(event) => setVoucherInput(event.target.value)}
                   placeholder="Nhập mã voucher tại đây"
                 />
-                <button type="button" onClick={() => handleApplyVoucher(voucherInput)}>Áp dụng</button>
+                <button type="button" onClick={() => handleApplyVoucher(voucherInput)} disabled={applyingVoucher}>
+                  {applyingVoucher ? 'Dang ap dung...' : 'Áp dụng'}
+                </button>
               </div>
 
               <div className="checkout-voucher-modal-list">
-                {savedVouchers.map((voucher) => (
-                  <article className="checkout-voucher-ticket" key={voucher.code}>
-                    <div className="checkout-voucher-ticket-left">
-                      <strong>{voucher.code}</strong>
-                    </div>
-                    <div className="checkout-voucher-ticket-body">
-                      <p>{voucher.label}</p>
-                      <span>{voucher.subtitle}</span>
-                      <small>Đã dùng {voucher.usedPercent}</small>
-                    </div>
-                    <button type="button" onClick={() => handleApplyVoucher(voucher.code)}>
-                      Dùng ngay
-                    </button>
-                  </article>
-                ))}
+                {loadingVouchers ? <p className="checkout-voucher-loading">Dang tai voucher...</p> : null}
+
+                {!loadingVouchers && availableVouchers.length === 0 ? (
+                  <p className="checkout-voucher-loading">Khong co voucher phu hop cho don hang hien tai.</p>
+                ) : null}
+
+                {!loadingVouchers
+                  ? availableVouchers.map((voucher) => (
+                    <article className="checkout-voucher-ticket" key={voucher.code}>
+                      <div className="checkout-voucher-ticket-left">
+                        <strong>{voucher.code}</strong>
+                      </div>
+                      <div className="checkout-voucher-ticket-body">
+                        <p>{voucher.voucher_name || formatVoucherBenefit(voucher)}</p>
+                        <span>{formatVoucherMeta(voucher)}</span>
+                        <small>
+                          {voucher.is_eligible
+                            ? `Uoc tinh giam ${formatVnd(voucher.estimated_discount)}`
+                            : `Can don toi thieu ${formatVnd(voucher.min_order_value)}`}
+                        </small>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleApplyVoucher(voucher.code)}
+                        disabled={!voucher.is_eligible || applyingVoucher}
+                      >
+                        {voucher.is_eligible ? 'Dùng ngay' : 'Chua du dieu kien'}
+                      </button>
+                    </article>
+                  ))
+                  : null}
               </div>
 
               <footer className="checkout-voucher-modal-foot">

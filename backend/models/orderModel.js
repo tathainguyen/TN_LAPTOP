@@ -17,6 +17,30 @@ function buildVariantName(item) {
   return chunks.length > 0 ? chunks.join(' | ') : item.product_name;
 }
 
+function calculateVoucherDiscountAmount(voucher, orderAmount) {
+  const normalizedOrderAmount = Math.max(0, Number(orderAmount || 0));
+  if (normalizedOrderAmount <= 0 || !voucher) {
+    return 0;
+  }
+
+  const discountType = String(voucher.discount_type || '').trim().toUpperCase();
+  const discountValue = Math.max(0, Number(voucher.discount_value || 0));
+  let discountAmount = 0;
+
+  if (discountType === 'PERCENT') {
+    discountAmount = (normalizedOrderAmount * discountValue) / 100;
+  } else {
+    discountAmount = discountValue;
+  }
+
+  if (voucher.max_discount_value !== null && voucher.max_discount_value !== undefined) {
+    discountAmount = Math.min(discountAmount, Math.max(0, Number(voucher.max_discount_value || 0)));
+  }
+
+  discountAmount = Math.min(discountAmount, normalizedOrderAmount);
+  return Number(discountAmount.toFixed(2));
+}
+
 export async function getCheckoutDataByUserId(userId) {
   const normalizedUserId = Number(userId);
 
@@ -55,6 +79,7 @@ export async function createCodOrderFromCart({
   userId,
   userAddressId,
   shippingMethodId,
+  voucherCode = null,
   customerNote = null,
 }) {
   const connection = await pool.getConnection();
@@ -151,8 +176,74 @@ export async function createCodOrderFromCart({
     );
 
     const shippingFee = Number(shippingRows[0].fee || 0);
-    const voucherDiscount = 0;
-    const grandTotal = totalItemsAmount + shippingFee - voucherDiscount;
+    const normalizedVoucherCode = String(voucherCode || '').trim().toUpperCase();
+    let appliedVoucherId = null;
+    let voucherDiscount = 0;
+
+    if (normalizedVoucherCode) {
+      const [voucherRows] = await connection.query(
+        `SELECT
+          id,
+          code,
+          discount_type,
+          discount_value,
+          max_discount_value,
+          min_order_value,
+          total_usage_limit,
+          used_count,
+          start_at,
+          end_at,
+          is_active
+        FROM vouchers
+        WHERE code = ?
+        LIMIT 1
+        FOR UPDATE`,
+        [normalizedVoucherCode]
+      );
+
+      if (voucherRows.length === 0) {
+        throw new Error('INVALID_VOUCHER');
+      }
+
+      const voucher = voucherRows[0];
+      if (Number(voucher.is_active) !== 1) {
+        throw new Error('VOUCHER_NOT_ACTIVE');
+      }
+
+      const now = new Date();
+      const startAt = new Date(voucher.start_at);
+      const endAt = new Date(voucher.end_at);
+
+      if (!Number.isNaN(startAt.getTime()) && now < startAt) {
+        throw new Error('VOUCHER_NOT_STARTED');
+      }
+
+      if (!Number.isNaN(endAt.getTime()) && now > endAt) {
+        throw new Error('VOUCHER_EXPIRED');
+      }
+
+      const usageLimit = voucher.total_usage_limit === null
+        ? null
+        : Number(voucher.total_usage_limit || 0);
+
+      if (usageLimit !== null && Number(voucher.used_count || 0) >= usageLimit) {
+        throw new Error('VOUCHER_USAGE_EXCEEDED');
+      }
+
+      const minOrderValue = Math.max(0, Number(voucher.min_order_value || 0));
+      if (totalItemsAmount < minOrderValue) {
+        throw new Error('VOUCHER_MIN_ORDER_NOT_MET');
+      }
+
+      voucherDiscount = calculateVoucherDiscountAmount(voucher, totalItemsAmount);
+      if (voucherDiscount <= 0) {
+        throw new Error('INVALID_VOUCHER');
+      }
+
+      appliedVoucherId = Number(voucher.id);
+    }
+
+    const grandTotal = Math.max(0, totalItemsAmount + shippingFee - voucherDiscount);
 
     const address = addressRows[0];
     const orderCode = buildOrderCode();
@@ -179,7 +270,7 @@ export async function createCodOrderFromCart({
         customer_note,
         total_items_amount,
         grand_total
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, 'COD', 'UNPAID', 'PENDING_CONFIRM', ?, ?, ?)`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'COD', 'UNPAID', 'PENDING_CONFIRM', ?, ?, ?)`,
       [
         orderCode,
         normalizedUserId,
@@ -193,6 +284,7 @@ export async function createCodOrderFromCart({
         address.address_note || null,
         normalizedShippingMethodId,
         shippingFee,
+        appliedVoucherId,
         voucherDiscount,
         customerNote ? String(customerNote).trim() : null,
         totalItemsAmount,
@@ -255,6 +347,15 @@ export async function createCodOrderFromCart({
       );
     }
 
+    if (appliedVoucherId) {
+      await connection.query(
+        `UPDATE vouchers
+        SET used_count = used_count + 1
+        WHERE id = ?`,
+        [appliedVoucherId]
+      );
+    }
+
     await connection.query('DELETE FROM cart_items WHERE cart_id = ?', [cartId]);
 
     await connection.commit();
@@ -264,6 +365,8 @@ export async function createCodOrderFromCart({
       order_code: orderCode,
       total_items_amount: totalItemsAmount,
       shipping_fee: shippingFee,
+      voucher_discount: voucherDiscount,
+      voucher_id: appliedVoucherId,
       grand_total: grandTotal,
       payment_method: 'COD',
       order_status: 'PENDING_CONFIRM',

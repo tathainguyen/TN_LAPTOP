@@ -313,3 +313,97 @@ export async function deleteVoucherCodeById(id) {
   const [result] = await pool.query('DELETE FROM vouchers WHERE id = ? LIMIT 1', [voucherId]);
   return Number(result?.affectedRows || 0) > 0;
 }
+
+export function calculateVoucherDiscountAmount(voucher, orderAmount) {
+  const normalizedOrderAmount = Math.max(0, Number(orderAmount || 0));
+  if (normalizedOrderAmount <= 0 || !voucher) {
+    return 0;
+  }
+
+  const discountType = String(voucher.discount_type || '').trim().toUpperCase();
+  const discountValue = Math.max(0, Number(voucher.discount_value || 0));
+  let discountAmount = 0;
+
+  if (discountType === 'PERCENT') {
+    discountAmount = (normalizedOrderAmount * discountValue) / 100;
+  } else {
+    discountAmount = discountValue;
+  }
+
+  if (voucher.max_discount_value !== null && voucher.max_discount_value !== undefined) {
+    discountAmount = Math.min(discountAmount, Math.max(0, Number(voucher.max_discount_value || 0)));
+  }
+
+  discountAmount = Math.min(discountAmount, normalizedOrderAmount);
+  return Number(discountAmount.toFixed(2));
+}
+
+export async function getAvailableVouchersForCheckout(orderAmount = 0) {
+  const [rows] = await pool.query(
+    `SELECT
+      id,
+      code,
+      voucher_name,
+      description,
+      discount_type,
+      discount_value,
+      max_discount_value,
+      min_order_value,
+      total_usage_limit,
+      used_count,
+      start_at,
+      end_at,
+      is_active
+    FROM vouchers
+    WHERE is_active = 1
+      AND start_at <= NOW()
+      AND end_at >= NOW()
+      AND (total_usage_limit IS NULL OR used_count < total_usage_limit)
+    ORDER BY end_at ASC, id DESC
+    LIMIT 50`
+  );
+
+  return rows.map((voucher) => {
+    const minOrderValue = Math.max(0, Number(voucher.min_order_value || 0));
+    const eligibleByOrderAmount = Number(orderAmount || 0) >= minOrderValue;
+    const estimatedDiscount = eligibleByOrderAmount
+      ? calculateVoucherDiscountAmount(voucher, orderAmount)
+      : 0;
+
+    return {
+      ...voucher,
+      estimated_discount: estimatedDiscount,
+      is_eligible: eligibleByOrderAmount && estimatedDiscount > 0,
+    };
+  });
+}
+
+export async function getVoucherByCodeForCheckout(code) {
+  const normalizedCode = String(code || '').trim().toUpperCase();
+  if (!normalizedCode) {
+    return null;
+  }
+
+  const [rows] = await pool.query(
+    `SELECT
+      id,
+      code,
+      voucher_name,
+      description,
+      discount_type,
+      discount_value,
+      max_discount_value,
+      min_order_value,
+      total_usage_limit,
+      used_count,
+      start_at,
+      end_at,
+      is_active
+    FROM vouchers
+    WHERE code = ?
+    LIMIT 1`,
+    [normalizedCode]
+  );
+
+  return rows[0] || null;
+}
