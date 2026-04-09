@@ -4,8 +4,28 @@
 }
 .customer-account-layout {
   display: grid;
-  grid-template-columns: 240px 1fr 250px;
   gap: 18px;
+}
+.customer-account-layout.is-profile-page {
+  grid-template-columns: 240px 1fr 250px;
+}
+.customer-account-layout.is-section-page {
+  grid-template-columns: 1fr 250px;
+}
+.customer-account-center {
+  min-width: 0;
+}
+.customer-account-layout.is-section-page .customer-account-center {
+  grid-column: 1;
+}
+.customer-account-layout.is-profile-page .customer-account-center {
+  grid-column: 2;
+}
+.customer-account-layout.is-section-page .customer-account-right {
+  grid-column: 2;
+}
+.customer-account-layout.is-profile-page .customer-account-right {
+  grid-column: 3;
 }
 .customer-account-left,
 .customer-account-center,

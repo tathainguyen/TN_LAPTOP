@@ -75,8 +75,6 @@
 ### 3.1.3. Chưa triển khai
 - Trang chi tiết đơn mua (hiển thị sản phẩm, giá, địa chỉ, trạng thái chi tiết).
 - Đăng nhập Google/Facebook.
-- Quên mật khẩu bằng OTP hoặc link reset.
-- Đồng bộ giỏ hàng khách vãng lai sang tài khoản sau đăng nhập.
 - Luồng checkout thực tế.
 - Thanh toán COD/VNPAY thực tế.
 - Đánh giá sản phẩm theo điều kiện Verified Purchase.

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
+import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { sendVerificationEmail } from '../../services/auth/authService.js';
 
@@ -30,6 +30,7 @@ function CustomerAccountLayout() {
   const [user, setUser] = useState(() => getUserFromStorage());
   const [sendingVerifyEmail, setSendingVerifyEmail] = useState(false);
   const [verificationCooldown, setVerificationCooldown] = useState(0);
+  const location = useLocation();
 
   useEffect(() => {
     if (verificationCooldown <= 0) {
@@ -72,6 +73,8 @@ function CustomerAccountLayout() {
     };
   }, [user]);
 
+  const isProfilePage = location.pathname === '/account/profile';
+
   async function handleSendVerificationMail() {
     if (!user?.id || !user?.email) {
       toast.error('Không tìm thấy thông tin tài khoản để gửi xác thực email.');
@@ -107,45 +110,47 @@ function CustomerAccountLayout() {
 
   return (
     <main className="customer-account-shell">
-      <section className="customer-account-layout">
-        <aside className="customer-account-left">
-          <div className="customer-avatar-wrap">
-            {profile.avatarUrl ? (
-              <img className="customer-avatar" src={profile.avatarUrl} alt={profile.fullName} />
-            ) : (
-              <div className="customer-avatar customer-avatar--fallback" aria-hidden="true">
-                {profile.initials}
-              </div>
-            )}
-          </div>
+      <section className={`customer-account-layout ${isProfilePage ? 'is-profile-page' : 'is-section-page'}`}>
+        {isProfilePage ? (
+          <aside className="customer-account-left">
+            <div className="customer-avatar-wrap">
+              {profile.avatarUrl ? (
+                <img className="customer-avatar" src={profile.avatarUrl} alt={profile.fullName} />
+              ) : (
+                <div className="customer-avatar customer-avatar--fallback" aria-hidden="true">
+                  {profile.initials}
+                </div>
+              )}
+            </div>
 
-          <h3>{profile.fullName}</h3>
+            <h3>{profile.fullName}</h3>
 
-          <p className="customer-email">
-            <span>{profile.email}</span>
-            <span
-              className={`customer-email-verify-dot ${profile.emailVerified ? 'is-verified' : 'is-unverified'}`}
-              title={profile.emailVerified ? 'Email đã xác thực' : 'Email chưa xác thực'}
+            <p className="customer-email">
+              <span>{profile.email}</span>
+              <span
+                className={`customer-email-verify-dot ${profile.emailVerified ? 'is-verified' : 'is-unverified'}`}
+                title={profile.emailVerified ? 'Email đã xác thực' : 'Email chưa xác thực'}
+              >
+                {profile.emailVerified ? '✓' : '✕'}
+              </span>
+            </p>
+
+            <button
+              type="button"
+              className="customer-verify-btn"
+              disabled={profile.emailVerified || sendingVerifyEmail || verificationCooldown > 0}
+              onClick={handleSendVerificationMail}
             >
-              {profile.emailVerified ? '✓' : '✕'}
-            </span>
-          </p>
-
-          <button
-            type="button"
-            className="customer-verify-btn"
-            disabled={profile.emailVerified || sendingVerifyEmail || verificationCooldown > 0}
-            onClick={handleSendVerificationMail}
-          >
-            {profile.emailVerified
-              ? 'Đã xác thực'
-              : verificationCooldown > 0
-                ? `Gửi lại sau ${verificationCooldown}s`
-              : sendingVerifyEmail
-                ? 'Đang gửi email...'
-                : 'Xác thực email'}
-          </button>
-        </aside>
+              {profile.emailVerified
+                ? 'Đã xác thực'
+                : verificationCooldown > 0
+                  ? `Gửi lại sau ${verificationCooldown}s`
+                  : sendingVerifyEmail
+                    ? 'Đang gửi email...'
+                    : 'Xác thực email'}
+            </button>
+          </aside>
+        ) : null}
 
         <section className="customer-account-center">
           <Outlet context={{ user, setUser }} />
