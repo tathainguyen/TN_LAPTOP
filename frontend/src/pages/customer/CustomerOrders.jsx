@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useOutletContext } from 'react-router-dom';
+import { useNavigate, useOutletContext } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
 import { getCustomerOrders } from '../../services/order/orderService.js';
@@ -50,6 +50,7 @@ function getOrderStatusClass(status) {
 }
 
 function CustomerOrders() {
+  const navigate = useNavigate();
   const { user } = useOutletContext();
   const [loading, setLoading] = useState(true);
   const [orders, setOrders] = useState([]);
@@ -90,16 +91,17 @@ function CustomerOrders() {
               <th>SL mặt hàng</th>
               <th>Tổng tiền</th>
               <th>Trạng thái</th>
+              <th>Thao tác</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={5} className="customer-empty-row">Đang tải đơn mua...</td>
+                <td colSpan={6} className="customer-empty-row">Đang tải đơn mua...</td>
               </tr>
             ) : orders.length === 0 ? (
               <tr>
-                <td colSpan={5} className="customer-empty-row">Bạn chưa có đơn hàng nào.</td>
+                <td colSpan={6} className="customer-empty-row">Bạn chưa có đơn hàng nào.</td>
               </tr>
             ) : (
               orders.map((order) => (
@@ -110,6 +112,15 @@ function CustomerOrders() {
                   <td>{formatVnd(order.grand_total)}</td>
                   <td>
                     <span className={getOrderStatusClass(order.order_status)}>{getOrderStatusLabel(order.order_status)}</span>
+                  </td>
+                  <td>
+                    <button
+                      type="button"
+                      className="customer-order-detail-btn"
+                      onClick={() => navigate(`/account/orders/${order.id}`)}
+                    >
+                      Xem chi tiết
+                    </button>
                   </td>
                 </tr>
               ))

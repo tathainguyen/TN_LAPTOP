@@ -1,7 +1,9 @@
 import {
+  cancelCustomerOrderById,
   createCodOrderFromCart,
   getAdminOrders,
   getCheckoutDataByUserId,
+  getOrderDetailByUserId,
   getOrdersByUserId,
   updateOrderStatusById,
 } from '../models/orderModel.js';
@@ -167,6 +169,113 @@ export async function getCustomerOrders(req, res) {
     return res.status(500).json({
       status: 'error',
       message: 'Không thể tải danh sách đơn mua.',
+      data: null,
+    });
+  }
+}
+
+export async function getCustomerOrderDetail(req, res) {
+  try {
+    const userId = parseUserId(req.query.user_id);
+    const orderId = Number(req.params.orderId || 0);
+
+    if (!userId) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Thiếu user_id hợp lệ.',
+        data: null,
+      });
+    }
+
+    if (!Number.isInteger(orderId) || orderId <= 0) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Thiếu orderId hợp lệ.',
+        data: null,
+      });
+    }
+
+    const order = await getOrderDetailByUserId({ userId, orderId });
+
+    if (!order) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Không tìm thấy đơn hàng.',
+        data: null,
+      });
+    }
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Lấy chi tiết đơn hàng thành công.',
+      data: order,
+    });
+  } catch (error) {
+    console.error('❌ Lỗi getCustomerOrderDetail:', error);
+
+    return res.status(500).json({
+      status: 'error',
+      message: 'Không thể tải chi tiết đơn hàng.',
+      data: null,
+    });
+  }
+}
+
+export async function cancelCustomerOrder(req, res) {
+  try {
+    const userId = parseUserId(req.body?.user_id || req.query.user_id);
+    const orderId = Number(req.params.orderId || 0);
+    const note = req.body?.note || 'Khach hang huy don';
+
+    if (!userId) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Thiếu user_id hợp lệ.',
+        data: null,
+      });
+    }
+
+    if (!Number.isInteger(orderId) || orderId <= 0) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Thiếu orderId hợp lệ.',
+        data: null,
+      });
+    }
+
+    const result = await cancelCustomerOrderById({
+      userId,
+      orderId,
+      note,
+    });
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Hủy đơn hàng thành công.',
+      data: result,
+    });
+  } catch (error) {
+    if (error?.message === 'ORDER_NOT_FOUND') {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Không tìm thấy đơn hàng.',
+        data: null,
+      });
+    }
+
+    if (error?.message === 'ORDER_CANNOT_CANCEL') {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Chỉ có thể hủy đơn ở trạng thái chờ xác nhận.',
+        data: null,
+      });
+    }
+
+    console.error('❌ Lỗi cancelCustomerOrder:', error);
+
+    return res.status(500).json({
+      status: 'error',
+      message: 'Không thể hủy đơn hàng.',
       data: null,
     });
   }

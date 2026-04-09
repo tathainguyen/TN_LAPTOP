@@ -23,6 +23,26 @@ export async function getCustomerOrders(userId) {
   return response.data;
 }
 
+export async function getCustomerOrderDetail(userId, orderId) {
+  const response = await orderApi.get(`/customer/${Number(orderId)}`, {
+    params: { user_id: Number(userId) },
+  });
+
+  return response.data;
+}
+
+export async function cancelCustomerOrder(userId, orderId, payload = {}) {
+  const response = await orderApi.patch(
+    `/customer/${Number(orderId)}/cancel`,
+    {
+      ...payload,
+      user_id: Number(userId),
+    }
+  );
+
+  return response.data;
+}
+
 export async function getAdminOrders(params = {}) {
   const response = await orderApi.get('/admin', { params });
   return response.data;

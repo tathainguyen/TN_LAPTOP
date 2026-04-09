@@ -17,6 +17,7 @@ import AdminUserCreate from './pages/admin/AdminUserCreate.jsx';
 import AdminUserList from './pages/admin/AdminUserList.jsx';
 import CustomerAccountLayout from './pages/customer/CustomerAccountLayout.jsx';
 import CustomerAddresses from './pages/customer/CustomerAddresses.jsx';
+import CustomerOrderDetail from './pages/customer/CustomerOrderDetail.jsx';
 import CustomerOrders from './pages/customer/CustomerOrders.jsx';
 import CustomerPassword from './pages/customer/CustomerPassword.jsx';
 import CustomerProfile from './pages/customer/CustomerProfile.jsx';
@@ -168,6 +169,7 @@ function App() {
             <Route path="addresses" element={<CustomerAddresses />} />
             <Route path="password" element={<CustomerPassword />} />
             <Route path="orders" element={<CustomerOrders />} />
+            <Route path="orders/:orderId" element={<CustomerOrderDetail />} />
             <Route path="vouchers" element={<CustomerVouchers />} />
             <Route index element={<Navigate to="profile" replace />} />
           </Route>
