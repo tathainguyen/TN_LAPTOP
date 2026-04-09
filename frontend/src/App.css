@@ -27,6 +27,10 @@
 .customer-account-layout.is-profile-page .customer-account-right {
   grid-column: 3;
 }
+.customer-account-right {
+  align-self: start;
+  height: fit-content;
+}
 .customer-account-left,
 .customer-account-center,
 .customer-account-right {
@@ -615,6 +619,51 @@
 .customer-order-item-total {
   color: #0f355e;
 }
+.admin-order-extra-card {
+  background: #fff;
+}
+.admin-order-detail-page {
+  width: 100%;
+  margin: 0;
+  max-width: none;
+}
+.admin-order-detail-page .customer-order-timeline-wrap,
+.admin-order-detail-page .customer-order-detail-side,
+.admin-order-detail-page .customer-order-detail-card,
+.admin-order-detail-page .customer-order-summary {
+  border-radius: 14px;
+}
+.admin-order-detail-stack {
+  gap: 14px;
+}
+.admin-order-payment-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  gap: 14px;
+  align-items: start;
+}
+.admin-order-detail-page .customer-order-item {
+  grid-template-columns: 100px minmax(0, 1fr) 140px 90px 160px;
+  gap: 12px;
+}
+.admin-order-history-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.admin-order-history-list li {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 10px;
+  background: #f8fbff;
+}
+.admin-order-history-list p {
+  margin: 4px 0 0;
+  color: #334155;
+  font-size: 13px;
+}
 .customer-order-back-link {
   color: #2563eb;
   font-weight: 700;
@@ -715,6 +764,14 @@
 
   .customer-order-item {
     grid-template-columns: 92px minmax(0, 1fr);
+  }
+
+  .admin-order-detail-page .customer-order-item {
+    grid-template-columns: 100px minmax(0, 1fr);
+  }
+
+  .admin-order-payment-row {
+    grid-template-columns: 1fr;
   }
 
   .customer-order-item-price,

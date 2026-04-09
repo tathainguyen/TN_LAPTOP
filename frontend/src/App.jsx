@@ -12,6 +12,7 @@ import AdminProductLinkCreate from './pages/admin/AdminProductLinkCreate.jsx';
 import AdminProductLinkList from './pages/admin/AdminProductLinkList.jsx';
 import AdminProductList from './pages/admin/AdminProductList.jsx';
 import AdminOrderList from './pages/admin/AdminOrderList.jsx';
+import AdminOrderDetail from './pages/admin/AdminOrderDetail.jsx';
 import AdminProfile from './pages/admin/AdminProfile.jsx';
 import AdminUserCreate from './pages/admin/AdminUserCreate.jsx';
 import AdminUserList from './pages/admin/AdminUserList.jsx';
@@ -157,6 +158,7 @@ function App() {
           <Route path="/admin/product-links" element={adminOnly(<AdminProductLinkList />)} />
           <Route path="/admin/product-links/create" element={adminOnly(<AdminProductLinkCreate />)} />
           <Route path="/admin/orders" element={adminOnly(<AdminOrderList />)} />
+          <Route path="/admin/orders/:id" element={adminOnly(<AdminOrderDetail />)} />
           <Route path="/product" element={storefrontOnly(<Product />)} />
           <Route path="/product/:slug" element={storefrontOnly(<ProductDetail />)} />
           <Route path="/cart" element={storefrontOnly(<Cart />)} />

@@ -381,6 +381,102 @@ export async function getOrderDetailByUserId({ userId, orderId }) {
   };
 }
 
+export async function getAdminOrderDetailById(orderId) {
+  const normalizedOrderId = Number(orderId);
+
+  const [orderRows] = await pool.query(
+    `SELECT
+      o.id,
+      o.order_code,
+      o.user_id,
+      u.full_name AS customer_name,
+      u.email AS customer_email,
+      u.phone AS customer_phone,
+      o.user_address_id,
+      o.recipient_name,
+      o.recipient_phone,
+      o.province,
+      o.district,
+      o.ward,
+      o.address_line,
+      o.address_note,
+      o.shipping_method_id,
+      sm.method_name AS shipping_method_name,
+      sm.method_code AS shipping_method_code,
+      o.shipping_fee,
+      o.voucher_id,
+      v.code AS voucher_code,
+      o.voucher_discount,
+      o.payment_method,
+      o.payment_status,
+      o.order_status,
+      o.customer_note,
+      o.total_items_amount,
+      o.grand_total,
+      o.tracking_code,
+      o.created_at,
+      o.updated_at
+    FROM orders o
+    LEFT JOIN users u ON u.id = o.user_id
+    LEFT JOIN shipping_methods sm ON sm.id = o.shipping_method_id
+    LEFT JOIN vouchers v ON v.id = o.voucher_id
+    WHERE o.id = ?
+    LIMIT 1`,
+    [normalizedOrderId]
+  );
+
+  if (orderRows.length === 0) {
+    return null;
+  }
+
+  const [itemRows] = await pool.query(
+    `SELECT
+      oi.id,
+      oi.order_id,
+      oi.product_id,
+      oi.product_name,
+      oi.variant_name,
+      oi.sku,
+      oi.quantity,
+      oi.unit_price,
+      oi.line_total,
+      (
+        SELECT pi.image_url
+        FROM product_images pi
+        WHERE pi.product_id = oi.product_id
+        ORDER BY pi.is_primary DESC, pi.sort_order ASC, pi.id ASC
+        LIMIT 1
+      ) AS primary_image
+    FROM order_items oi
+    WHERE oi.order_id = ?
+    ORDER BY oi.id ASC`,
+    [normalizedOrderId]
+  );
+
+  const [historyRows] = await pool.query(
+    `SELECT
+      h.id,
+      h.old_status,
+      h.new_status,
+      h.note,
+      h.created_at,
+      h.changed_by,
+      u.full_name AS changed_by_name
+    FROM order_status_histories h
+    LEFT JOIN users u ON u.id = h.changed_by
+    WHERE h.order_id = ?
+    ORDER BY h.created_at DESC, h.id DESC`,
+    [normalizedOrderId]
+  );
+
+  return {
+    ...orderRows[0],
+    items: itemRows,
+    item_count: itemRows.length,
+    status_histories: historyRows,
+  };
+}
+
 export async function getAdminOrders({
   page = 1,
   limit = 10,

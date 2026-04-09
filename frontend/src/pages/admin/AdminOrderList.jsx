@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
 import AdminLayout from '../../layouts/AdminLayout.jsx';
@@ -86,6 +87,7 @@ function getStoredUserId() {
 }
 
 function AdminOrderList() {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [savingOrderId, setSavingOrderId] = useState(null);
   const [orders, setOrders] = useState([]);
@@ -254,6 +256,7 @@ function AdminOrderList() {
                     <th>Tổng tiền</th>
                     <th>Thanh toán</th>
                     <th>Trạng thái</th>
+                    <th>Chi tiết</th>
                     <th>Cập nhật trạng thái</th>
                     <th>Ngày tạo</th>
                   </tr>
@@ -261,7 +264,7 @@ function AdminOrderList() {
                 <tbody>
                   {orders.length === 0 ? (
                     <tr>
-                      <td colSpan={9} className="admin-empty">Không có đơn hàng phù hợp.</td>
+                      <td colSpan={10} className="admin-empty">Không có đơn hàng phù hợp.</td>
                     </tr>
                   ) : (
                     orders.map((order) => (
@@ -286,6 +289,15 @@ function AdminOrderList() {
                           <span className={getOrderStatusClass(order.order_status)}>
                             {getOrderStatusLabel(order.order_status)}
                           </span>
+                        </td>
+                        <td>
+                          <button
+                            type="button"
+                            className="admin-btn admin-btn--edit"
+                            onClick={() => navigate(`/admin/orders/${order.id}`)}
+                          >
+                            Xem chi tiết
+                          </button>
                         </td>
                         <td>
                           <div className="admin-order-update-row">

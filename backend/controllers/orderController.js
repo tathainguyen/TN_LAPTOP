@@ -1,5 +1,6 @@
 import {
   cancelCustomerOrderById,
+  getAdminOrderDetailById,
   createCodOrderFromCart,
   getAdminOrders,
   getCheckoutDataByUserId,
@@ -324,6 +325,44 @@ export async function getAdminOrdersList(req, res) {
     return res.status(500).json({
       status: 'error',
       message: 'Không thể tải danh sách đơn hàng.',
+      data: null,
+    });
+  }
+}
+
+export async function getAdminOrderDetail(req, res) {
+  try {
+    const orderId = Number(req.params.id || 0);
+
+    if (!Number.isInteger(orderId) || orderId <= 0) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'ID đơn hàng không hợp lệ.',
+        data: null,
+      });
+    }
+
+    const order = await getAdminOrderDetailById(orderId);
+
+    if (!order) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Không tìm thấy đơn hàng.',
+        data: null,
+      });
+    }
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Lấy chi tiết đơn hàng thành công.',
+      data: order,
+    });
+  } catch (error) {
+    console.error('❌ Lỗi getAdminOrderDetail:', error);
+
+    return res.status(500).json({
+      status: 'error',
+      message: 'Không thể tải chi tiết đơn hàng.',
       data: null,
     });
   }

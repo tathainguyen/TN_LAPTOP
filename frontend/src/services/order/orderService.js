@@ -48,6 +48,11 @@ export async function getAdminOrders(params = {}) {
   return response.data;
 }
 
+export async function getAdminOrderDetail(orderId) {
+  const response = await orderApi.get(`/admin/${Number(orderId)}`);
+  return response.data;
+}
+
 export async function updateAdminOrderStatus(id, payload) {
   const response = await orderApi.patch(`/admin/${id}/status`, payload);
   return response.data;
