@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { Upload } from 'lucide-react';
 
 import AdminLayout from '../../layouts/AdminLayout.jsx';
 import {
@@ -125,6 +126,7 @@ function getImageItemKey(item) {
 }
 
 function AdminProductList() {
+  const editFileInputRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [submittingId, setSubmittingId] = useState(null);
   const [products, setProducts] = useState([]);
@@ -809,13 +811,18 @@ function AdminProductList() {
 
       {editItem ? (
         <div className="admin-modal-overlay" onClick={() => setEditItem(null)} role="presentation">
-          <article className="admin-modal admin-modal--large" onClick={(event) => event.stopPropagation()}>
+          <article className="admin-modal admin-modal--large admin-modal--product-edit" onClick={(event) => event.stopPropagation()}>
             <header>
-              <h3>Chỉnh sửa Sản Phẩm</h3>
-              <button type="button" onClick={() => setEditItem(null)}>Đóng</button>
+              <div className="admin-modal-title-wrap">
+                <h3>Chỉnh sửa Sản Phẩm</h3>
+                <p>Chỉnh thông tin SKU, giá bán và ảnh hiển thị theo cùng một biểu mẫu thống nhất.</p>
+              </div>
+              <button type="button" onClick={() => setEditItem(null)} aria-label="Đóng">
+                X
+              </button>
             </header>
 
-            <form className="admin-form-grid" onSubmit={handleSubmitEdit}>
+            <form className="admin-form-grid admin-form-grid--airy" onSubmit={handleSubmitEdit}>
               <label>
                 Hãng
                 <select
@@ -1001,12 +1008,23 @@ function AdminProductList() {
               <label className="admin-form-grid__full">
                 Thêm ảnh mới (Cloudinary)
                 <input
+                  ref={editFileInputRef}
                   type="file"
                   accept="image/*"
                   multiple
                   onChange={handleEditFilesChange}
+                  className="admin-file-input-hidden"
                   disabled={submittingId === editItem.id}
                 />
+                <button
+                  type="button"
+                  className="admin-file-trigger"
+                  onClick={() => editFileInputRef.current?.click()}
+                  disabled={submittingId === editItem.id}
+                >
+                  <Upload size={16} />
+                  <span>Chọn tệp ảnh</span>
+                </button>
               </label>
 
               <div className="admin-form-grid__full admin-edit-image-panel">
@@ -1039,7 +1057,7 @@ function AdminProductList() {
                 )}
               </div>
 
-              <div className="admin-form-actions">
+              <div className="admin-form-actions admin-form-grid__full admin-form-actions--sticky">
                 <button type="button" onClick={() => setEditItem(null)}>
                   Hủy
                 </button>
@@ -1054,10 +1072,15 @@ function AdminProductList() {
 
       {viewItem ? (
         <div className="admin-modal-overlay" onClick={() => setViewItem(null)} role="presentation">
-          <article className="admin-modal" onClick={(event) => event.stopPropagation()}>
+          <article className="admin-modal admin-modal--large" onClick={(event) => event.stopPropagation()}>
             <header>
-              <h3>Chi tiết sản phẩm</h3>
-              <button type="button" onClick={() => setViewItem(null)}>Đóng</button>
+              <div className="admin-modal-title-wrap">
+                <h3>Chi tiết sản phẩm</h3>
+                <p>Thông tin đầy đủ của SKU hiện tại, bao gồm cấu hình, giá và ảnh hiển thị.</p>
+              </div>
+              <button type="button" onClick={() => setViewItem(null)} aria-label="Đóng">
+                X
+              </button>
             </header>
 
             <div className="admin-quick-info">
@@ -1082,12 +1105,12 @@ function AdminProductList() {
               <p><strong>Trạng thái:</strong> {Number(viewItem.is_active) ? 'Đang kích hoạt' : 'Khóa'}</p>
             </div>
 
-            <div className="admin-view-gallery-wrap">
+            <div className="admin-view-gallery-wrap admin-view-gallery-wrap--product">
               <h4>Ảnh sản phẩm</h4>
               {getDetailImageUrls(viewItem).length > 0 ? (
-                <div className="admin-view-gallery-grid">
+                <div className="admin-view-gallery-grid admin-view-gallery-grid--product">
                   {getDetailImageUrls(viewItem).map((url, index) => (
-                    <img key={`${url}-${index + 1}`} src={url} alt={`${viewItem.product_name || 'product'}-${index + 1}`} className="admin-view-gallery-item" />
+                    <img key={`${url}-${index + 1}`} src={url} alt={`${viewItem.product_name || 'product'}-${index + 1}`} className="admin-view-gallery-item admin-view-gallery-item--product" />
                   ))}
                 </div>
               ) : (

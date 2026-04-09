@@ -574,99 +574,112 @@ function AdminUserList() {
         <div className="admin-modal-overlay" onClick={() => setEditItem(null)} role="presentation">
           <article className="admin-modal admin-modal--large" onClick={(event) => event.stopPropagation()}>
             <header>
-              <h3>Chỉnh sửa người dùng</h3>
-              <button type="button" onClick={() => setEditItem(null)}>
-                Đóng
+              <div className="admin-modal-title-wrap">
+                <h3>Chỉnh sửa người dùng</h3>
+                <p>Cập nhật đúng quyền, trạng thái và thông tin định danh của tài khoản.</p>
+              </div>
+              <button type="button" onClick={() => setEditItem(null)} aria-label="Đóng">
+                X
               </button>
             </header>
 
-            <form className="admin-form-grid" onSubmit={handleSubmitEdit}>
-              <label>
-                Họ và tên
-                <input
-                  type="text"
-                  value={form.full_name}
-                  onChange={(event) => setForm((prev) => ({ ...prev, full_name: event.target.value }))}
-                  required
-                />
-              </label>
+            <form className="admin-form-grid admin-form-grid--airy" onSubmit={handleSubmitEdit}>
+              <div className="admin-modal-section admin-form-grid__full">
+                <h4 className="admin-modal-section__title">Thông tin tài khoản</h4>
+                <div className="admin-form-grid admin-form-grid--compact">
+                  <label>
+                    Họ và tên
+                    <input
+                      type="text"
+                      value={form.full_name}
+                      onChange={(event) => setForm((prev) => ({ ...prev, full_name: event.target.value }))}
+                      required
+                    />
+                  </label>
 
-              <label>
-                Email
-                <input type="email" value={editItem.email || ''} disabled />
-              </label>
+                  <label>
+                    Email
+                    <input type="email" value={editItem.email || ''} disabled />
+                  </label>
 
-              <label>
-                Vai trò
-                <select
-                  value={form.role_id}
-                  onChange={(event) => setForm((prev) => ({ ...prev, role_id: event.target.value }))}
-                  required
-                >
-                  <option value="">-- Chọn vai trò --</option>
-                  {roles.map((role) => (
-                    <option key={role.id} value={role.id}>
-                      {role.role_name}
-                    </option>
-                  ))}
-                </select>
-              </label>
+                  <label>
+                    Vai trò
+                    <select
+                      value={form.role_id}
+                      onChange={(event) => setForm((prev) => ({ ...prev, role_id: event.target.value }))}
+                      required
+                    >
+                      <option value="">-- Chọn vai trò --</option>
+                      {roles.map((role) => (
+                        <option key={role.id} value={role.id}>
+                          {role.role_name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
 
-              <label>
-                Số điện thoại
-                <input
-                  type="text"
-                  value={form.phone}
-                  onChange={(event) => setForm((prev) => ({ ...prev, phone: event.target.value }))}
-                  placeholder="0912 345 678"
-                />
-              </label>
+                  <label>
+                    Số điện thoại
+                    <input
+                      type="text"
+                      value={form.phone}
+                      onChange={(event) => setForm((prev) => ({ ...prev, phone: event.target.value }))}
+                      placeholder="0912 345 678"
+                    />
+                  </label>
+                </div>
+              </div>
 
-              <label>
-                Giới tính
-                <select
-                  value={form.gender}
-                  onChange={(event) => setForm((prev) => ({ ...prev, gender: event.target.value }))}
-                >
-                  <option value="">-- Không chọn --</option>
-                  <option value="MALE">Nam</option>
-                  <option value="FEMALE">Nữ</option>
-                  <option value="OTHER">Khác</option>
-                </select>
-              </label>
+              <div className="admin-modal-section admin-form-grid__full">
+                <h4 className="admin-modal-section__title">Hồ sơ cá nhân & trạng thái</h4>
+                <div className="admin-form-grid admin-form-grid--compact">
+                  <label>
+                    Giới tính
+                    <select
+                      value={form.gender}
+                      onChange={(event) => setForm((prev) => ({ ...prev, gender: event.target.value }))}
+                    >
+                      <option value="">-- Không chọn --</option>
+                      <option value="MALE">Nam</option>
+                      <option value="FEMALE">Nữ</option>
+                      <option value="OTHER">Khác</option>
+                    </select>
+                  </label>
 
-              <label>
-                Ngày sinh
-                <input
-                  type="date"
-                  value={form.date_of_birth}
-                  onChange={(event) => setForm((prev) => ({ ...prev, date_of_birth: event.target.value }))}
-                />
-              </label>
+                  <label>
+                    Ngày sinh
+                    <input
+                      type="date"
+                      value={form.date_of_birth}
+                      onChange={(event) => setForm((prev) => ({ ...prev, date_of_birth: event.target.value }))}
+                    />
+                  </label>
 
-              <label>
-                Xác thực email
-                <select
-                  value={form.email_verified}
-                  onChange={(event) => setForm((prev) => ({ ...prev, email_verified: Number(event.target.value) }))}
-                >
-                  <option value={0}>Chưa xác thực</option>
-                  <option value={1}>Đã xác thực</option>
-                </select>
-              </label>
+                  <label>
+                    Xác thực email
+                    <select
+                      value={form.email_verified}
+                      onChange={(event) => setForm((prev) => ({ ...prev, email_verified: Number(event.target.value) }))}
+                    >
+                      <option value={0}>Chưa xác thực</option>
+                      <option value={1}>Đã xác thực</option>
+                    </select>
+                  </label>
 
-              <label>
-                Trạng thái
-                <select
-                  value={form.user_status}
-                  onChange={(event) => setForm((prev) => ({ ...prev, user_status: event.target.value }))}
-                >
-                  <option value="ACTIVE">Đang hoạt động</option>
-                  <option value="BLOCKED">Đã khóa</option>
-                </select>
-              </label>
+                  <label>
+                    Trạng thái
+                    <select
+                      value={form.user_status}
+                      onChange={(event) => setForm((prev) => ({ ...prev, user_status: event.target.value }))}
+                    >
+                      <option value="ACTIVE">Đang hoạt động</option>
+                      <option value="BLOCKED">Đã khóa</option>
+                    </select>
+                  </label>
+                </div>
+              </div>
 
-              <div className="admin-form-actions admin-form-grid__full">
+              <div className="admin-form-actions admin-form-grid__full admin-form-actions--sticky">
                 <button type="button" onClick={() => setEditItem(null)}>
                   Hủy
                 </button>
@@ -681,27 +694,54 @@ function AdminUserList() {
 
       {viewItem ? (
         <div className="admin-modal-overlay" onClick={() => setViewItem(null)} role="presentation">
-          <article className="admin-modal" onClick={(event) => event.stopPropagation()}>
+          <article className="admin-modal admin-modal--large" onClick={(event) => event.stopPropagation()}>
             <header>
-              <h3>Thông tin người dùng</h3>
-              <button type="button" onClick={() => setViewItem(null)}>
-                Đóng
+              <div className="admin-modal-title-wrap">
+                <h3>Thông tin người dùng</h3>
+                <p>Chi tiết hồ sơ và trạng thái bảo mật của tài khoản.</p>
+              </div>
+              <button type="button" onClick={() => setViewItem(null)} aria-label="Đóng">
+                X
               </button>
             </header>
 
-            <div className="admin-quick-info admin-quick-info--single">
-              <p><strong>Họ và tên:</strong> {viewItem.full_name || '-'}</p>
-              <p><strong>Email:</strong> {viewItem.email || '-'}</p>
-              <p><strong>Mật khẩu:</strong> •••••••• (đã ẩn)</p>
-              <p><strong>Vai trò:</strong> {viewItem.role_name || roleMap[viewItem.role_id] || '-'}</p>
-              <p><strong>Số điện thoại:</strong> {viewItem.phone || '-'}</p>
-              <p><strong>Giới tính:</strong> {getGenderLabel(viewItem.gender)}</p>
-              <p><strong>Ngày sinh:</strong> {viewItem.date_of_birth || '-'}</p>
-              <p><strong>Xác thực email:</strong> {getVerificationLabel(viewItem.email_verified)}</p>
-              <p><strong>Trạng thái:</strong> {getStatusLabel(viewItem.user_status === 'ACTIVE' ? 1 : viewItem.user_status)}</p>
-              <p><strong>Đăng nhập cuối:</strong> {formatDateTime(viewItem.last_login_at)}</p>
-              <p><strong>Tạo lúc:</strong> {formatDateTime(viewItem.created_at)}</p>
-              <p><strong>Cập nhật lúc:</strong> {formatDateTime(viewItem.updated_at)}</p>
+            <div className="admin-detail-shell">
+              <section className="admin-detail-block admin-detail-block--hero">
+                <div>
+                  <p className="admin-detail-kicker">TÀI KHOẢN</p>
+                  <h4>{viewItem.full_name || '-'}</h4>
+                  <p className="admin-detail-sub">ID: {viewItem.id || '-'}</p>
+                </div>
+                <div className="admin-detail-chip-row">
+                  <span className={`admin-status-chip ${Number(viewItem.email_verified) ? 'admin-status-chip--success' : 'admin-status-chip--muted'}`}>
+                    {getVerificationLabel(viewItem.email_verified)}
+                  </span>
+                  <span className={`admin-status-chip ${Number(viewItem.user_status) === 1 || viewItem.user_status === 'ACTIVE' ? 'admin-status-chip--success' : 'admin-status-chip--danger'}`}>
+                    {getStatusLabel(viewItem.user_status === 'ACTIVE' ? 1 : viewItem.user_status)}
+                  </span>
+                </div>
+              </section>
+
+              <section className="admin-detail-block">
+                <h5>Thông tin liên hệ & quyền</h5>
+                <dl className="admin-detail-grid">
+                  <div><dt>Email</dt><dd>{viewItem.email || '-'}</dd></div>
+                  <div><dt>Mật khẩu</dt><dd>•••••••• (đã ẩn)</dd></div>
+                  <div><dt>Vai trò</dt><dd>{viewItem.role_name || roleMap[viewItem.role_id] || '-'}</dd></div>
+                  <div><dt>Số điện thoại</dt><dd>{viewItem.phone || '-'}</dd></div>
+                </dl>
+              </section>
+
+              <section className="admin-detail-block">
+                <h5>Hồ sơ cá nhân & lịch sử</h5>
+                <dl className="admin-detail-grid">
+                  <div><dt>Giới tính</dt><dd>{getGenderLabel(viewItem.gender)}</dd></div>
+                  <div><dt>Ngày sinh</dt><dd>{viewItem.date_of_birth || '-'}</dd></div>
+                  <div><dt>Đăng nhập cuối</dt><dd>{formatDateTime(viewItem.last_login_at)}</dd></div>
+                  <div><dt>Tạo lúc</dt><dd>{formatDateTime(viewItem.created_at)}</dd></div>
+                  <div className="admin-detail-grid__full"><dt>Cập nhật lúc</dt><dd>{formatDateTime(viewItem.updated_at)}</dd></div>
+                </dl>
+              </section>
             </div>
           </article>
         </div>
@@ -740,8 +780,8 @@ function AdminUserList() {
           <article className="admin-modal admin-modal--large" onClick={(event) => event.stopPropagation()}>
             <header>
               <h3>Chi tiết hoạt động khách hàng</h3>
-              <button type="button" onClick={() => setActivityItem(null)}>
-                Đóng
+              <button type="button" onClick={() => setActivityItem(null)} aria-label="Đóng">
+                X
               </button>
             </header>
 

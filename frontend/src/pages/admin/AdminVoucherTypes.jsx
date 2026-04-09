@@ -17,6 +17,20 @@ function formatVnd(value) {
   }).format(Number(value || 0));
 }
 
+function formatCurrencyInput(value) {
+  const digits = String(value || '').replace(/\D/g, '');
+  if (!digits) {
+    return '';
+  }
+
+  return Number(digits).toLocaleString('vi-VN');
+}
+
+function parseCurrencyInputToNumber(value) {
+  const digits = String(value || '').replace(/\D/g, '');
+  return digits ? Number(digits) : 0;
+}
+
 const EMPTY_FORM = {
   type_name: '',
   discount_type: 'PERCENT',
@@ -69,7 +83,8 @@ function AdminVoucherTypes() {
       discount_type: item.discount_type || 'PERCENT',
       discount_value: Number(item.discount_value || 0),
       min_order_value: Number(item.min_order_value || 0),
-      max_discount_value: item.max_discount_value === null ? '' : Number(item.max_discount_value || 0),
+      max_discount_value:
+        item.max_discount_value === null ? '' : formatCurrencyInput(item.max_discount_value),
       is_active: Number(item.is_active || 0),
     });
     setModalOpen(true);
@@ -110,7 +125,10 @@ function AdminVoucherTypes() {
         discount_type: discountType,
         discount_value: Number(form.discount_value || 0),
         min_order_value: Number(form.min_order_value || 0),
-        max_discount_value: form.max_discount_value === '' ? null : Number(form.max_discount_value),
+        max_discount_value:
+          form.max_discount_value === ''
+            ? null
+            : parseCurrencyInputToNumber(form.max_discount_value),
         is_active: Number(form.is_active || 0),
       };
 
@@ -276,12 +294,21 @@ function AdminVoucherTypes() {
 
                 <label>
                   Tối đa giảm (để trống nếu không giới hạn)
-                  <input
-                    type="number"
-                    min="0"
-                    value={form.max_discount_value}
-                    onChange={(event) => setForm((prev) => ({ ...prev, max_discount_value: event.target.value }))}
-                  />
+                  <div className="admin-input-with-unit">
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={form.max_discount_value}
+                      onChange={(event) =>
+                        setForm((prev) => ({
+                          ...prev,
+                          max_discount_value: formatCurrencyInput(event.target.value),
+                        }))
+                      }
+                      placeholder="Để trống nếu không giới hạn"
+                    />
+                    <span>VND</span>
+                  </div>
                 </label>
 
                 <label>
