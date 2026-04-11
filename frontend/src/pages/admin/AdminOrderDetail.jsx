@@ -221,11 +221,12 @@ function AdminOrderDetail() {
             <div className="admin-order-payment-row">
               <article className="customer-order-detail-side">
                 <h3>Thanh toán và vận chuyển</h3>
+                <p>Mã đơn hàng: <strong>{order.order_code || '-'}</strong></p>
+                <p>Mã vận đơn: <strong>{order.tracking_code || 'Đang cập nhật'}</strong></p>
                 <p>Phương thức thanh toán: <strong>{getPaymentMethodLabel(order.payment_method)}</strong></p>
                 <p>Trạng thái thanh toán: <strong>{getPaymentStatusLabel(order.payment_status)}</strong></p>
                 <p>Phương thức vận chuyển: <strong>{order.shipping_method_name || '-'}</strong></p>
                 <p>Mã voucher đã dùng: <strong>{order.voucher_code || '-'}</strong></p>
-                <p>Mã vận đơn: <strong>{order.tracking_code || '-'}</strong></p>
               </article>
 
               <article className="customer-order-summary">

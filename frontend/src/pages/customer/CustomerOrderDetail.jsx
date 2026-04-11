@@ -68,6 +68,20 @@ function getPaymentStatusLabel(status) {
   return key || '-';
 }
 
+function getOrderCodeDisplay(order) {
+  const rawCode = String(order?.order_code || '').trim();
+  if (rawCode) {
+    return rawCode;
+  }
+
+  const orderId = Number(order?.id || 0);
+  if (!Number.isInteger(orderId) || orderId <= 0) {
+    return '-';
+  }
+
+  return `DH${String(orderId).padStart(8, '0')}`;
+}
+
 const FALLBACK_IMAGE = 'https://via.placeholder.com/120x80?text=No+Image';
 
 const STATUS_STEPS = ['PENDING_CONFIRM', 'CONFIRMED', 'SHIPPING', 'SUCCESS'];
@@ -165,11 +179,13 @@ function CustomerOrderDetail() {
     );
   }
 
+  const orderCodeDisplay = getOrderCodeDisplay(order);
+
   return (
     <section className="customer-card customer-order-detail">
       <div className="customer-card-head customer-order-detail-head customer-order-detail-head--wide">
         <div>
-          <h2>Chi tiết đơn hàng {order.order_code}</h2>
+          <h2>Chi tiết đơn hàng {orderCodeDisplay}</h2>
           <p>
             Ngày tạo: {formatDate(order.created_at)}
             {' · '}
@@ -249,11 +265,11 @@ function CustomerOrderDetail() {
 
         <article className="customer-order-detail-side">
           <h3>Thanh toán và vận chuyển</h3>
+          <p>Mã đơn hàng: <strong>{orderCodeDisplay}</strong></p>
           <p>Phương thức thanh toán: <strong>{getPaymentMethodLabel(order.payment_method)}</strong></p>
           <p>Trạng thái thanh toán: <strong>{getPaymentStatusLabel(order.payment_status)}</strong></p>
           <p>Phương thức vận chuyển: <strong>{order.shipping_method_name || '-'}</strong></p>
           <p>Mã voucher đã dùng: <strong>{order.voucher_code || '-'}</strong></p>
-          <p>Mã vận đơn: <strong>{order.tracking_code || '-'}</strong></p>
         </article>
 
         <article className="customer-order-summary">

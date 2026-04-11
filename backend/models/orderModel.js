@@ -413,7 +413,7 @@ export async function getOrdersByUserId(userId) {
   const [rows] = await pool.query(
     `SELECT
       o.id,
-      o.order_code,
+      COALESCE(NULLIF(o.order_code, ''), CONCAT('DH', DATE_FORMAT(o.created_at, '%y%m%d'), LPAD(o.id, 4, '0'))) AS order_code,
       o.created_at,
       o.payment_method,
       o.payment_status,
@@ -421,7 +421,6 @@ export async function getOrdersByUserId(userId) {
       o.total_items_amount,
       o.shipping_fee,
       o.grand_total,
-      o.tracking_code,
       (
         SELECT COUNT(*)
         FROM order_items oi
@@ -443,7 +442,7 @@ export async function getOrderDetailByUserId({ userId, orderId }) {
   const [orderRows] = await pool.query(
     `SELECT
       o.id,
-      o.order_code,
+      COALESCE(NULLIF(o.order_code, ''), CONCAT('DH', DATE_FORMAT(o.created_at, '%y%m%d'), LPAD(o.id, 4, '0'))) AS order_code,
       o.user_id,
       o.user_address_id,
       o.recipient_name,
@@ -466,7 +465,6 @@ export async function getOrderDetailByUserId({ userId, orderId }) {
       o.customer_note,
       o.total_items_amount,
       o.grand_total,
-      o.tracking_code,
       o.created_at,
       o.updated_at
     FROM orders o
@@ -518,7 +516,7 @@ export async function getAdminOrderDetailById(orderId) {
   const [orderRows] = await pool.query(
     `SELECT
       o.id,
-      o.order_code,
+      COALESCE(NULLIF(o.order_code, ''), CONCAT('DH', DATE_FORMAT(o.created_at, '%y%m%d'), LPAD(o.id, 4, '0'))) AS order_code,
       o.user_id,
       u.full_name AS customer_name,
       u.email AS customer_email,
@@ -646,7 +644,7 @@ export async function getAdminOrders({
   const [rows] = await pool.query(
     `SELECT
       o.id,
-      o.order_code,
+      COALESCE(NULLIF(o.order_code, ''), CONCAT('DH', DATE_FORMAT(o.created_at, '%y%m%d'), LPAD(o.id, 4, '0'))) AS order_code,
       o.user_id,
       u.full_name AS customer_name,
       u.email AS customer_email,
