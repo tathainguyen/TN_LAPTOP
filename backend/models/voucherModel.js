@@ -338,29 +338,34 @@ export function calculateVoucherDiscountAmount(voucher, orderAmount) {
   return Number(discountAmount.toFixed(2));
 }
 
-export async function getAvailableVouchersForCheckout(orderAmount = 0) {
+export async function getAvailableVouchersForCheckout(orderAmount = 0, userId = null) {
+  const normalizedUserId = Number(userId || 0);
+  const hasUser = Number.isInteger(normalizedUserId) && normalizedUserId > 0;
+
   const [rows] = await pool.query(
     `SELECT
-      id,
-      code,
-      voucher_name,
-      description,
-      discount_type,
-      discount_value,
-      max_discount_value,
-      min_order_value,
-      total_usage_limit,
-      used_count,
-      start_at,
-      end_at,
-      is_active
-    FROM vouchers
-    WHERE is_active = 1
-      AND start_at <= NOW()
-      AND end_at >= NOW()
-      AND (total_usage_limit IS NULL OR used_count < total_usage_limit)
-    ORDER BY end_at ASC, id DESC
-    LIMIT 50`
+      v.id,
+      v.code,
+      v.voucher_name,
+      v.description,
+      v.discount_type,
+      v.discount_value,
+      v.max_discount_value,
+      v.min_order_value,
+      v.total_usage_limit,
+      v.used_count,
+      v.start_at,
+      v.end_at,
+      v.is_active
+    FROM vouchers v
+    ${hasUser ? 'INNER JOIN user_vouchers uv ON uv.voucher_id = v.id AND uv.user_id = ? AND uv.voucher_status = \'AVAILABLE\'' : ''}
+    WHERE v.is_active = 1
+      AND v.start_at <= NOW()
+      AND v.end_at >= NOW()
+      AND (v.total_usage_limit IS NULL OR v.used_count < v.total_usage_limit)
+    ORDER BY v.end_at ASC, v.id DESC
+    LIMIT 50`,
+    hasUser ? [normalizedUserId] : []
   );
 
   return rows.map((voucher) => {
@@ -406,4 +411,310 @@ export async function getVoucherByCodeForCheckout(code) {
   );
 
   return rows[0] || null;
+}
+
+export async function getUserSavedVoucherByCodeForCheckout({ userId, code }) {
+  const normalizedUserId = Number(userId || 0);
+  const normalizedCode = String(code || '').trim().toUpperCase();
+
+  if (!Number.isInteger(normalizedUserId) || normalizedUserId <= 0 || !normalizedCode) {
+    return null;
+  }
+
+  const [rows] = await pool.query(
+    `SELECT
+      v.id,
+      v.code,
+      v.voucher_name,
+      v.description,
+      v.discount_type,
+      v.discount_value,
+      v.max_discount_value,
+      v.min_order_value,
+      v.total_usage_limit,
+      v.used_count,
+      v.start_at,
+      v.end_at,
+      v.is_active
+    FROM vouchers v
+    INNER JOIN user_vouchers uv
+      ON uv.voucher_id = v.id
+      AND uv.user_id = ?
+      AND uv.voucher_status = 'AVAILABLE'
+    WHERE v.code = ?
+    LIMIT 1`,
+    [normalizedUserId, normalizedCode]
+  );
+
+  return rows[0] || null;
+}
+
+export async function getStorefrontVouchers({ userId = null } = {}) {
+  const normalizedUserId = Number(userId || 0);
+  const hasUser = Number.isInteger(normalizedUserId) && normalizedUserId > 0;
+
+  const [rows] = await pool.query(
+    `SELECT
+      v.id,
+      v.code,
+      v.voucher_name,
+      v.description,
+      v.discount_type,
+      v.discount_value,
+      v.max_discount_value,
+      v.min_order_value,
+      v.total_usage_limit,
+      v.used_count,
+      v.start_at,
+      v.end_at,
+      v.is_active,
+      uv.id AS user_voucher_id,
+      uv.voucher_status
+    FROM vouchers v
+    LEFT JOIN user_vouchers uv
+      ON uv.voucher_id = v.id
+      AND uv.user_id = ?
+    WHERE v.is_active = 1
+      AND v.start_at <= NOW()
+      AND v.end_at >= NOW()
+      AND (v.total_usage_limit IS NULL OR v.used_count < v.total_usage_limit)
+    ORDER BY v.end_at ASC, v.id DESC
+    LIMIT 100`,
+    [hasUser ? normalizedUserId : 0]
+  );
+
+  return rows.map((voucher) => {
+    const limit = voucher.total_usage_limit === null
+      ? null
+      : Number(voucher.total_usage_limit || 0);
+    const used = Math.max(0, Number(voucher.used_count || 0));
+    const usagePercent = limit && limit > 0
+      ? Math.min(100, Number(((used / limit) * 100).toFixed(1)))
+      : 0;
+
+    return {
+      ...voucher,
+      usage_percent: usagePercent,
+      is_saved: Number(voucher.user_voucher_id || 0) > 0
+        && String(voucher.voucher_status || '').toUpperCase() === 'AVAILABLE',
+    };
+  });
+}
+
+export async function saveVoucherToUserWallet({ userId, voucherId = null, code = null }) {
+  const normalizedUserId = Number(userId || 0);
+  if (!Number.isInteger(normalizedUserId) || normalizedUserId <= 0) {
+    throw new Error('INVALID_USER');
+  }
+
+  const connection = await pool.getConnection();
+
+  try {
+    await connection.beginTransaction();
+
+    const [userRows] = await connection.query(
+      'SELECT id FROM users WHERE id = ? LIMIT 1',
+      [normalizedUserId]
+    );
+
+    if (userRows.length === 0) {
+      throw new Error('USER_NOT_FOUND');
+    }
+
+    let voucher = null;
+
+    if (voucherId !== null && voucherId !== undefined) {
+      const normalizedVoucherId = Number(voucherId || 0);
+      const [voucherRows] = await connection.query(
+        `SELECT
+          id,
+          code,
+          voucher_name,
+          discount_type,
+          discount_value,
+          max_discount_value,
+          min_order_value,
+          total_usage_limit,
+          used_count,
+          start_at,
+          end_at,
+          is_active
+        FROM vouchers
+        WHERE id = ?
+        LIMIT 1
+        FOR UPDATE`,
+        [normalizedVoucherId]
+      );
+
+      voucher = voucherRows[0] || null;
+    } else {
+      const normalizedCode = String(code || '').trim().toUpperCase();
+      if (!normalizedCode) {
+        throw new Error('INVALID_VOUCHER');
+      }
+
+      const [voucherRows] = await connection.query(
+        `SELECT
+          id,
+          code,
+          voucher_name,
+          discount_type,
+          discount_value,
+          max_discount_value,
+          min_order_value,
+          total_usage_limit,
+          used_count,
+          start_at,
+          end_at,
+          is_active
+        FROM vouchers
+        WHERE code = ?
+        LIMIT 1
+        FOR UPDATE`,
+        [normalizedCode]
+      );
+
+      voucher = voucherRows[0] || null;
+    }
+
+    if (!voucher) {
+      throw new Error('VOUCHER_NOT_FOUND');
+    }
+
+    if (Number(voucher.is_active) !== 1) {
+      throw new Error('VOUCHER_NOT_ACTIVE');
+    }
+
+    const now = new Date();
+    const startAt = new Date(voucher.start_at);
+    const endAt = new Date(voucher.end_at);
+
+    if (!Number.isNaN(startAt.getTime()) && now < startAt) {
+      throw new Error('VOUCHER_NOT_STARTED');
+    }
+
+    if (!Number.isNaN(endAt.getTime()) && now > endAt) {
+      throw new Error('VOUCHER_EXPIRED');
+    }
+
+    const usageLimit = voucher.total_usage_limit === null
+      ? null
+      : Number(voucher.total_usage_limit || 0);
+
+    if (usageLimit !== null && Number(voucher.used_count || 0) >= usageLimit) {
+      throw new Error('VOUCHER_USAGE_EXCEEDED');
+    }
+
+    const [existingRows] = await connection.query(
+      `SELECT id, voucher_status
+      FROM user_vouchers
+      WHERE user_id = ? AND voucher_id = ?
+      LIMIT 1
+      FOR UPDATE`,
+      [normalizedUserId, Number(voucher.id)]
+    );
+
+    const existing = existingRows[0] || null;
+    if (existing && String(existing.voucher_status || '').toUpperCase() === 'AVAILABLE') {
+      await connection.commit();
+
+      return {
+        voucher_id: Number(voucher.id),
+        code: voucher.code,
+        is_saved: true,
+        already_saved: true,
+      };
+    }
+
+    if (existing) {
+      await connection.query(
+        `UPDATE user_vouchers
+        SET
+          voucher_status = 'AVAILABLE',
+          order_id = NULL,
+          used_at = NULL,
+          assigned_at = NOW()
+        WHERE id = ?`,
+        [Number(existing.id)]
+      );
+    } else {
+      await connection.query(
+        `INSERT INTO user_vouchers (
+          user_id,
+          voucher_id,
+          order_id,
+          voucher_status,
+          assigned_at,
+          used_at
+        ) VALUES (?, ?, NULL, 'AVAILABLE', NOW(), NULL)`,
+        [normalizedUserId, Number(voucher.id)]
+      );
+    }
+
+    await connection.commit();
+
+    return {
+      voucher_id: Number(voucher.id),
+      code: voucher.code,
+      is_saved: true,
+      already_saved: false,
+    };
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
+}
+
+export async function getUserVoucherWallet(userId) {
+  const normalizedUserId = Number(userId || 0);
+  if (!Number.isInteger(normalizedUserId) || normalizedUserId <= 0) {
+    return [];
+  }
+
+  const [rows] = await pool.query(
+    `SELECT
+      uv.id AS user_voucher_id,
+      uv.user_id,
+      uv.voucher_status,
+      uv.assigned_at,
+      uv.used_at,
+      uv.created_at,
+      v.id AS voucher_id,
+      v.code,
+      v.voucher_name,
+      v.description,
+      v.discount_type,
+      v.discount_value,
+      v.max_discount_value,
+      v.min_order_value,
+      v.total_usage_limit,
+      v.used_count,
+      v.start_at,
+      v.end_at,
+      v.is_active
+    FROM user_vouchers uv
+    INNER JOIN vouchers v ON v.id = uv.voucher_id
+    WHERE uv.user_id = ?
+    ORDER BY uv.assigned_at DESC, uv.id DESC`,
+    [normalizedUserId]
+  );
+
+  return rows.map((voucher) => {
+    const now = new Date();
+    const endAt = new Date(voucher.end_at);
+    const status = String(voucher.voucher_status || '').toUpperCase();
+
+    let displayStatus = status;
+    if (status === 'AVAILABLE' && !Number.isNaN(endAt.getTime()) && now > endAt) {
+      displayStatus = 'EXPIRED';
+    }
+
+    return {
+      ...voucher,
+      display_status: displayStatus,
+      is_active_for_use: displayStatus === 'AVAILABLE' && Number(voucher.is_active) === 1,
+    };
+  });
 }

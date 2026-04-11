@@ -274,7 +274,7 @@ function Checkout() {
   async function loadAvailableVouchers() {
     try {
       setLoadingVouchers(true);
-      const response = await getCheckoutVouchers(subtotal);
+      const response = await getCheckoutVouchers(subtotal, user?.id);
       setAvailableVouchers(response?.data || []);
     } catch (error) {
       const message = error?.response?.data?.message || 'Khong the tai danh sach voucher.';
@@ -295,7 +295,7 @@ function Checkout() {
 
     try {
       setApplyingVoucher(true);
-      const response = await validateCheckoutVoucher(normalizedCode, subtotal);
+      const response = await validateCheckoutVoucher(normalizedCode, subtotal, user?.id);
       const voucher = response?.data;
 
       if (!voucher) {

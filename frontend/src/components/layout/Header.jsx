@@ -118,6 +118,7 @@ function Header() {
           <nav className="main-menu" aria-label="Điều hướng chính">
             <Link to="/">TRANG CHỦ</Link>
             <Link to="/product">SẢN PHẨM</Link>
+            <Link to="/vouchers">VOUCHER</Link>
             <a href="#">TIN TỨC</a>
             <a href="#">GIỚI THIỆU</a>
           </nav>

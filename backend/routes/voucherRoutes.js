@@ -5,9 +5,12 @@ import {
   createVoucherTypeController,
   deleteVoucherCodeController,
   deleteVoucherTypeController,
+  getCustomerVoucherWallet,
   getCheckoutVouchers,
+  getStorefrontVoucherList,
   getVoucherCodes,
   getVoucherTypes,
+  saveVoucherForCustomer,
   updateVoucherCodeController,
   updateVoucherTypeController,
   validateCheckoutVoucher,
@@ -27,5 +30,8 @@ router.delete('/codes/:id', deleteVoucherCodeController);
 
 router.get('/checkout/available', getCheckoutVouchers);
 router.post('/checkout/validate', validateCheckoutVoucher);
+router.get('/storefront', getStorefrontVoucherList);
+router.get('/customer/wallet', getCustomerVoucherWallet);
+router.post('/customer/save', saveVoucherForCustomer);
 
 export default router;

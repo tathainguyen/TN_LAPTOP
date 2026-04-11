@@ -161,6 +161,14 @@ export async function placeCodOrder(req, res) {
       });
     }
 
+    if (error?.message === 'VOUCHER_NOT_SAVED') {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Voucher chua duoc luu trong kho cua ban.',
+        data: null,
+      });
+    }
+
     if (error?.message === 'CART_EMPTY') {
       return res.status(400).json({
         status: 'error',

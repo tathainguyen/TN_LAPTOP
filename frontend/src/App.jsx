@@ -35,6 +35,7 @@ import ForgotPassword from './pages/auth/ForgotPassword.jsx';
 import Login from './pages/auth/Login.jsx';
 import Product from './pages/store/Product.jsx';
 import ProductDetail from './pages/store/ProductDetail.jsx';
+import Vouchers from './pages/store/Vouchers.jsx';
 import Register from './pages/auth/Register.jsx';
 import ResetPassword from './pages/auth/ResetPassword.jsx';
 
@@ -171,6 +172,7 @@ function App() {
           <Route path="/admin/voucher-codes" element={adminOnly(<AdminVoucherCodes />)} />
           <Route path="/product" element={storefrontOnly(<Product />)} />
           <Route path="/product/:slug" element={storefrontOnly(<ProductDetail />)} />
+          <Route path="/vouchers" element={storefrontOnly(<Vouchers />)} />
           <Route path="/cart" element={storefrontOnly(<Cart />)} />
           <Route path="/checkout" element={storefrontOnly(<Checkout />)} />
           <Route path="/email-verified" element={storefrontOnly(<EmailVerifyResult />)} />

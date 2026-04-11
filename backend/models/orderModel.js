@@ -241,6 +241,21 @@ export async function createCodOrderFromCart({
       }
 
       appliedVoucherId = Number(voucher.id);
+
+      const [savedVoucherRows] = await connection.query(
+        `SELECT id
+        FROM user_vouchers
+        WHERE user_id = ?
+          AND voucher_id = ?
+          AND voucher_status = 'AVAILABLE'
+        LIMIT 1
+        FOR UPDATE`,
+        [normalizedUserId, appliedVoucherId]
+      );
+
+      if (savedVoucherRows.length === 0) {
+        throw new Error('VOUCHER_NOT_SAVED');
+      }
     }
 
     const grandTotal = Math.max(0, totalItemsAmount + shippingFee - voucherDiscount);
@@ -353,6 +368,19 @@ export async function createCodOrderFromCart({
         SET used_count = used_count + 1
         WHERE id = ?`,
         [appliedVoucherId]
+      );
+
+      await connection.query(
+        `UPDATE user_vouchers
+        SET
+          voucher_status = 'USED',
+          order_id = ?,
+          used_at = NOW()
+        WHERE user_id = ?
+          AND voucher_id = ?
+          AND voucher_status = 'AVAILABLE'
+        LIMIT 1`,
+        [orderId, normalizedUserId, appliedVoucherId]
       );
     }
 

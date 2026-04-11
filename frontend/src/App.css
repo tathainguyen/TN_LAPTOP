@@ -749,6 +749,461 @@
   color: #64748b;
   font-size: 13px;
 }
+.customer-voucher-head {
+  margin-bottom: 10px;
+}
+.customer-voucher-head p {
+  margin: 6px 0 0;
+  color: #64748b;
+}
+.customer-voucher-discover-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 999px;
+  background: #ffede8;
+  color: #ef4423;
+  font-weight: 700;
+  text-decoration: none;
+}
+.customer-voucher-discover-link:hover {
+  background: #e7f2ff;
+}
+.customer-wallet-ticket {
+  display: grid;
+  grid-template-columns: 170px minmax(0, 1fr);
+  border: 1px solid #d5e4f4;
+  border-radius: 16px;
+  overflow: hidden;
+  background: linear-gradient(180deg, #ffffff 0%, #f9fcff 100%);
+}
+.customer-wallet-ticket-left {
+  background: linear-gradient(160deg, #17324d 0%, #1f4f73 100%);
+  color: #f2f8ff;
+  padding: 14px;
+  display: grid;
+  align-content: center;
+  gap: 12px;
+  text-align: center;
+}
+.customer-wallet-ticket-left strong {
+  font-size: 20px;
+  line-height: 1.2;
+  letter-spacing: 0.03em;
+}
+.customer-wallet-ticket-left span {
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.05em;
+  opacity: 0.92;
+}
+.customer-wallet-ticket-body {
+  padding: 14px 16px;
+  display: grid;
+  gap: 6px;
+}
+.customer-wallet-ticket-body h4 {
+  margin: 0;
+  color: #212529;
+  font-size: 24px;
+  line-height: 1;
+}
+.customer-wallet-ticket-body p {
+  margin: 0;
+  color: #39424e;
+  font-size: 18px;
+}
+.customer-wallet-ticket-body span {
+  color: #6b7280;
+  font-size: 14px;
+}
+.customer-wallet-usage {
+  display: inline-flex;
+  width: fit-content;
+  height: 28px;
+  align-items: center;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid #c7dbef;
+  background: #edf6ff;
+  color: #1f4f73;
+  font-weight: 600;
+  font-size: 12px;
+}
+.customer-wallet-ticket-foot {
+  margin-top: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+.customer-wallet-ticket-foot small {
+  color: #6b7280;
+  font-size: 13px;
+}
+.customer-wallet-status {
+  font-size: 13px;
+  font-weight: 700;
+}
+.customer-wallet-status.is-available {
+  color: #15803d;
+}
+.customer-wallet-status.is-used {
+  color: #475569;
+}
+.customer-wallet-status.is-expired {
+  color: #b45309;
+}
+
+.store-voucher-page {
+  width: min(1240px, 100%);
+  margin: 0 auto;
+  padding: 26px 20px 40px;
+  display: grid;
+  gap: 18px;
+}
+.store-voucher-hero {
+  border-radius: 20px;
+  padding: 22px;
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 14px;
+  background:
+    radial-gradient(circle at 12% 8%, rgba(103, 232, 249, 0.25), transparent 42%),
+    radial-gradient(circle at 86% 82%, rgba(79, 70, 229, 0.24), transparent 46%),
+    linear-gradient(120deg, #0f172a 0%, #172554 48%, #1e3a8a 100%);
+  color: #eff6ff;
+  box-shadow: 0 16px 34px rgba(15, 23, 42, 0.35);
+}
+.store-voucher-hero-left {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+.store-voucher-badge {
+  margin: 0;
+  display: inline-flex;
+  width: fit-content;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: rgba(191, 219, 254, 0.14);
+  border: 1px solid rgba(191, 219, 254, 0.42);
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+.store-voucher-hero-left h1 {
+  margin: 0;
+  font-size: clamp(28px, 3.8vw, 42px);
+  line-height: 1.06;
+}
+.store-voucher-hero-left p {
+  margin: 0;
+  max-width: 60ch;
+  color: rgba(255, 255, 255, 0.93);
+}
+.store-voucher-hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.store-voucher-hero-meta span {
+  display: inline-flex;
+  align-items: center;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: rgba(11, 59, 123, 0.34);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-size: 13px;
+}
+.store-voucher-hero-right {
+  min-height: 220px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(15, 118, 110, 0.25), rgba(30, 64, 175, 0.33));
+  border: 1px solid rgba(191, 219, 254, 0.25);
+}
+.store-voucher-hero-ticket {
+  position: absolute;
+  right: 18px;
+  top: 16px;
+  width: 230px;
+  height: 120px;
+  border-radius: 18px;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  background: linear-gradient(145deg, #0ea5e9 0%, #2563eb 100%);
+  box-shadow: 0 20px 30px rgba(30, 64, 175, 0.45);
+}
+.store-voucher-hero-ticket strong {
+  font-size: 34px;
+  line-height: 1;
+}
+.store-voucher-hero-ticket span {
+  font-size: 34px;
+  font-weight: 800;
+  color: #e0f2fe;
+  line-height: 1;
+}
+.store-voucher-hero-box {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  height: 52px;
+  border-radius: 14px;
+  background: linear-gradient(145deg, #66cb9f 0%, #2f9f87 100%);
+}
+.store-voucher-hero-car {
+  position: absolute;
+  left: 24px;
+  bottom: 34px;
+  width: 102px;
+  height: 60px;
+  border-radius: 18px;
+  background: linear-gradient(130deg, #7dd3fc 0%, #1d4ed8 95%);
+  box-shadow: inset -8px -10px 0 rgba(255, 255, 255, 0.2);
+}
+.store-voucher-grid-wrap {
+  border-radius: 16px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  border: 1px solid #d5e4f4;
+  padding: 14px;
+}
+.store-voucher-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.store-voucher-filter-btn {
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid #c7d8ed;
+  background: #eef5ff;
+  color: #19416a;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+.store-voucher-filter-btn:hover {
+  transform: translateY(-1px);
+  background: #e3efff;
+}
+.store-voucher-filter-btn.is-active {
+  border-color: #2563eb;
+  background: linear-gradient(120deg, #0ea5e9 0%, #2563eb 100%);
+  color: #fff;
+}
+.store-voucher-filter-count {
+  margin-left: auto;
+  color: #4b647e;
+  font-size: 13px;
+  font-weight: 600;
+}
+.store-voucher-empty {
+  text-align: center;
+  color: #64748b;
+  padding: 24px 10px;
+}
+.store-voucher-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.store-voucher-ticket-card {
+  border: 1px solid #d8e7f6;
+  border-radius: 14px;
+  display: grid;
+  grid-template-columns: 190px minmax(0, 1fr);
+  background: #ffffff;
+  overflow: hidden;
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+}
+.store-voucher-ticket-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(30, 64, 175, 0.12);
+}
+.store-voucher-ticket-card.is-saved {
+  border-color: #7fb0f6;
+  box-shadow: 0 8px 18px rgba(14, 165, 233, 0.12);
+}
+.store-voucher-ticket-card.is-just-saved {
+  animation: voucherSavedPulse 1.2s ease;
+}
+.store-voucher-ticket-left {
+  background: linear-gradient(180deg, #1e3a8a 0%, #1f4f73 100%);
+  color: #ecf8ff;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 10px;
+  padding: 12px;
+}
+.store-voucher-ticket-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 62px;
+  height: 62px;
+  border-radius: 16px;
+  background: rgba(147, 197, 253, 0.2);
+  border: 2px solid rgba(191, 219, 254, 0.6);
+  font-size: 34px;
+  font-weight: 800;
+}
+.store-voucher-ticket-left strong {
+  font-size: 24px;
+  font-weight: 700;
+  text-align: center;
+  word-break: break-all;
+}
+.store-voucher-ticket-body {
+  padding: 14px;
+  display: grid;
+  gap: 8px;
+}
+.store-voucher-ticket-body h3 {
+  margin: 0;
+  font-size: 34px;
+  line-height: 1;
+  color: #111827;
+}
+.store-voucher-ticket-body p {
+  margin: 0;
+  color: #374151;
+  font-size: 22px;
+}
+.store-voucher-ticket-condition {
+  color: #6b7280;
+  font-size: 18px;
+}
+.store-voucher-progress-row {
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.store-voucher-progress-track {
+  height: 10px;
+  width: 210px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: #e5e7eb;
+}
+.store-voucher-progress-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #0ea5e9 0%, #2563eb 100%);
+}
+.store-voucher-progress-row small {
+  color: #1e40af;
+  font-weight: 700;
+  font-size: 18px;
+}
+.store-voucher-ticket-body button {
+  margin-top: 5px;
+  height: 50px;
+  border-radius: 8px;
+  border: 0;
+  background: linear-gradient(120deg, #0ea5e9 0%, #2563eb 100%);
+  color: #fff;
+  font-size: 28px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease, filter 0.2s ease, box-shadow 0.2s ease;
+}
+.store-voucher-ticket-body button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(1.03);
+  box-shadow: 0 8px 14px rgba(37, 99, 235, 0.28);
+}
+.store-voucher-ticket-body button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+.store-voucher-ticket-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.store-voucher-ticket-foot span {
+  color: #6b7280;
+  font-size: 12px;
+}
+.store-voucher-ticket-foot a {
+  color: #1d4ed8;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.store-voucher-ticket-foot a:hover {
+  text-decoration: underline;
+}
+.customer-wallet-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.customer-wallet-tab {
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid #c7d8ed;
+  background: #eef5ff;
+  color: #183b60;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+}
+.customer-wallet-tab span {
+  min-width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #d9e8fb;
+  color: #1d4d79;
+  font-size: 12px;
+  font-weight: 700;
+}
+.customer-wallet-tab.is-active {
+  background: linear-gradient(120deg, #0ea5e9 0%, #2563eb 100%);
+  border-color: #2563eb;
+  color: #fff;
+}
+.customer-wallet-tab.is-active span {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+@keyframes voucherSavedPulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.35);
+  }
+  35% {
+    transform: scale(1.012);
+    box-shadow: 0 0 0 12px rgba(14, 165, 233, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: none;
+  }
+}
 @media (max-width: 1080px) {
   .customer-account-shell {
     width: 100%;
@@ -857,6 +1312,37 @@
     width: 2px;
     height: calc(100% - 12px);
   }
+
+  .store-voucher-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .store-voucher-filter-count {
+    margin-left: 0;
+  }
+
+  .store-voucher-ticket-card {
+    grid-template-columns: 160px minmax(0, 1fr);
+  }
+
+  .store-voucher-ticket-left strong {
+    font-size: 22px;
+  }
+
+  .store-voucher-ticket-body h3 {
+    font-size: 24px;
+  }
+
+  .store-voucher-ticket-body p,
+  .store-voucher-ticket-condition,
+  .store-voucher-progress-row small {
+    font-size: 18px;
+  }
+
+  .store-voucher-ticket-body button {
+    height: 46px;
+    font-size: 24px;
+  }
 }
 @media (max-width: 720px) {
   .customer-profile-form {
@@ -916,6 +1402,75 @@
 
   .customer-voucher-form {
     grid-template-columns: 1fr;
+  }
+
+  .customer-wallet-ticket {
+    grid-template-columns: 1fr;
+  }
+
+  .customer-wallet-ticket-left strong {
+    font-size: 30px;
+  }
+
+  .customer-wallet-ticket-body h4 {
+    font-size: 24px;
+  }
+
+  .customer-wallet-ticket-body p {
+    font-size: 16px;
+  }
+
+  .store-voucher-page {
+    padding: 16px 10px 32px;
+  }
+
+  .store-voucher-hero {
+    grid-template-columns: 1fr;
+    padding: 14px;
+  }
+
+  .store-voucher-hero-right {
+    min-height: 170px;
+  }
+
+  .store-voucher-hero-ticket {
+    width: 190px;
+    height: 100px;
+  }
+
+  .store-voucher-ticket-card {
+    grid-template-columns: 1fr;
+  }
+
+  .store-voucher-ticket-left {
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    justify-items: start;
+    gap: 12px;
+  }
+
+  .store-voucher-ticket-icon {
+    width: 52px;
+    height: 52px;
+    font-size: 28px;
+  }
+
+  .store-voucher-progress-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .store-voucher-progress-track {
+    width: 100%;
+  }
+
+  .customer-wallet-tabs {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .customer-wallet-tab {
+    justify-content: space-between;
   }
 }
 .header-inner {

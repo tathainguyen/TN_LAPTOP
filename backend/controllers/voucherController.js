@@ -5,9 +5,13 @@ import {
   deleteVoucherCodeById,
   deleteVoucherTypeById,
   getAvailableVouchersForCheckout,
+  getStorefrontVouchers,
+  getUserSavedVoucherByCodeForCheckout,
+  getUserVoucherWallet,
   getVoucherByCodeForCheckout,
   getVouchersAdmin,
   getVoucherTypesAdmin,
+  saveVoucherToUserWallet,
   updateVoucherCodeById,
   updateVoucherTypeById,
 } from '../models/voucherModel.js';
@@ -380,6 +384,7 @@ export async function deleteVoucherCodeController(req, res) {
 export async function getCheckoutVouchers(req, res) {
   try {
     const orderAmount = parseOrderAmount(req.query?.order_amount);
+    const userId = Number(req.query?.user_id || 0);
 
     if (orderAmount === null) {
       return res.status(400).json({
@@ -389,7 +394,15 @@ export async function getCheckoutVouchers(req, res) {
       });
     }
 
-    const vouchers = await getAvailableVouchersForCheckout(orderAmount);
+    if (!Number.isInteger(userId) || userId <= 0) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Can user_id hop le de lay voucher checkout.',
+        data: null,
+      });
+    }
+
+    const vouchers = await getAvailableVouchersForCheckout(orderAmount, userId);
 
     return res.status(200).json({
       status: 'success',
@@ -411,6 +424,7 @@ export async function validateCheckoutVoucher(req, res) {
   try {
     const code = String(req.body?.code || '').trim().toUpperCase();
     const orderAmount = parseOrderAmount(req.body?.order_amount);
+    const userId = Number(req.body?.user_id || 0);
 
     if (!code) {
       return res.status(400).json({
@@ -428,7 +442,23 @@ export async function validateCheckoutVoucher(req, res) {
       });
     }
 
-    const voucher = await getVoucherByCodeForCheckout(code);
+    if (!Number.isInteger(userId) || userId <= 0) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Can user_id hop le de ap dung voucher.',
+        data: null,
+      });
+    }
+
+    const voucher = await getUserSavedVoucherByCodeForCheckout({ userId, code });
+    if (!voucher) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Voucher chua duoc luu trong kho cua ban.',
+        data: null,
+      });
+    }
+
     const check = checkVoucherAvailability(voucher, orderAmount);
 
     if (!check.ok) {
@@ -462,6 +492,126 @@ export async function validateCheckoutVoucher(req, res) {
     return res.status(500).json({
       status: 'error',
       message: 'Khong the kiem tra voucher luc nay.',
+      data: null,
+    });
+  }
+}
+
+export async function getStorefrontVoucherList(req, res) {
+  try {
+    const userId = Number(req.query?.user_id || 0);
+    const vouchers = await getStorefrontVouchers({ userId: userId > 0 ? userId : null });
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Lay danh sach voucher trang khach hang thanh cong.',
+      data: vouchers,
+    });
+  } catch (error) {
+    console.error('❌ Loi getStorefrontVoucherList:', error);
+
+    return res.status(500).json({
+      status: 'error',
+      message: 'Khong the tai danh sach voucher.',
+      data: null,
+    });
+  }
+}
+
+export async function saveVoucherForCustomer(req, res) {
+  try {
+    const userId = Number(req.body?.user_id || req.query?.user_id || 0);
+    const voucherIdRaw = req.body?.voucher_id;
+    const voucherId = voucherIdRaw === undefined || voucherIdRaw === null || voucherIdRaw === ''
+      ? null
+      : Number(voucherIdRaw);
+    const code = req.body?.code;
+
+    if (!Number.isInteger(userId) || userId <= 0) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'user_id khong hop le.',
+        data: null,
+      });
+    }
+
+    if ((voucherId === null || !Number.isInteger(voucherId) || voucherId <= 0) && !String(code || '').trim()) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Can voucher_id hoac code de luu voucher.',
+        data: null,
+      });
+    }
+
+    const result = await saveVoucherToUserWallet({
+      userId,
+      voucherId,
+      code,
+    });
+
+    return res.status(200).json({
+      status: 'success',
+      message: result.already_saved
+        ? 'Voucher da co san trong kho cua ban.'
+        : 'Luu voucher thanh cong.',
+      data: result,
+    });
+  } catch (error) {
+    console.error('❌ Loi saveVoucherForCustomer:', error);
+
+    const errorCode = String(error?.message || '').toUpperCase();
+    const knownErrors = {
+      INVALID_USER: { status: 400, message: 'user_id khong hop le.' },
+      USER_NOT_FOUND: { status: 404, message: 'Khong tim thay tai khoan nguoi dung.' },
+      INVALID_VOUCHER: { status: 400, message: 'Voucher khong hop le.' },
+      VOUCHER_NOT_FOUND: { status: 404, message: 'Khong tim thay voucher.' },
+      VOUCHER_NOT_ACTIVE: { status: 400, message: 'Voucher hien khong hoat dong.' },
+      VOUCHER_NOT_STARTED: { status: 400, message: 'Voucher chua den thoi gian ap dung.' },
+      VOUCHER_EXPIRED: { status: 400, message: 'Voucher da het han.' },
+      VOUCHER_USAGE_EXCEEDED: { status: 400, message: 'Voucher da het luot su dung.' },
+    };
+
+    if (knownErrors[errorCode]) {
+      return res.status(knownErrors[errorCode].status).json({
+        status: 'error',
+        message: knownErrors[errorCode].message,
+        data: null,
+      });
+    }
+
+    return res.status(500).json({
+      status: 'error',
+      message: 'Khong the luu voucher luc nay.',
+      data: null,
+    });
+  }
+}
+
+export async function getCustomerVoucherWallet(req, res) {
+  try {
+    const userId = Number(req.query?.user_id || 0);
+
+    if (!Number.isInteger(userId) || userId <= 0) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'user_id khong hop le.',
+        data: null,
+      });
+    }
+
+    const vouchers = await getUserVoucherWallet(userId);
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Lay kho voucher cua khach hang thanh cong.',
+      data: vouchers,
+    });
+  } catch (error) {
+    console.error('❌ Loi getCustomerVoucherWallet:', error);
+
+    return res.status(500).json({
+      status: 'error',
+      message: 'Khong the tai kho voucher.',
       data: null,
     });
   }
